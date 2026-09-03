@@ -163,6 +163,23 @@ The runtime should know:
 
 A restarted worker need not be the same process. Recovery is from durable task state and evidence, not assumed hidden continuity.
 
+## Historical predecessor: Side Chats were sessions, not agents
+
+A 2026-09-03 recovery pass found detailed July 2026 Stage 5 planning for persistent Side Chats, central durable memory, global identity/relationship state, cross-chat coordination, continuity packages, and administrator recovery.
+
+That history is useful because it shows the project had already recognized that one Vera should remain globally consistent across multiple conversation channels. However, the same historical audit explicitly says Atlas, Kestrel, and TKIK-AC-01 were reasoning/review lenses and should not be treated as autonomous background agents without separate runtimes and provenance.
+
+Therefore the historical architecture maps approximately as follows:
+
+- old `Side Chat` -> current attachable **session**;
+- old central coordination summary -> current durable **workspace/task frontier**;
+- old central memory -> current governed **state/memory services**;
+- old review lens -> current **worker role only when instantiated as a real bounded runtime**.
+
+This distinction matters. Global multi-session continuity is necessary, but it is not sufficient to claim a multi-agent workspace.
+
+See `10-historical-stage5-specification.md` for the recovered predecessor specification and its evidence ceiling.
+
 ## Early implementation requirement
 
 The first meaningful Vera OS prototype should demonstrate **more than one worker at once**.
