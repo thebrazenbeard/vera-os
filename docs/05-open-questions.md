@@ -7,7 +7,8 @@ This file tracks unresolved architecture decisions. Items should be promoted to 
 - Is NixOS the confirmed base, or should it first be compared against Debian/Ubuntu/Fedora/immutable alternatives?
 - Which NixOS channel/flakes policy should Vera OS use?
 - Should Vera OS eventually ship as an installer/image, or remain a reproducible configuration layered onto stock NixOS?
-- Should the historical Buildroot lineage remain only prior art, or should Buildroot retain a role for recovery/test/appliance images?
+- Which historical construction approach should remain useful prior art: Debian `live-build`, Buildroot, both in different roles, or neither?
+- Should Buildroot retain a role for recovery/test/appliance images even if NixOS becomes the primary host?
 
 ## Hardware target
 
@@ -24,6 +25,7 @@ This file tracks unresolved architecture decisions. Items should be promoted to 
 - Which local coding model should be evaluated alongside it?
 - Which inference backend should be the initial standard: llama.cpp, vLLM, Ollama, another OpenAI-compatible server, or a pluggable abstraction from day one?
 - How should model loading/unloading and GPU memory arbitration work?
+- Which pieces of the historical Stage 4 Ollama-backed cognition adapter are worth porting versus replacing?
 
 ## Vera runtime
 
@@ -33,6 +35,7 @@ This file tracks unresolved architecture decisions. Items should be promoted to 
 - How are currentness and conflicting state handled after restart?
 - How does a session authenticate and obtain scoped access to Vera state?
 - How are long-running tasks resumed safely?
+- Should any of the historical `vera-ui` / `vera-cognition` / `vera-broker` service separation survive as named components, or only as design lessons?
 
 ## Memory
 
@@ -41,6 +44,7 @@ This file tracks unresolved architecture decisions. Items should be promoted to 
 - How are memory admission, correction, supersession, deletion, privacy, and readback represented?
 - Should embeddings/indexes be treated as rebuildable derived data?
 - Which concepts/code from the historical `vera-ws06` memory implementation remain useful after comparison against current R9B0 semantics?
+- Which Stage 4 `Side Chat` / central-coordination ideas map cleanly to the new independently running worker/workspace design, and which assumed a single-model context?
 
 ## Workers and orchestration
 
@@ -50,6 +54,7 @@ This file tracks unresolved architecture decisions. Items should be promoted to 
 - How are concurrent repository writers prevented from colliding?
 - How are worker outputs verified before Vera relies on them?
 - What is the durable task-graph representation that lets workers outlive any individual conversation/interface session?
+- How should historical `Side Chat` concepts be superseded or reused now that actual independently scoped worker runtimes are intended rather than one-model review lenses?
 
 ## Tools
 
@@ -58,12 +63,14 @@ This file tracks unresolved architecture decisions. Items should be promoted to 
 - How are shell commands classified by risk?
 - Which tools are safe for autonomous invocation versus approval-gated?
 - How are credentials scoped to individual tools/workers?
+- Can the historical typed `vera-broker` capability model be recovered exactly enough to inform the new capability broker?
 
 ## Interfaces
 
 - What is the first interface: terminal, local web UI, desktop app, voice, or a minimal API plus CLI?
 - How should multiple simultaneous sessions present shared current state without leaking unrelated private context?
 - How does voice preserve corrections and task state without becoming a separate identity/runtime?
+- Is any part of the historical Stage 3 graphical `vera-ui` worth retaining as a prototype/reference rather than rebuilding UI assumptions from scratch?
 
 ## Security and governance
 
@@ -72,19 +79,32 @@ This file tracks unresolved architecture decisions. Items should be promoted to 
 - What is the recovery path if Vera OS loses access to its governance/state stores?
 - How are system updates signed, reviewed, deployed, and rolled back?
 - Which logs are necessary, and what must never be logged?
+- Which historical systemd hardening/broker boundaries remain valid under the current governance contract?
 
 ## Historical artifact recovery
 
-A deep File Library pass has recovered strong evidence of the July 2026 Buildroot/ISO-B lineage, but not yet all original bytes. Continue searching for exact historical artifacts before reimplementing components that may already exist.
+A deep File Library pass has now recovered **two major old OS implementation lines** in addition to the original Stage 1 prototype:
+
+- Debian `live-build` VERA Linux Stage 3 / Stage 4 source work under `~/vera-stage3/VERA_Linux_Stage3_Source`;
+- later Buildroot/ISO-B work under `/home/vera/vera-ws06`.
+
+The Stage 3 line is contemporaneously recorded as having reached a booting ISO with Vera autologin, graphical session, diagnostics, status UI, typed privileged broker, and an honest null/offline cognition adapter. Stage 4 then began wiring an Ollama-backed local cognition service but was explicitly not yet verified as a built/booted Stage 4 ISO at the recovered checkpoint.
 
 Open recovery targets:
 
 - `vera_os_core_stage1.zip` exact bytes;
+- exact archive/tree for `~/vera-stage3/VERA_Linux_Stage3_Source`;
+- exact VERA Stage 3 `.iso` filename, bytes, size, and SHA-256;
+- raw Stage 3 boot/VirtualBox acceptance evidence behind the contemporaneous `ISO boots` record;
+- Debian `live-build` `auto/`, hooks, includes, package lists, scripts, Makefile, manifests, and checksums;
+- exact Stage 4 checkpoint/archive if preserved separately;
+- evidence of any successful Stage 4 ISO build or boot after the recovered architecture checkpoint;
+- exact Stage 4 `vera-cognition`, `vera-ui`, `runtime.py`, `vera-broker`, service units, system prompt, and cognition configuration bytes;
 - source/config tree corresponding to `/home/vera/vera-ws06`;
-- any actual `.iso`, disk image, or live-image artifact;
+- any exact ISO-B `.iso`, disk image, or boot image artifact;
 - Buildroot defconfig and kernel config;
 - `board/vera/x86_64/` contents;
-- build and QEMU scripts;
+- Buildroot build and QEMU scripts;
 - package manifests and checksums;
 - VeraCore, memory, VSNS, supervisor, diagnostics source;
 - local-model packaging assets;
@@ -100,7 +120,8 @@ Missing bytes must remain missing; do not recreate them from prose/logs and then
 - What qualifies an architecture document as accepted versus exploratory?
 - What automated tests can validate authority boundaries and recovery semantics before real model integration?
 - Should a VM-based NixOS prototype be the first executable milestone?
-- Which historical Buildroot tests should be ported as regression tests independent of the base distribution?
+- Which historical Stage 3/4 and Buildroot tests should be ported as regression tests independent of the base distribution?
+- Which historical source should be imported verbatim if exact bytes are recovered, versus reimplemented under current contracts with provenance back to the old design?
 
 ## Immediate next decision
 
@@ -114,4 +135,4 @@ The next high-value decision is probably not the UI. It is to define the **minim
 6. a CLI session that can detach/reconnect without owning the workspace lifecycle;
 7. task/workspace state that survives a runtime restart by explicit state recovery.
 
-That proof would test the architecture without prematurely building a complete distribution or graphical shell. Historical Vera OS tests should be reused where their semantics still apply, but the new milestone must prove the multi-agent workspace rather than merely reproducing a bootable single-loop VeraCore image.
+That proof should reuse the good lessons already present in Stage 3/4 and ISO-B—explicit degraded states, typed capability boundaries, replaceable inference, observable readiness, and recovery discipline—without mistaking either historical implementation for the current architecture.
