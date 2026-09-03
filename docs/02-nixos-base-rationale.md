@@ -96,3 +96,16 @@ A lower-risk sequence is:
 6. interfaces;
 7. reproducible host deployment;
 8. only then evaluate whether a branded installation image/distribution adds real value.
+
+## Recovered historical baseline: Buildroot ISO-B
+
+A 2026-09-03 File Library recovery pass found that Vera OS already had a substantial Buildroot lineage in July 2026. Historical logs show Buildroot `2024.02.4`, Linux `6.6.69`, x86_64 root filesystem generation, QEMU boots reaching a `VERA OS ISO-B` login, and several explicit state/recovery tests. See `07-historical-vera-os-evidence.md`.
+
+This matters because NixOS is **not** being considered from a blank slate. Buildroot has already demonstrated that a small reproducible Vera-branded Linux image can be built and boot-tested. What it did not provide was the persistent multi-agent workspace and capable local cognition layer now considered central.
+
+Therefore the base decision should compare roles rather than treat one platform as a generic replacement for the other:
+
+- Buildroot remains proven prior art for minimal image construction, tightly bounded appliances, boot/recovery fixtures, and possibly future reduced rescue/test images.
+- NixOS is the current candidate for the primary development/runtime host because the new architecture requires many long-lived services, worker isolation, declarative capabilities, local models, durable state, rapid iteration, and rollback.
+
+A future architecture could even use both without contradiction: NixOS for the full Vera workstation/runtime, and a much smaller Buildroot-style recovery or hardware-validation image if that provides measurable value. This is only a design option, not a current decision.
