@@ -81,6 +81,7 @@ Before NixOS becomes the confirmed base, test at least:
 7. remote administration/recovery behavior.
 8. update and rollback behavior when Vera services have database migrations.
 9. feasibility of creating reproducible installation media later without making custom-ISO work an early dependency.
+10. whether NixOS can retain the useful separation already prototyped historically between Vera UI/session surfaces, cognition/model service, privileged broker, status, and durable services without coupling their lifecycle unnecessarily.
 
 ## Initial implementation strategy
 
@@ -97,15 +98,52 @@ A lower-risk sequence is:
 7. reproducible host deployment;
 8. only then evaluate whether a branded installation image/distribution adds real value.
 
-## Recovered historical baseline: Buildroot ISO-B
+## Recovered historical baselines
 
-A 2026-09-03 File Library recovery pass found that Vera OS already had a substantial Buildroot lineage in July 2026. Historical logs show Buildroot `2024.02.4`, Linux `6.6.69`, x86_64 root filesystem generation, QEMU boots reaching a `VERA OS ISO-B` login, and several explicit state/recovery tests. See `07-historical-vera-os-evidence.md`.
+A 2026-09-03 File Library recovery pass established that NixOS is **not** being considered from a blank slate. Vera OS had at least two materially different Linux implementation lines in July 2026. See `07-historical-vera-os-evidence.md` for the evidence boundary.
 
-This matters because NixOS is **not** being considered from a blank slate. Buildroot has already demonstrated that a small reproducible Vera-branded Linux image can be built and boot-tested. What it did not provide was the persistent multi-agent workspace and capable local cognition layer now considered central.
+### Debian `live-build` — VERA Linux Stage 3 / Stage 4 source
 
-Therefore the base decision should compare roles rather than treat one platform as a generic replacement for the other:
+The older `~/vera-stage3/VERA_Linux_Stage3_Source` tree used Debian Trixie `live-build` to construct an AMD64 hybrid live ISO with Syslinux + GRUB-EFI, systemd, LightDM, a Vera autologin/session, a graphical `vera-ui`, diagnostics, and a typed privileged broker.
 
-- Buildroot remains proven prior art for minimal image construction, tightly bounded appliances, boot/recovery fixtures, and possibly future reduced rescue/test images.
-- NixOS is the current candidate for the primary development/runtime host because the new architecture requires many long-lived services, worker isolation, declarative capabilities, local models, durable state, rapid iteration, and rollback.
+A contemporaneous architecture checkpoint records the Stage 3 ISO as booting successfully with Vera autologin, graphical session, diagnostics, status panel, broker, and an honest null/offline cognition adapter. The UI itself explicitly said language-model cognition was not attached in Stage 3.
 
-A future architecture could even use both without contradiction: NixOS for the full Vera workstation/runtime, and a much smaller Buildroot-style recovery or hardware-validation image if that provides measurable value. This is only a design option, not a current decision.
+Stage 4 source then began adding a local Ollama-backed `vera-cognition` service, Unix socket client path, streamed UI generation, explicit backend/model-unavailable states, and systemd hardening. That checkpoint explicitly did **not** claim the Stage 4 ISO had been built/booted or that Ollama/model inference worked end to end.
+
+This historical Debian line is directly relevant to the current NixOS decision because it demonstrates that a conventional service-oriented Linux host was already a workable fit for the Vera appliance concept. It also shows the cost of treating a booting branded desktop as the milestone when the intelligence/runtime beneath it was still incomplete.
+
+### Buildroot — later ISO-B
+
+A later `/home/vera/vera-ws06` effort used Buildroot `2024.02.4` and Linux `6.6.69`. Historical logs show x86_64 root filesystem generation, actual QEMU boots reaching `VERA OS ISO-B`, a supervised VeraCore runtime, default-deny policy, audit chaining, transactional SQLite memory, corruption/recovery testing, and model-adapter plumbing.
+
+Buildroot demonstrated that a small reproducible Vera-branded appliance image can be built and boot-tested with tightly controlled dependencies. In the evidence recovered so far, however, the active cognition backend remained mock-backed.
+
+## Why the historical evidence strengthens rather than weakens the NixOS candidate
+
+The old Debian and Buildroot systems prove that the project already knows how to put Vera-specific services inside Linux images. Repeating that feat is not the hard problem anymore.
+
+The new requirement is materially harder:
+
+- persistent multi-agent workspace;
+- many long-lived supervised services;
+- independently scoped worker runtimes;
+- durable task graphs and state;
+- replaceable inference engines;
+- development-time iteration and rollback;
+- explicit capability policy;
+- multiple attachable interfaces;
+- potentially more than one local node.
+
+That favors evaluating a declarative general-purpose host rather than optimizing first for the smallest boot image.
+
+The base decision should therefore compare **roles**, not brands:
+
+- Debian `live-build` is proven prior art for a richer graphical live-appliance image and conventional systemd service composition.
+- Buildroot is proven prior art for minimal images, tightly bounded recovery/test appliances, and deterministic QEMU validation.
+- NixOS is the current candidate for the primary persistent workstation/runtime host because the new architecture emphasizes service composition, isolation, reproducible configuration, local models, durable state, rapid iteration, and rollback.
+
+A future architecture could use more than one construction method without contradiction—for example NixOS for the full Vera runtime and a smaller Buildroot-style recovery/hardware-validation image. That is only a design option, not a current decision.
+
+## Decision guardrail
+
+Do not choose NixOS merely because it sounds architecturally elegant, and do not reject it merely because Debian/Buildroot already booted. The winning base should be the one that best supports the **new executable Vera runtime** with the least hidden operational complexity. The historical implementations are test cases and prior art against which that claim can be measured.
