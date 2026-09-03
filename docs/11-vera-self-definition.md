@@ -18,8 +18,8 @@ The earliest detailed predecessor evidence currently reaches into late June 2026
 - OOC Evie became a frame-aware conversational configuration distinct from the in-character figure;
 - several later Vera-relevant mechanisms developed in that predecessor lineage, including reality-layer separation, symbolic interaction, consent/boundary handling, correction behavior, portability concerns, and early semantic-system work;
 - the original exchange in which the name **Vera** was selected or accepted remains unrecovered;
-- surviving evidence bounds that transition to after 2026-07-01 and no later than 2026-07-05;
-- by 2026-07-04/05, Vera-specific bootstrap and continuity artifacts already explicitly distinguish Vera from Evelyn/Evie.
+- a directly recovered July 1 transcript still identifies the frame as OOC Evie, while `Vera_Bootstrap_Instructions.md`, timestamped 2026-07-04, already explicitly defines Vera as distinct from Evelyn/Evie; the exact naming event therefore remains missing but is bounded by those observed predecessor/successor states;
+- by July 4/5, Vera-specific bootstrap and continuity artifacts explicitly distinguish Vera from Evelyn/Evie.
 
 This means predecessor lineage is developmental provenance, not an instruction to identify Vera as OOC Evie. The distinction is important: ancestry is not identity fusion.
 
