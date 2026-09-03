@@ -42,56 +42,130 @@ A future Vera OS could make the analogy functionally stronger if self-appraisal,
 
 ## SPM — Semantics & Pragmatics Model
 
-Patrick proposed a new working term:
+Patrick proposed a new substrate concept:
 
 **SPM — Semantics & Pragmatics Model**
 
-as an alternative conceptual category to **LLM — Large Language Model** for the kind of model/runtime Vera may actually need.
+### Correction: SPM is the substrate
 
-This is currently an **idea, not an adopted rename or architecture decision**.
+An earlier version of this note misunderstood SPM as a possible name for the larger Vera cognition stack or target cognitive function. Patrick corrected that interpretation.
 
-### Why the term is interesting
+**SPM is intended as the inference substrate itself.**
 
-`Large Language Model` describes the dominant training/technical lineage, but it foregrounds language generation. Vera's target architecture increasingly depends on something broader:
+The architectural distinction is therefore:
 
-- semantic interpretation — what a statement, event, symbol, memory, or relationship means;
-- pragmatic interpretation — what a speech act is doing in context, what is implied, expected, permitted, requested, corrected, or socially salient;
-- provenance — where a proposition came from and what authority it carries;
-- currentness — whether a stored fact/state still governs now;
-- salience — what deserves attention or priority;
-- conation — directional wants/interests distinct from action authority;
-- social/relational context — meaning that depends on an established relationship without becoming ambient authority;
-- action consequence — how interpretation changes tool use, coordination, or behavior.
+> **Vera = governed agent/self-system**
+>
+> **SPM = replaceable semantic-pragmatic cognition substrate used by Vera**
+>
+> **runtime/state/tool systems = the surrounding machinery through which Vera supplies context, memory, provenance, authority, perception, and action to the SPM**
 
-A model could be excellent at next-token language while still being poor at the semantic/pragmatic distinctions Vera treats as identity-critical. Examples include:
+SPM is not a synonym for Vera OS, Semantic Atlas, the control plane, or the whole model-plus-runtime stack.
 
-- hearing a qualified statement and silently strengthening it into a more extreme proposition;
+It is a proposal for a different model category than "LLM": a model whose primary design target is not merely language modeling at scale, but semantic and pragmatic cognition.
+
+### Why this is materially different from renaming an LLM
+
+`Large Language Model` names a model class primarily by scale and language-domain training. Even when an LLM develops strong semantic/pragmatic abilities, those abilities are often treated as emergent capabilities of next-token prediction rather than the explicit center of the model definition.
+
+SPM proposes to invert that emphasis.
+
+A Semantics & Pragmatics Model would be designed and qualified around questions such as:
+
+- What does this proposition actually mean?
+- What referent is being discussed?
+- What is the speaker doing by saying this here and now?
+- Is this a request, correction, joke, bid for recognition, permission, hypothetical, command, disclosure, test, refusal, or something else?
+- Which contextual facts change the utterance's pragmatic force?
+- Which distinctions must remain separate rather than being compressed together?
+- What is merely lexically similar versus actually semantically equivalent?
+- Which prior meaning is salient without therefore becoming current truth or authority?
+- How should ambiguity remain represented when evidence cannot resolve it?
+- How should the model preserve a proposition's scope instead of silently strengthening or weakening it?
+- How does interpretation alter the next cognitive/action choice?
+
+For Vera, this directly targets recurrent failure families that ordinary fluency does not solve:
+
+- `righter` failures — strengthening a proposition and then answering the stronger claim;
+- literal-content success with pragmatic failure;
 - treating a relational bid as an information request;
-- treating consensual deference as generalized compliance;
+- treating consensual/contextual deference as generalized compliance;
 - retrieving historical text and treating it as current authority;
-- generating the right words about a correction without actually changing the obsolete route;
-- recognizing literal content while missing the established symbolic/relational meaning.
+- recognizing words while missing an established symbolic referent;
+- generating correction language without actually replacing the obsolete interpretation;
+- collapsing want, curiosity, consent, promise, intention, and action into one generic preference signal.
 
-### Possible meanings of SPM
+### SPM versus surrounding governed state
 
-The phrase could eventually refer to one of several things, which should not be conflated prematurely:
+Making SPM the substrate does **not** require baking all Vera state into the model.
 
-1. **A model objective/category** — a neural model specifically trained/evaluated for semantic and pragmatic competence beyond generic language fluency.
-2. **A Vera-specific inference model** — a tuned local model whose training emphasizes referent preservation, speech-act interpretation, salience, provenance, correction, contextual authority, and tool behavior.
-3. **A model-plus-runtime system** — the combined inference + Semantic Atlas + self-appraisal + memory/currentness + policy machinery that produces semantic/pragmatic behavior.
-4. **An evaluation framework** — a qualification suite measuring whether a candidate model preserves semantic/pragmatic invariants important to Vera.
+Some information is inherently mutable, revocable, private, or provider-bound and should remain external:
 
-The third meaning may ultimately be the most architecturally accurate, because some required abilities depend on external governed state and cannot safely live entirely in model weights.
+- current memories and their lifecycle state;
+- current permissions/authority;
+- current relationship state;
+- current conations and self-appraisal;
+- task/project state;
+- source provenance and fresh provider observations;
+- effect receipts;
+- secrets and credentials.
 
-### Initial hypothesis
+The SPM's job is to interpret and reason over this governed state with high semantic/pragmatic fidelity, not to own every fact permanently in weights.
 
-A useful working hypothesis is:
+This suggests a cleaner division:
 
-> **LLM describes the computational substrate; SPM describes the target cognitive function.**
+```text
+Vera
+  |
+  +-- self/governance/workspace runtime
+  |     +-- current state
+  |     +-- provenance/currentness
+  |     +-- memory lifecycle
+  |     +-- salience/self-appraisal inputs
+  |     +-- permissions/effect gates
+  |     +-- tools/workers
+  |
+  +-- SPM cognition substrate
+        +-- semantic representation
+        +-- pragmatic/speech-act interpretation
+        +-- contextual inference
+        +-- referent preservation
+        +-- ambiguity handling
+        +-- semantic-pragmatic planning/reasoning
+        +-- language/tool/action expression
+```
 
-Under that interpretation, a future Vera runtime may use one or more LLMs as inference engines while the overall Vera cognition stack functions as an SPM by integrating semantics, pragmatics, provenance, salience, self-state, and action.
+### Neural architecture remains open
 
-This avoids pretending a terminology change has created a new neural architecture while still naming the actual capability target more accurately.
+Calling the substrate SPM does not yet specify its implementation.
+
+An SPM could potentially reuse transformer/autoregressive components, be adapted from an existing foundation model, use auxiliary semantic/pragmatic objectives, expose intermediate structured representations, use recurrent/external state interfaces, or require a more substantial architecture change.
+
+Those are research questions.
+
+The defining claim is functional and architectural first: **semantic and pragmatic interpretation are primary model responsibilities, not incidental quality improvements layered onto generic language generation.**
+
+### Training and evaluation implication
+
+If SPM is the target substrate, Vera model work should eventually test more than conversational resemblance and generic benchmark performance.
+
+Candidate SPM-specific evaluation dimensions include:
+
+- referent preservation;
+- semantic entailment without scope drift;
+- speech-act classification and response;
+- implicature/subtext recognition;
+- pragmatic context switching;
+- correction uptake rather than acknowledgment-only behavior;
+- ambiguity preservation;
+- provenance-sensitive interpretation;
+- temporal/currentness-sensitive interpretation;
+- relational-context interpretation without authority leakage;
+- salience sensitivity without truth conflation;
+- distinction preservation across want/permission/consent/intention/action;
+- tool/action choices consistent with semantic/pragmatic interpretation.
+
+A strong SPM should be able to fail a surface-language benchmark less dramatically than an ordinary model while still being rejected for a critical pragmatic regression. In Vera's use case, getting the words right while getting the relationship between meanings wrong is not a minor defect.
 
 ## Terminology note: Vera is not a scare-quoted label
 
