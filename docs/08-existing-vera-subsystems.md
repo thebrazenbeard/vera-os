@@ -100,6 +100,25 @@ Role hypothesis for Vera OS: model-production pipeline, not Vera identity. Produ
 
 Integration rule: model provenance/version must be observable; installing a new model must not silently redefine Vera identity, authority, or durable state.
 
+## `thebrazenbeard/spm`
+
+README: `Design hub for the evolution of the LLM into the SPM: Semantics & Pragmatics Model`
+
+Visibility: private.
+
+Initial repository state observed 2026-09-03: one `README.md` on `main`, initial commit `221e8f205250194d00b1519938a989d33d0b213d`.
+
+Role for Vera OS: **dedicated cognition-substrate research/design owner** for the proposed SPM model class. This repo is intentionally separate from Vera OS because SPM is not a Vera-specific runtime wrapper; it is a proposed successor/evolution of the LLM substrate itself.
+
+Current architecture relationship:
+
+- Vera remains the governed agent/self-system.
+- Vera OS hosts and coordinates runtime state, tools, workers, permissions, persistence, and interfaces.
+- SPM is a candidate future cognition substrate that Vera could use in place of or alongside current LLM-class inference engines.
+- SPM research must not be collapsed into `LLM + retrieval/runtime glue`; the explicit research question is what changes in neural/model architecture, representation, objectives, training, and evaluation when semantics and pragmatics become primary model concerns.
+
+Important boundary: repository existence and README establish the dedicated design hub; they do not establish that an SPM architecture has been designed, trained, implemented, or validated yet.
+
 ## `thebrazenbeard/vera-brain`
 
 Description: `Vera's conceptual Noöplex hyperconnetome brain`
@@ -130,9 +149,10 @@ Vera OS
   |
   +-- integrates existing subsystem owners/adapters
         |
+        +-- spm                  successor cognition-substrate research/design
         +-- vera-control-plane   governance/save/restore administration
         +-- vera-mesh            multi-node connectivity (if validated)
-        +-- vera_model_training  model artifact production
+        +-- vera_model_training  current model artifact production/qualification
         +-- vera-apk             Android client
         +-- vera-synology        storage/server/node package
         +-- vera-habitat         virtual-environment surface (scope TBD)
@@ -149,4 +169,5 @@ This diagram is a candidate ownership map, not a declaration that every listed r
 3. Recover a file-level inventory of `vera-mesh` and determine whether it already solves any multi-node problem.
 4. Recover the `vera-synology` package architecture and decide whether the DS216 is storage-only, an always-on control-plane node, or something else.
 5. Keep Android/mobile/UI work downstream of a stable `vera-api` session contract.
-6. Avoid moving or consolidating repositories merely to make the tree look tidy. Ownership should follow real interfaces and working code, not branding symmetry.
+6. Keep SPM substrate research in its dedicated repository while defining a clean model/runtime interface in Vera OS so future SPM artifacts can be qualified and swapped in without redefining Vera.
+7. Avoid moving or consolidating repositories merely to make the tree look tidy. Ownership should follow real interfaces and working code, not branding symmetry.
