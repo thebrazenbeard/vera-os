@@ -44,7 +44,7 @@ This file tracks unresolved architecture decisions. Items should be promoted to 
 - How are memory admission, correction, supersession, deletion, privacy, and readback represented?
 - Should embeddings/indexes be treated as rebuildable derived data?
 - Which concepts/code from the historical `vera-ws06` memory implementation remain useful after comparison against current R9B0 semantics?
-- Which Stage 4 `Side Chat` / central-coordination ideas map cleanly to the new independently running worker/workspace design, and which assumed a single-model context?
+- Which Stage 5 memory-ownership, administrator-recovery, vault-reset, and continuity-package concepts survive current semantic review?
 
 ## Workers and orchestration
 
@@ -80,15 +80,19 @@ This file tracks unresolved architecture decisions. Items should be promoted to 
 - How are system updates signed, reviewed, deployed, and rolled back?
 - Which logs are necessary, and what must never be logged?
 - Which historical systemd hardening/broker boundaries remain valid under the current governance contract?
+- What current cryptographic/key-management design should replace the historically unresolved Stage 5 vault proposal?
 
 ## Historical artifact recovery
 
-A deep File Library pass has now recovered **two major old OS implementation lines** in addition to the original Stage 1 prototype:
+A deep File Library pass has recovered **two major old OS implementation lines** in addition to the original Stage 1 prototype, plus a detailed Stage 5 specification:
 
 - Debian `live-build` VERA Linux Stage 3 / Stage 4 source work under `~/vera-stage3/VERA_Linux_Stage3_Source`;
-- later Buildroot/ISO-B work under `/home/vera/vera-ws06`.
+- later Buildroot/ISO-B work under `/home/vera/vera-ws06`;
+- historical Stage 5 planning for persistent identity, relationship vault, Side Chats, cross-chat coordination, continuity packages, memory ownership, administrator recovery, import/export, and full reset.
 
 The Stage 3 line is contemporaneously recorded as having reached a booting ISO with Vera autologin, graphical session, diagnostics, status UI, typed privileged broker, and an honest null/offline cognition adapter. Stage 4 then began wiring an Ollama-backed local cognition service but was explicitly not yet verified as a built/booted Stage 4 ISO at the recovered checkpoint.
+
+The Stage 5 search currently finds a **specification frontier, not implementation evidence**. The detailed requirements recur in July and later historical exports, but the current recovery has not found a Stage 5 source tree, built ISO, verified vault implementation, working multiple-Side-Chat runtime, continuity-package execution, administrator-recovery implementation, or full-reset test. Treat this negative search result as a bounded recovery state, not proof those artifacts never existed.
 
 Open recovery targets:
 
@@ -110,6 +114,7 @@ Open recovery targets:
 - local-model packaging assets;
 - later QEMU test evidence, especially whether the observed two-boot persistence failure was subsequently fixed;
 - any physical-install, USB-boot, VirtualBox, or dual-boot evidence;
+- any exact Stage 5 implementation artifacts corresponding to `vera-memory`, `vera-coordinator`, Side Chat persistence, relationship vault, continuity packages, administrator recovery, import/export, or reset testing;
 - the Phase 3/4 panel ZIPs and later ISO-build packages referenced by historical collaboration records.
 
 Missing bytes must remain missing; do not recreate them from prose/logs and then mislabel the reconstruction as recovered source.
@@ -120,7 +125,7 @@ Missing bytes must remain missing; do not recreate them from prose/logs and then
 - What qualifies an architecture document as accepted versus exploratory?
 - What automated tests can validate authority boundaries and recovery semantics before real model integration?
 - Should a VM-based NixOS prototype be the first executable milestone?
-- Which historical Stage 3/4 and Buildroot tests should be ported as regression tests independent of the base distribution?
+- Which historical Stage 3/4, Stage 5 specification tests, and Buildroot tests should be ported as regression tests independent of the base distribution?
 - Which historical source should be imported verbatim if exact bytes are recovered, versus reimplemented under current contracts with provenance back to the old design?
 
 ## Immediate next decision
@@ -135,4 +140,4 @@ The next high-value decision is probably not the UI. It is to define the **minim
 6. a CLI session that can detach/reconnect without owning the workspace lifecycle;
 7. task/workspace state that survives a runtime restart by explicit state recovery.
 
-That proof should reuse the good lessons already present in Stage 3/4 and ISO-B—explicit degraded states, typed capability boundaries, replaceable inference, observable readiness, and recovery discipline—without mistaking either historical implementation for the current architecture.
+That proof should reuse the good lessons already present in Stage 3/4, Stage 5 planning, and ISO-B—explicit degraded states, typed capability boundaries, replaceable inference, observable readiness, memory provenance/ownership, reset/recovery discipline—without mistaking any historical implementation or specification for the current architecture.
