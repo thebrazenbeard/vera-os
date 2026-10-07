@@ -3,7 +3,9 @@ param(
     [string]$ArtifactRoot = "D:\VeraOS\vm\artifacts",
     [string]$BuilderImage = "veraos-buildroot-builder:2024.02.4",
     [string]$BuildVolume = "veraos-buildroot-work",
-    [int]$Jobs = 4
+    [int]$Jobs = 4,
+    [ValidateSet("CORE_BOOT", "BROWSER")]
+    [string]$Profile = "CORE_BOOT"
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,6 +18,17 @@ if (-not $sourceHead) { throw "Unable to resolve VeraOS source head" }
 $sourceStatus = @(& git -C $repo status --porcelain=v1)
 if ($sourceStatus.Count -gt 0) {
     throw "VeraOS image build requires a clean source tree for exact-head provenance"
+}
+
+switch ($Profile) {
+    "CORE_BOOT" {
+        $defconfig = "veraos_x86_64_defconfig"
+        $browserPackaged = $false
+    }
+    "BROWSER" {
+        $defconfig = "veraos_x86_64_browser_defconfig"
+        $browserPackaged = $true
+    }
 }
 
 New-Item -ItemType Directory -Force $artifacts | Out-Null
@@ -38,7 +51,7 @@ if [ ! -d /work/buildroot/.git ]; then
 fi
 actual="$(git -C /work/buildroot rev-parse HEAD)"
 test "$actual" = "$expected"
-make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot veraos_x86_64_defconfig
+make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot "$VERAOS_DEFCONFIG"
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot olddefconfig
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot BR2_JLEVEL="$VERAOS_JOBS" -j"$VERAOS_JOBS"
 test -f /work/output/images/bzImage
@@ -59,6 +72,7 @@ $scriptPath = Join-Path $artifacts "veraos-buildroot-build.sh"
 $dockerArgs = @(
     "run", "--rm",
     "--env", "VERAOS_JOBS=$Jobs",
+    "--env", "VERAOS_DEFCONFIG=$defconfig",
     "--mount", "type=bind,source=$repo,target=/workspace,readonly",
     "--mount", "type=bind,source=$artifacts,target=/artifacts",
     "--mount", "type=volume,source=$BuildVolume,target=/work",
@@ -90,8 +104,9 @@ $result = [ordered]@{
     KernelSha256 = ((Get-FileHash $kernel -Algorithm SHA256).Hash.ToLowerInvariant())
     Rootfs = $rootfs
     RootfsSha256 = ((Get-FileHash $rootfs -Algorithm SHA256).Hash.ToLowerInvariant())
-    BuildProfile = "CORE_BOOT"
-    BrowserPackaged = $false
+    BuildProfile = $Profile
+    Defconfig = $defconfig
+    BrowserPackaged = $browserPackaged
     BrowserProfileDefconfig = "veraos_x86_64_browser_defconfig"
     ProtectedEffectAuthority = $false
 }

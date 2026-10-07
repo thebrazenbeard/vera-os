@@ -34,6 +34,19 @@ if ($buildReceipt.Schema -ne "VERA_OS_BUILDROOT_BUILD_RESULT_V1") {
 if ($buildReceipt.SourceHead -ne $currentHead) {
     throw "VeraOS build receipt source head does not match current source head"
 }
+$buildProfile = [string]$buildReceipt.BuildProfile
+$browserPackaged = [bool]$buildReceipt.BrowserPackaged
+if ($buildProfile -eq "CORE_BOOT") {
+    if ($buildReceipt.Defconfig -ne "veraos_x86_64_defconfig" -or $browserPackaged) {
+        throw "CORE_BOOT build receipt is internally inconsistent"
+    }
+} elseif ($buildProfile -eq "BROWSER") {
+    if ($buildReceipt.Defconfig -ne "veraos_x86_64_browser_defconfig" -or -not $browserPackaged) {
+        throw "BROWSER build receipt is internally inconsistent"
+    }
+} else {
+    throw "Unknown VeraOS build profile: $buildProfile"
+}
 $kernelSha256 = ((Get-FileHash $kernel -Algorithm SHA256).Hash.ToLowerInvariant())
 $rootfsSha256 = ((Get-FileHash $rootfs -Algorithm SHA256).Hash.ToLowerInvariant())
 if ($buildReceipt.KernelSha256 -ne $kernelSha256) { throw "VeraOS kernel hash does not match build receipt" }
@@ -130,8 +143,8 @@ $receipt = [ordered]@{
     memory_mib = $MemoryMiB
     cpu_count = $CpuCount
     marker = $marker
-    build_profile = "CORE_BOOT"
-    browser_packaged = $false
+    build_profile = $buildProfile
+    browser_packaged = $browserPackaged
     browser_profile_defconfig = "veraos_x86_64_browser_defconfig"
     browser_runtime_qualified = $false
     ambient_protected_effect_authority = $false
