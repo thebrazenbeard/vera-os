@@ -59,6 +59,7 @@ class VmContractTests(unittest.TestCase):
         self.assertIn('veraos-buildroot-build.sh', build)
         self.assertIn('[System.IO.File]::WriteAllText(', build)
         self.assertNotIn('"-lc", $script', build)
+        self.assertIn('BR2_JLEVEL="$VERAOS_JOBS"', build)
         self.assertIn("init=/sbin/vera-init", test)
         self.assertIn("VERAOS_BOOT_READY_V1", test)
         self.assertNotIn("flake", combined.lower())

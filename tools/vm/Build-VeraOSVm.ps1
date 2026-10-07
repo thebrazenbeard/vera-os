@@ -34,7 +34,7 @@ actual="$(git -C /work/buildroot rev-parse HEAD)"
 test "$actual" = "$expected"
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot veraos_x86_64_defconfig
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot olddefconfig
-make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot -j"$VERAOS_JOBS"
+make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot BR2_JLEVEL="$VERAOS_JOBS" -j"$VERAOS_JOBS"
 test -f /work/output/images/bzImage
 test -f /work/output/images/rootfs.ext2
 cp /work/output/images/bzImage /artifacts/veraos-bzImage
