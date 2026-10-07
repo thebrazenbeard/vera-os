@@ -1,3 +1,4 @@
 *.sh text eol=lf
-buildroot/board/**/rootfs-overlay/sbin/* text eol=lf
+buildroot/** text eol=lf
+tools/vm/*.Dockerfile text eol=lf
 Dockerfile text eol=lf

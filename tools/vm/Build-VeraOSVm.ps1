@@ -19,7 +19,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "VeraOS Buildroot builder image failed"
 }
 
-$existingVolume = (& docker volume ls --filter "name=^$BuildVolume$" --format "{{.Name}}").Trim()
+$existingVolume = (& docker volume ls --filter "name=^$BuildVolume$" --format "{{.Name}}" | Select-Object -First 1)
 if ($existingVolume -ne $BuildVolume) {
     docker volume create $BuildVolume | Out-Null
 }

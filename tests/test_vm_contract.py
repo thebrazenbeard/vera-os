@@ -53,6 +53,8 @@ class VmContractTests(unittest.TestCase):
         combined = build + test
         self.assertIn("Buildroot", build)
         self.assertIn("VERA_OS_BUILDROOT_BUILD_RESULT_V1", build)
+        self.assertIn("Select-Object -First 1", build)
+        self.assertNotIn(").Trim()", build)
         self.assertIn("init=/sbin/vera-init", test)
         self.assertIn("VERAOS_BOOT_READY_V1", test)
         self.assertNotIn("flake", combined.lower())
