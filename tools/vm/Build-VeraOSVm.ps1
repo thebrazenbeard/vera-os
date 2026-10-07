@@ -42,6 +42,7 @@ cp /work/output/images/rootfs.ext2 /artifacts/veraos-rootfs.ext2
 sha256sum /artifacts/veraos-bzImage > /artifacts/veraos-bzImage.sha256
 sha256sum /artifacts/veraos-rootfs.ext2 > /artifacts/veraos-rootfs.ext2.sha256
 '@
+$script = $script -replace "`r`n", "`n"
 
 $dockerArgs = @(
     "run", "--rm",
