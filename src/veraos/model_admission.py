@@ -7,7 +7,7 @@ from typing import Any
 
 _GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
-_SCHEMA = "VERA_OS_COGNITION_ENGINE_CANDIDATE_V1"
+_SCHEMA = "VERA_OS_LOCAL_MODEL_PROVIDER_CANDIDATE_V1"
 
 
 class ModelAdmissionError(ValueError):
@@ -48,11 +48,11 @@ def _sha256(value: object, name: str) -> str:
     return text
 
 
-def validate_cognition_engine_candidate(
+def validate_local_model_provider_candidate(
     candidate: Mapping[str, Any],
 ) -> None:
     data = _mapping(candidate, "candidate")
-    _require(data.get("schema") == _SCHEMA, "unsupported model candidate schema")
+    _require(data.get("schema") == _SCHEMA, "unsupported local-model provider schema")
     _text(data.get("artifact_id"), "artifact_id")
 
     producer = _mapping(data.get("producer"), "producer")
@@ -124,22 +124,26 @@ def validate_cognition_engine_candidate(
     authority = _mapping(data.get("authority"), "authority")
     _require(
         authority.get("identity_authority") is False,
-        "model candidate cannot hold identity authority",
+        "local model provider cannot hold identity authority",
     )
     _require(
         authority.get("canonical_memory_write_authority") is False,
-        "model candidate cannot hold canonical-memory write authority",
+        "local model provider cannot hold canonical-memory write authority",
     )
     _require(
         authority.get("protected_effect_authority") is False,
-        "model candidate cannot hold protected-effect authority",
+        "local model provider cannot hold protected-effect authority",
+    )
+    _require(
+        authority.get("browser_authority") is False,
+        "local model provider cannot hold browser authority",
     )
 
     admission = _mapping(data.get("admission"), "admission")
     admission_status = _text(admission.get("status"), "admission.status")
     _require(
         admission.get("route_class") == "COGNITION_ONLY",
-        "model candidate route class must be COGNITION_ONLY",
+        "local model provider route class must be COGNITION_ONLY",
     )
     _require(
         admission.get("selector_owner") == "thebrazenbeard/portal",
@@ -150,20 +154,24 @@ def validate_cognition_engine_candidate(
         "Vera Mono must own the identity/runtime boundary",
     )
     _require(
-        admission.get("effect_executor_owner") == "thebrazenbeard/fuckup",
-        "F.U.C.K.U.P. must own protected-effect execution",
+        admission.get("integration") == "OPTIONAL_PROVIDER",
+        "trained Vera model must remain an optional provider",
     )
 
     expected = "VERAOS_ROUTE_ELIGIBLE" if status == "PASS" else "HELD"
     _require(
         admission_status == expected,
-        "model admission state does not match qualification state",
+        "local-model admission state does not match qualification state",
     )
 
 
-def candidate_route_eligible(candidate: Mapping[str, Any]) -> bool:
-    validate_cognition_engine_candidate(candidate)
+def local_model_route_eligible(candidate: Mapping[str, Any]) -> bool:
+    validate_local_model_provider_candidate(candidate)
     return (
         candidate["qualification"]["status"] == "PASS"
         and candidate["admission"]["status"] == "VERAOS_ROUTE_ELIGIBLE"
     )
+
+
+validate_cognition_engine_candidate = validate_local_model_provider_candidate
+candidate_route_eligible = local_model_route_eligible

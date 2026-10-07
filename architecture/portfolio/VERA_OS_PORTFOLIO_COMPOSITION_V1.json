@@ -6,6 +6,16 @@
     "protected_effect_authority_source": "PATRICK_EXPLICIT_EXACT_TARGET_EFFECT",
     "runtime_acceptance_is_not_effect_authority": true
   },
+  "capability_awareness": {
+    "assignment_rule": "KNOWN_OWNERS_REQUIRE_EXPLICIT_DISPOSITION_BEFORE_NEW_ASSIGNMENT",
+    "chatgpt_plugin_catalog": "architecture/capabilities/CHATGPT_PLUGIN_CAPABILITY_INVENTORY_V1.json",
+    "coordinator_consumer": "thebrazenbeard/portal",
+    "discovery_owner": "thebrazenbeard/discovery",
+    "private_catalog_may_name_private_repositories": true,
+    "private_portfolio_catalog": "architecture/capabilities/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json",
+    "semantic_support": "thebrazenbeard/semanticatlas",
+    "unknown_capability_rule": "SEND_TO_DISCOVERY_BEFORE_ASSIGNMENT"
+  },
   "claim_ceiling": "SOURCE_COMPOSITION_LOCK_ONLY_NOT_NIXOS_BUILD_NOT_INSTALLATION_NOT_RUNTIME_CONSUMPTION_NOT_PROTECTED_EFFECT_AUTHORITY",
   "composition_root": {
     "base_head": "be4a45a2b8b7a8e329f772820df0a757766b3073",
@@ -20,7 +30,7 @@
   },
   "model_policy": {
     "artifact_root": "vera/models",
-    "candidate_schema": "VERA_OS_COGNITION_ENGINE_CANDIDATE_V1",
+    "candidate_schema": "VERA_OS_LOCAL_MODEL_PROVIDER_CANDIDATE_V1",
     "canonical_memory_write_authority": false,
     "final_qualification_issuer_must_differ_from_producer": true,
     "identity_authority": false,
@@ -39,8 +49,9 @@
       "qualification_issuer"
     ],
     "route_class": "COGNITION_ONLY",
-    "selection_rule": "EXPLICIT_QUALIFIED_ROUTE",
-    "trained_model_role": "COGNITION_ENGINE"
+    "selection_rule": "EXPLICIT_QUALIFIED_PROVIDER_ROUTE",
+    "trained_model_role": "OPTIONAL_LOCAL_COGNITION_PROVIDER",
+    "veraos_requires_trained_vera_model": false
   },
   "observed_at": "2026-10-07T07:30:00-04:00",
   "portfolio_policy": {
@@ -55,6 +66,13 @@
     "live_nonarchived_default": "INTEGRATED",
     "rule": "ALL_OWNED_REPOSITORIES_MUST_BE_REPRESENTED_EXACTLY_ONCE",
     "unknown_role_default": "MANAGED_PROJECT"
+  },
+  "privacy": {
+    "distribution_intent": "PRIVATE_PERSONAL_OS_NOT_FOR_PUBLIC_RELEASE",
+    "full_repository_identity_map_allowed": true,
+    "private_repository_names_may_be_persisted_inside_veraos": true,
+    "public_discovery_repository_must_preserve_opaque_private_boundary": true,
+    "public_subsystems_must_not_receive_private_catalog_contents_unless_explicitly_authorized": true
   },
   "repositories": [
     {
@@ -1323,6 +1341,14 @@
       "repository": "thebrazenbeard/vera-control-plane",
       "service": "vera-admin"
     },
+    "cognition_provider_router": {
+      "provider_authority_rule": "COGNITION_ONLY",
+      "provider_required_for_boot": false,
+      "provider_schema": "VERA_OS_COGNITION_PROVIDER_V1",
+      "reasoning_owner": "thebrazenbeard/rezon",
+      "repository": "thebrazenbeard/portal",
+      "service": "vera-cognition-router"
+    },
     "coordination_bus": {
       "repository": "thebrazenbeard/chat-communication-bus",
       "service": "vera-bus"
@@ -1331,27 +1357,29 @@
       "repository": "thebrazenbeard/deepmemorystorage",
       "service": "vera-memory"
     },
-    "effect_executor": {
+    "effect_execution": {
+      "authority_source": "PATRICK_EXPLICIT_EXACT_TARGET_EFFECT",
       "protected_effect_authority": false,
-      "repository": "thebrazenbeard/fuckup",
-      "service": "vera-effect-executor"
+      "repositories": [
+        "thebrazenbeard/project-runner",
+        "thebrazenbeard/executor",
+        "thebrazenbeard/WorkBridgeMCP"
+      ],
+      "service": "vera-effect-broker"
     },
     "execution_substrate": {
       "repository": "thebrazenbeard/project-runner",
       "service": "vera-project-runner"
     },
+    "failure_correction": {
+      "protected_effect_authority": false,
+      "repository": "thebrazenbeard/fuckup",
+      "service": "vera-fuckup"
+    },
     "identity_runtime": {
       "preferred_boundary": "vera_core.QualifiedVeraRuntime",
       "repository": "thebrazenbeard/vera-mono",
       "service": "verad"
-    },
-    "inference_router": {
-      "candidate_schema": "VERA_OS_COGNITION_ENGINE_CANDIDATE_V1",
-      "local_model_root": "vera/models",
-      "model_identity_rule": "MODEL_PROVENANCE_IS_NOT_VERA_IDENTITY",
-      "qualification_binding_rule": "EXACT_ARTIFACT_MANIFEST_AND_SEPARATE_ISSUER",
-      "repository": "thebrazenbeard/portal",
-      "service": "vera-inference"
     },
     "intake": {
       "repository": "thebrazenbeard/ingest",
@@ -1363,7 +1391,8 @@
     },
     "model_production": {
       "boot_policy": "NEVER",
-      "candidate_schema": "VERA_OS_COGNITION_ENGINE_CANDIDATE_V1",
+      "candidate_schema": "VERA_OS_LOCAL_MODEL_PROVIDER_CANDIDATE_V1",
+      "integration": "OPTIONAL_LOCAL_PROVIDER",
       "is_identity_authority": false,
       "protected_effect_authority": false,
       "repository": "thebrazenbeard/vera_model_training",
@@ -1379,9 +1408,19 @@
       "repository": "thebrazenbeard/portal",
       "service": "vera-portal"
     },
+    "portfolio_discovery": {
+      "catalog": "PRIVATE_VERAOS_CAPABILITY_MAP",
+      "repository": "thebrazenbeard/discovery",
+      "service": "vera-discovery"
+    },
     "preactive_admission": {
       "repository": "thebrazenbeard/pre-active",
       "service": "vera-pre-active"
+    },
+    "reasoning_architecture": {
+      "provider_dependency": "OPTIONAL",
+      "repository": "thebrazenbeard/rezon",
+      "service": "vera-rezon"
     },
     "synology_node": {
       "repository": "thebrazenbeard/vera-synology",

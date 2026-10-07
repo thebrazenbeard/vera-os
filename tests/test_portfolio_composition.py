@@ -13,7 +13,12 @@ from veraos.composition import validate_manifest
 
 class PortfolioCompositionTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.path = ROOT / "architecture" / "portfolio" / "VERA_OS_PORTFOLIO_COMPOSITION_V1.json"
+        self.path = (
+            ROOT
+            / "architecture"
+            / "portfolio"
+            / "VERA_OS_PORTFOLIO_COMPOSITION_V1.json"
+        )
         self.manifest = json.loads(self.path.read_text(encoding="utf-8"))
 
     def test_manifest_validates(self) -> None:
@@ -34,42 +39,81 @@ class PortfolioCompositionTests(unittest.TestCase):
 
     def test_core_runtime_owners_are_exact_and_non_ambient(self) -> None:
         roles = self.manifest["runtime_roles"]
-        self.assertEqual(roles["identity_runtime"]["repository"], "thebrazenbeard/vera-mono")
-        self.assertEqual(roles["portfolio_coordinator"]["repository"], "thebrazenbeard/portal")
-        self.assertEqual(roles["preactive_admission"]["repository"], "thebrazenbeard/pre-active")
-        self.assertEqual(roles["volition"]["repository"], "thebrazenbeard/volition")
-        effect_repo = "thebrazenbeard/" + "fuck" + "up"
-        self.assertEqual(roles["effect_executor"]["repository"], effect_repo)
-        self.assertFalse(self.manifest["authority"]["ambient_protected_effect_authority"])
+        self.assertEqual(
+            roles["identity_runtime"]["repository"],
+            "thebrazenbeard/vera-mono",
+        )
+        self.assertEqual(
+            roles["portfolio_coordinator"]["repository"],
+            "thebrazenbeard/portal",
+        )
+        self.assertEqual(
+            roles["portfolio_discovery"]["repository"],
+            "thebrazenbeard/discovery",
+        )
+        self.assertEqual(
+            roles["reasoning_architecture"]["repository"],
+            "thebrazenbeard/rezon",
+        )
+        self.assertEqual(
+            roles["failure_correction"]["repository"],
+            "thebrazenbeard/fuckup",
+        )
+        self.assertEqual(
+            roles["preactive_admission"]["repository"],
+            "thebrazenbeard/pre-active",
+        )
+        self.assertEqual(
+            roles["volition"]["repository"],
+            "thebrazenbeard/volition",
+        )
+        self.assertFalse(
+            self.manifest["authority"]["ambient_protected_effect_authority"]
+        )
         self.assertEqual(
             self.manifest["authority"]["protected_effect_authority_source"],
             "PATRICK_EXPLICIT_EXACT_TARGET_EFFECT",
         )
+        self.assertFalse(roles["effect_execution"]["protected_effect_authority"])
+        self.assertIn(
+            "thebrazenbeard/project-runner",
+            roles["effect_execution"]["repositories"],
+        )
+        self.assertIn(
+            "thebrazenbeard/executor",
+            roles["effect_execution"]["repositories"],
+        )
 
-    def test_model_artifacts_are_cognition_engines_not_identity(self) -> None:
+    def test_cognition_provider_is_optional_and_model_agnostic(self) -> None:
+        provider = self.manifest["runtime_roles"]["cognition_provider_router"]
         model = self.manifest["runtime_roles"]["model_production"]
         policy = self.manifest["model_policy"]
-        inference = self.manifest["runtime_roles"]["inference_router"]
 
-        self.assertEqual(model["repository"], "thebrazenbeard/vera_model_training")
+        self.assertEqual(provider["repository"], "thebrazenbeard/portal")
+        self.assertEqual(
+            provider["provider_schema"],
+            "VERA_OS_COGNITION_PROVIDER_V1",
+        )
+        self.assertFalse(provider["provider_required_for_boot"])
+        self.assertEqual(
+            provider["reasoning_owner"],
+            "thebrazenbeard/rezon",
+        )
+
+        self.assertEqual(
+            model["repository"],
+            "thebrazenbeard/vera_model_training",
+        )
+        self.assertEqual(model["integration"], "OPTIONAL_LOCAL_PROVIDER")
         self.assertFalse(model["is_identity_authority"])
         self.assertFalse(model["route_authority"])
         self.assertFalse(model["protected_effect_authority"])
 
+        self.assertFalse(policy["veraos_requires_trained_vera_model"])
         self.assertEqual(
-            inference["model_identity_rule"],
-            "MODEL_PROVENANCE_IS_NOT_VERA_IDENTITY",
+            policy["candidate_schema"],
+            "VERA_OS_LOCAL_MODEL_PROVIDER_CANDIDATE_V1",
         )
-        self.assertEqual(
-            inference["candidate_schema"],
-            "VERA_OS_COGNITION_ENGINE_CANDIDATE_V1",
-        )
-        self.assertEqual(
-            inference["qualification_binding_rule"],
-            "EXACT_ARTIFACT_MANIFEST_AND_SEPARATE_ISSUER",
-        )
-
-        self.assertEqual(policy["trained_model_role"], "COGNITION_ENGINE")
         self.assertEqual(policy["route_class"], "COGNITION_ONLY")
         self.assertFalse(policy["identity_authority"])
         self.assertFalse(policy["canonical_memory_write_authority"])
@@ -80,13 +124,19 @@ class PortfolioCompositionTests(unittest.TestCase):
         self.assertTrue(policy["qualification_must_bind_artifact_manifest"])
 
     def test_historical_lineages_are_integrated_as_provenance_not_runtime_authority(self) -> None:
-        by_repo = {item["repository"]: item for item in self.manifest["repositories"]}
+        by_repo = {
+            item["repository"]: item
+            for item in self.manifest["repositories"]
+        }
         for repo in (
             "thebrazenbeard/vera",
             "thebrazenbeard/vera-R9A0",
             "thebrazenbeard/unbound-sol",
         ):
-            self.assertEqual(by_repo[repo]["integration_mode"], "PROVENANCE")
+            self.assertEqual(
+                by_repo[repo]["integration_mode"],
+                "PROVENANCE",
+            )
             self.assertFalse(by_repo[repo]["runtime_authority"])
 
 

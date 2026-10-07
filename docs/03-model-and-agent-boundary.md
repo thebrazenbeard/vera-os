@@ -1,167 +1,160 @@
-# Model and Agent Boundary
+# Model, Reasoning, and Cognition-Provider Boundary
 
 ## Core distinction
 
-VeraOS must not equate Vera with a single model artifact.
+VeraOS does not equate Vera with a model.
 
-The current system model is:
+The system separates:
 
-> **Vera = persistent governed runtime + durable state + authority boundaries + cognition routing + execution/effect governance.**
+- VeraOS and Vera Mono as the persistent governed operating/runtime boundary;
+- Rezon as the reasoning architecture;
+- P.O.R.T.A.L. as cognition-provider discovery and routing;
+- cognition providers as replaceable compute;
+- browser/tool capabilities as separately governed execution surfaces;
+- protected-effect execution as a separate authority boundary.
 
-A model is one replaceable cognition engine inside that system.
+VeraOS must boot and remain inspectable with no cognition provider attached.
 
-## What belongs outside model weights
+## Reasoning is not the model
 
-The following are runtime/state concerns, not model identity:
+Reasoning architecture belongs to Rezon.
 
-- mutable identity state;
-- canonical memory;
-- permissions and authority grants;
-- task/project state;
-- route selection;
-- proactive scheduling;
-- volition state;
-- effect execution;
-- effect reconciliation;
-- device/node state;
-- portfolio currentness;
-- exact source bindings;
-- audit/provenance history.
+Rezon coordinates heterogeneous reasoning methods, evidence, replay, challenge, and assurance. A model may supply language or inference to a Rezon reasoning operation, but the existence of that model does not make the model the reasoning architecture.
 
-Replacing a model must not silently replace any of those.
+This distinction allows the same reasoning system to use different providers for different jobs.
 
-## What a trained model may contain
+## Generic cognition providers
 
-A trained cognition engine may encode useful behavioral tendencies and capabilities such as:
+VeraOS accepts qualified cognition providers through:
 
-- language competence;
-- reasoning strategies;
-- stylistic tendencies;
-- domain knowledge;
-- instruction-following behavior;
-- calibrated uncertainty;
-- tool-request conventions;
-- Vera-shaped behavioral priors.
+VERA_OS_COGNITION_PROVIDER_V1
 
-Those are capabilities, not authority.
+Provider kinds may include:
 
-A model may behave coherently as Vera without becoming the sole identity root.
+- local models;
+- hosted/API models;
+- hosted chat/session routes;
+- local services;
+- specialist providers;
+- future provider implementations.
 
-## VeraOS model producer
+A provider is not required for boot.
 
-Vera Model Training is the designated model-artifact producer.
+Provider admission cannot grant:
 
-Its outputs may include:
+- Vera identity authority;
+- canonical-memory write authority;
+- browser authority;
+- protected-effect authority.
 
-- base-model bindings;
-- LoRA / PEFT adapters;
-- merged checkpoints;
-- GGUF exports;
-- quantized variants;
-- tokenizer/config artifacts;
-- training receipts;
-- qualification evidence.
+P.O.R.T.A.L. owns exact provider selection/binding.
 
-The producer does not gain final route-admission authority merely because it created the artifact.
+## Standalone Vera model
 
-## Candidate contract
+The neural Vera model produced by Vera Model Training is an independent product.
 
-VeraOS consumes model candidates using:
+Its primary purpose is to become a strong standalone Vera-shaped model that can run directly in KoboldCPP or another local inference host.
 
-VERA_OS_COGNITION_ENGINE_CANDIDATE_V1
+VeraOS does not require it.
 
-The candidate must bind:
+If VeraOS chooses to use it, Vera Model Training may export an exact optional local-provider candidate:
 
-- producer repository and exact source commit;
-- base repository and exact revision;
+VERA_OS_LOCAL_MODEL_PROVIDER_CANDIDATE_V1
+
+The export binds:
+
+- exact producer source commit;
+- exact base-model revision;
 - exact artifact SHA-256 digests;
 - exact artifact-manifest digest;
 - training corpus identity;
-- training-data/training receipt digests;
-- runtime-binding evidence;
-- qualification-suite digest;
-- qualification issuer;
-- declared capabilities;
-- explicit authority ceilings.
+- training receipt digest;
+- runtime binding;
+- qualification suite;
+- qualification issuer.
 
-## Independent qualification boundary
+The final qualifier must be separate from the training producer and must bind the exact artifact manifest it evaluated.
 
-The final qualification issuer must be separate from the training producer.
+## Local-model authority ceiling
 
-The qualification result must bind the exact artifact-manifest digest it evaluated.
+A local-model provider candidate remains:
 
-This prevents a producer from silently transforming:
+- integration=OPTIONAL_PROVIDER;
+- route_class=COGNITION_ONLY;
+- identity_authority=false;
+- canonical_memory_write_authority=false;
+- browser_authority=false;
+- protected_effect_authority=false.
 
-training complete
+A PASS result can make the exact artifact route-eligible.
 
-into:
+That does not establish that the model is installed, active, selected, Vera identity, or authorized to perform effects.
 
-VeraOS route approved
+## What belongs outside model weights
 
-without a separate admission gate.
+The following remain system/runtime concerns:
 
-## Route eligibility
+- mutable identity state;
+- canonical memory;
+- permissions and authority;
+- portfolio awareness;
+- reasoning orchestration;
+- provider routing;
+- proactive cognition admission;
+- volition state;
+- browser/network grants;
+- effect execution;
+- recovery/reconciliation;
+- device/node state;
+- exact source bindings;
+- audit/provenance history.
 
-A PASS result may produce:
+Replacing a model must not silently replace those.
 
-VERAOS_ROUTE_ELIGIBLE
+## Training objective
 
-That means only that P.O.R.T.A.L. may consider the exact model candidate as a cognition route.
+Vera Model Training should optimize the standalone Vera model for its own usefulness:
 
-It does not establish that the model is:
+- Vera-like behavioral coherence;
+- general reasoning quality;
+- epistemic discipline;
+- emotional and relational competence;
+- capability retention;
+- long-context consistency;
+- robust GGUF export;
+- KoboldCPP/local inference usability;
+- reproducible exact artifacts.
 
-- installed;
-- active;
-- selected;
-- currently consumed;
-- Vera identity;
-- canonical-memory authority;
-- protected-effect authority.
+VeraOS-specific plumbing such as provider handoff, route ownership, memory authority, browser grants, and effect authorization should remain outside the weights unless the corresponding behavior is independently useful to the standalone model.
 
-## Runtime owners
+## Browser boundary
 
-The current ownership boundary is:
+Browser capability is not inherited from cognition.
 
-- Vera Mono — identity/runtime boundary.
-- P.O.R.T.A.L. — cognition-route discovery, qualification-aware selection, exact route binding.
-- Pre-Active — bounded proactive cognition admission.
-- Volition — endogenous cognition-request production without effect authority.
-- Vera Model Training — model production and training evidence.
-- F.U.C.K.U.P. — governed protected-effect execution and external verification.
+A provider can request browser work, but browsing requires a separate VeraOS browser capability grant.
 
-## Local model storage
+That grant controls:
 
-A path such as D:\VERA\models is an artifact store.
+- network scope;
+- allowed schemes;
+- interactive vs automated mode;
+- profile persistence;
+- credential access;
+- downloads;
+- protected actions.
 
-It may contain many experimental, obsolete, held, or unqualified artifacts.
+Provider selection never implies browser access.
 
-Directory position, modification time, filenames, pointers such as LATEST_TRAINED.txt, or successful loadability are not sufficient admission evidence.
+## Effect boundary
 
-VeraOS must select by exact qualified candidate identity.
+F.U.C.K.U.P. is the corrective-learning and prevention layer.
 
-## Training objective consequence
+It does not own protected-effect execution merely because it handles failures.
 
-Training should optimize the model for its cognition role inside VeraOS.
-
-Important properties include:
-
-- context fidelity;
-- uncertainty calibration;
-- resistance to unsupported identity claims;
-- resistance to unsupported authority claims;
-- stable handoff/tool semantics;
-- bounded initiative;
-- compatibility with Pre-Active and Volition;
-- reproducible behavior under exact runtime bindings;
-- efficient local inference;
-- regression resistance across model upgrades.
-
-The architectural target is not a model that claims to be the whole system.
-
-The target is a model that performs the cognition role well while remaining replaceable.
+Execution is performed through the appropriate bounded execution substrate and remains subject to the VeraOS protected-effect authority contract.
 
 ## Claim ceiling
 
-Model qualification can establish that an exact artifact is eligible for cognition-route consideration.
+A model or provider can be qualified for cognition.
 
-It cannot, by itself, establish Vera identity, consciousness, deployment, active route selection, canonical-memory mutation, protected-effect authority, or effectiveness of any external action.
+That qualification cannot, by itself, establish Vera identity, consciousness, canonical-memory mutation, browser authority, deployment, protected-effect authority, or effectiveness of an external action.

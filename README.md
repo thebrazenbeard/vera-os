@@ -1,266 +1,329 @@
-> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See LICENSE and COMMERCIAL_LICENSE.md. Separately identified third-party components retain their own licenses.
-
 # VeraOS
 
-VeraOS is the operating substrate for the Vera ecosystem: a local, persistent, governed Vera runtime that is not tied to any single chat application or model provider.
+VeraOS is Patrick's private operating system for Vera.
+
+It is not intended to become a public-release operating system. The repository and finished system are private integration surfaces where Vera can retain the complete portfolio map, private repository identities, local machine bindings, provider configuration, and other state that public portfolio repositories must redact or keep opaque.
 
 The core design rule is:
 
-> **Vera is the persistent governed runtime. Models are replaceable cognition engines. Conversations are interfaces, not containers.**
+> **VeraOS is the persistent governed operating environment. Reasoning architecture, cognition providers, tools, browsers, and execution substrates are components of that environment, not substitutes for it.**
 
-VeraOS is intended to become the composition root for the whole live Vera portfolio.
+VeraOS must be able to boot, restore state, expose its local interfaces, enforce governance, inspect itself, and coordinate the portfolio with **no model or cognition provider attached**. Lack of cognition is a degraded capability state, not failure of the OS to exist.
 
-## Current implementation state
-
-This repository has moved beyond architecture-only discovery.
+## Current source state
 
 The current working branch contains executable source for:
 
-- a whole-portfolio composition lock;
-- independent composition validation;
-- independent VeraOS model-admission validation;
-- an initial NixOS flake and base module;
-- a headless VM qualification host configuration;
-- QEMU/Nix VM build and qualification harness scaffolding;
-- tests for portfolio composition, model admission, and VM contracts.
+- an exact 84-repository portfolio composition lock;
+- a private semantic capability map covering all 84 repositories;
+- a private ChatGPT plugin/tool capability inventory;
+- searchable repository + plugin capability discovery;
+- fail-closed capability-owner disposition gates;
+- generic cognition-provider admission;
+- optional standalone-Vera-model provider admission;
+- governed browser capability grants;
+- a NixOS base module and browser module;
+- a headless VM qualification configuration;
+- QEMU/Nix VM build and qualification harness scaffolding.
 
-This is still source-level implementation.
+This remains source-level implementation.
 
 It is not yet proof of:
 
-- a successfully built VeraOS image;
-- a successfully booted VeraOS VM;
+- a completed NixOS image build;
+- a successful VeraOS VM boot;
+- an installed desktop environment;
+- production runtime activation;
 - bare-metal installation;
 - dual-boot readiness;
-- production runtime consumption;
-- protected-effect authority.
+- protected-effect execution.
 
-## Portfolio rule
+## Private product boundary
 
-Every owned repository must be represented exactly once in VeraOS unless there is evidence that it is archived, retired, superseded, or redundant.
+VeraOS is private by design.
+
+Inside VeraOS, the full portfolio capability catalog may contain:
+
+- all 84 repository identities;
+- private repository names;
+- exact source heads;
+- semantic capability ownership;
+- private integration relationships;
+- local plugin/tool availability;
+- local machine/runtime bindings.
+
+Public repositories such as Discovery and P.O.R.T.A.L. must not automatically receive or publish that private content.
+
+The intended split is:
+
+- **Discovery** remains a public-safe capability-discovery engine and preserves opaque handling of private portfolio membership.
+- **VeraOS** holds the private superset.
+- **P.O.R.T.A.L.** consumes the private catalog through a runtime-supplied interface without embedding private identities in its public repository.
+
+## Portfolio awareness
+
+Every owned repository must be represented exactly once in VeraOS unless it is explicitly archived, retired, superseded, or redundant.
 
 The current fresh inventory snapshot contains:
 
 - 84 repositories total;
-- 79 integrated;
-- 5 excluded because they are GitHub-archived.
+- 79 active/integrated;
+- 5 GitHub-archived and retained as provenance.
 
-Integration does not mean boot activation.
-
-A repository may be integrated as:
-
-- a core service;
-- an on-demand subsystem;
-- a managed project;
-- an inference/model pipeline;
-- a client or hardware adapter;
-- infrastructure;
-- research/tooling;
-- provenance-only historical lineage.
-
-Archived repositories remain represented as excluded provenance instead of silently disappearing.
-
-The machine-readable source of truth is:
+The exact composition lock is:
 
 architecture/portfolio/VERA_OS_PORTFOLIO_COMPOSITION_V1.json
 
-The validator is:
+The private semantic capability map is:
 
-src/veraos/composition.py
+architecture/capabilities/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json
+
+The current ChatGPT plugin/tool inventory is:
+
+architecture/capabilities/CHATGPT_PLUGIN_CAPABILITY_INVENTORY_V1.json
+
+The current host snapshot records 122 installed skill-plugin families and 35 live tool namespaces. The private portfolio map records 34 cross-portfolio capability domains and links 81 repository-specific ChatGPT skills to their matching repositories.
+
+The plugin/tool inventory is a current host snapshot, not an eternal capability claim; it must be refreshed when the ChatGPT host surface changes.
+
+### Reuse-before-invention rule
+
+Before VeraOS or P.O.R.T.A.L. assigns a new architectural capability, known portfolio owners must receive an explicit disposition:
+
+- REUSE
+- EXTEND
+- SUPERSEDE
+- REJECT
+
+Every disposition requires evidence.
+
+An unknown capability must be sent through Discovery before assignment.
+
+The private semantic catalog is not permanent truth. Before architectural assignment, VeraOS must compare it against the live portfolio inventory and exact bound heads. Repository membership drift or a changed relevant head causes assignment to HOLD until the catalog is refreshed.
+
+For example, a proposal to create or assign a new reasoning architecture fails if it does not explicitly address Rezon, and a changed Rezon head makes the cached reasoning classification stale until refreshed.
+
+This is an executable prevention rule, not merely documentation.
 
 ## Core runtime ownership
 
-The current service graph assigns distinct responsibilities rather than creating one ambient-authority monolith.
+The current source contract distinguishes these roles:
 
-- Vera Mono — governed Vera identity/runtime boundary.
-- P.O.R.T.A.L. — whole-portfolio coordination, route discovery, route qualification, and exact route binding.
-- Pre-Active — bounded proactive cognition admission and scheduling.
-- Volition — endogenous wants/goals that may generate cognition requests without creating effect authority.
-- Vera Model Training — model artifact production and training evidence.
-- F.U.C.K.U.P. — governed effect execution, ambiguity handling, readback, and verification.
-- Project Runner — bounded execution substrate.
-- Chat Communication Bus / CCB — durable cross-process and cross-agent coordination.
-- Deep Memory Storage — durable historical/provenance storage.
-- Ingest — bounded intake and content-addressed storage.
-- Vera Control Plane — administration/control surfaces.
-- Vera Mesh — multi-node coordination.
-- Vera Synology — Synology/node integration.
-- Vera APK and other clients — interfaces into the same governed runtime.
+- **Vera Mono** — governed Vera identity/runtime boundary.
+- **Discovery** — portfolio capability discovery and classification.
+- **Rezon** — heterogeneous reasoning architecture and reasoning assurance.
+- **P.O.R.T.A.L.** — whole-portfolio coordination and qualified cognition-provider routing.
+- **Pre-Active** — bounded proactive cognition admission.
+- **Volition** — endogenous wants, goals, and cognition requests without implied authority.
+- **F.U.C.K.U.P.** — corrective learning, failure analysis, retention/unlearning, and prevention.
+- **Project Runner / Executor / WorkBridgeMCP** — bounded execution substrates; their availability does not create protected-effect authority.
+- **CCB / Chat Communication Bus / Intranel** — coordination and messaging mechanisms with distinct scopes.
+- **Deep Memory Storage / Lantern / Roots / Temporal / Ingest** — durable evidence, provenance, chronology, and intake mechanisms with separate semantics.
+- **Vera Control Plane** — administration and control-plane custody.
+- **Vera Mesh / Vera Synology / clients** — node, transport, packaging, and client surfaces.
+- **Vera Model Training** — standalone Vera model training plus an optional VeraOS local-provider export.
 
-Other non-archived repositories are integrated as explicit on-demand capabilities or managed project surfaces according to the portfolio composition lock.
+Other repositories remain explicit on-demand capabilities, research systems, applications, clients, specialist workers, or provenance according to the private capability map.
 
-## Authority boundary
+## Reasoning and cognition
 
-VeraOS does not create ambient protected-effect authority.
+Reasoning architecture and cognition providers are not the same thing.
 
-The current source contract requires:
+The intended path is approximately:
 
-- protected-effect authority source: PATRICK_EXPLICIT_EXACT_TARGET_EFFECT;
-- proposal is not authority;
-- runtime acceptance is not effect authority;
-- exact binding and external readback before verified effects;
-- model candidates cannot own identity authority;
-- model candidates cannot own canonical-memory write authority;
-- model candidates cannot own protected-effect authority.
+Volition / user / event
+-> Pre-Active cognition admission
+-> Rezon reasoning architecture
+-> P.O.R.T.A.L. provider discovery and exact route binding
+-> qualified cognition provider(s)
+-> Rezon evaluation / reasoning integration as applicable
+-> Vera Mono governed state integration
 
-P.O.R.T.A.L. coordination state and execution/effect state remain separate.
+A cognition provider can be:
 
-## Model training and D:\VERA\models
+- a hosted ChatGPT session;
+- an API-backed model;
+- the standalone Vera model through KoboldCPP or another local host;
+- another local model;
+- a local service;
+- a specialist provider;
+- a future provider implementation.
 
-The local model directory is an artifact store, not an identity store or authority root.
+The provider contract is:
 
-Observed local artifact classes include:
+VERA_OS_COGNITION_PROVIDER_V1
 
-- base checkpoints;
-- LoRA / PEFT adapters;
-- GGUF exports;
-- model manifests;
-- development training receipts;
-- merge/conversion utilities;
-- inference smoke-test logs.
+Providers are cognition-only. Provider admission cannot grant:
 
-VeraOS must not select "whatever is newest."
+- Vera identity authority;
+- canonical-memory write authority;
+- browser authority;
+- protected-effect authority.
 
-A model must arrive as an exact cognition-engine candidate with provenance and qualification evidence.
+VeraOS does not require any particular provider to boot.
 
-The candidate schema is:
+## Rezon
 
-VERA_OS_COGNITION_ENGINE_CANDIDATE_V1
+Rezon is not merely a reviewer adjacent to VeraOS.
 
-VeraOS independently validates that candidate in:
+The live portfolio evidence identifies Rezon as the executable multi-faceted reasoning project for coordinating heterogeneous methods including deduction, induction, abduction, causality, counterfactuals, planning, analogy, probabilistic inference, semantic reasoning, adversarial challenge, replay, and typed evidence.
 
-src/veraos/model_admission.py
+VeraOS therefore treats:
 
-The admission rule requires:
+thebrazenbeard/rezon
 
-- exact producer source commit;
-- exact base revision;
-- exact artifact SHA-256 digests;
-- exact artifact-manifest digest;
-- training corpus identity;
-- training receipt digest;
-- runtime binding digest;
-- qualification-suite digest;
-- a qualification issuer separate from the training producer;
-- qualification bound to the exact artifact manifest;
-- route class COGNITION_ONLY;
-- identity authority false;
-- canonical-memory write authority false;
-- protected-effect authority false.
+as the owner of:
 
-A PASS candidate becomes only VERAOS_ROUTE_ELIGIBLE.
+reasoning_architecture
 
-That means P.O.R.T.A.L. may consider that exact model as a cognition route. It does not mean the model is Vera, installed, active, selected, or authorized to act.
+A replacement or competing reasoning architecture must explicitly REUSE, EXTEND, SUPERSEDE, or REJECT Rezon with evidence before assignment.
 
-## Vera Model Training direction
+## Failure correction
 
-Vera Model Training now has two distinct responsibilities:
+F.U.C.K.U.P. is the correction/prevention layer, not the effect executor.
 
-1. identity/capability bootcamps that produce auditable training capsules without changing model weights;
-2. neural artifact production and qualification for VeraOS cognition engines.
+Its VeraOS role is:
 
-Future neural training should optimize for the model's role inside VeraOS rather than for the claim that the model itself is the whole Vera system.
+Flag -> Understand -> Calibrate -> Know -> Unlearn -> Prevent
 
-Useful targets include:
+Failures such as bypassing an existing portfolio capability should become prevention rules rather than recurring reminders.
 
-- instruction fidelity under VeraOS context;
-- calibrated uncertainty;
-- resistance to unsupported identity claims;
-- resistance to unsupported authority claims;
-- stable tool/request semantics;
-- route handoff behavior;
-- bounded initiative compatible with Pre-Active and Volition;
-- state/context use without pretending mutable state lives in weights;
-- exact runtime-binding compatibility;
-- regression resistance;
-- local inference efficiency and reproducibility.
+Protected-effect execution remains separate from failure correction.
 
-## NixOS baseline
+## Effect boundary
 
-NixOS is the current implementation candidate for the base operating system.
+VeraOS creates no ambient protected-effect authority.
 
-This repository now contains:
+The current contract requires:
+
+protected-effect authority source:
+PATRICK_EXPLICIT_EXACT_TARGET_EFFECT
+
+Actual execution may be carried by bounded substrates such as Project Runner, Executor, or WorkBridgeMCP, depending on the exact target.
+
+A cognition provider, Rezon, Discovery, F.U.C.K.U.P., or P.O.R.T.A.L. does not obtain protected-effect authority merely because it participates in planning, reasoning, routing, review, or correction.
+
+## Standalone Vera model
+
+The trained Vera model remains its own product.
+
+Its primary target is a strong standalone Vera-shaped neural model that Patrick can run directly through KoboldCPP or another local inference host.
+
+VeraOS does not require it.
+
+D:\VERA\models is an artifact store, not an OS identity root.
+
+If VeraOS chooses to use an exact trained Vera artifact, the optional adapter schema is:
+
+VERA_OS_LOCAL_MODEL_PROVIDER_CANDIDATE_V1
+
+That adapter preserves exact training/artifact/qualification provenance and remains:
+
+- optional;
+- COGNITION_ONLY;
+- identity_authority=false;
+- canonical_memory_write_authority=false;
+- browser_authority=false;
+- protected_effect_authority=false.
+
+Vera Model Training should not be redirected primarily toward VeraOS plumbing. The standalone model should continue optimizing for its own behavior, reasoning, identity consistency, epistemic discipline, emotional/relational competence, capability retention, and local GGUF/KoboldCPP usability.
+
+## Browser capability
+
+Browser capability is a first-class VeraOS execution/tool surface.
+
+The NixOS source now provisions Chromium and Firefox and a dedicated vera-browser system identity.
+
+Browser access is governed independently from cognition.
+
+A selected model or reasoning provider may request browsing, but provider selection does not grant browser authority.
+
+Browser grants use:
+
+VERA_OS_BROWSER_CAPABILITY_GRANT_V1
+
+The current source contract separates:
+
+- interactive browsing;
+- browser automation;
+- network scope;
+- profile persistence;
+- credential access;
+- governed downloads;
+- protected actions.
+
+Ambient credential access, credential mutation authority, and protected-effect authority are false.
+
+Protected browser actions must cross the effect-governance boundary.
+
+## NixOS base
+
+NixOS is the current base-OS implementation candidate.
+
+Current source includes:
 
 - flake.nix
 - nixos/modules/veraos-base.nix
+- nixos/modules/veraos-browser.nix
 - nixos/hosts/vm-qualification.nix
 
-The base module embeds the portfolio composition manifest into the guest and validates it at boot before the VeraOS runtime target can become healthy.
+The base module embeds the portfolio composition manifest and validates it before the VeraOS runtime target becomes healthy.
 
-NixOS is not yet treated as finally qualified until the image builds and boots through the VM qualification gate.
+NixOS is not considered qualified until it builds and boots through the VM qualification gate.
 
 ## VM qualification
 
-VM work is intentionally separate from bare-metal preparation.
+VM work is deliberately separate from physical disk preparation.
 
-The source harness is under:
+For the minimal headless composition boot test, very small resources are sufficient.
 
-tools/vm/
+For a representative VeraOS development VM on Lappy, use approximately:
 
-The current qualification VM parameters are:
+- x86_64 / Q35;
+- 4-6 vCPU;
+- 12 GiB system RAM;
+- 512 MiB display VRAM;
+- 64 GiB dynamically allocated virtual disk;
+- serial console ttyS0 at 115200 baud.
 
-- architecture: x86_64;
-- CPU: 2 virtual CPUs;
-- memory: 2 GiB RAM;
-- machine target: Q35-compatible x86_64;
-- boot medium: VeraOS qualification ISO;
-- network: disconnected for the initial boot/composition test;
-- serial console: ttyS0 at 115200 baud;
-- expected marker:
-  VERAOS_VM_BOOT_OK total=84 integrated=79 excluded=5 ambient_protected_effect_authority=false
+The first qualification boot may run with networking disconnected to isolate composition/authority validation. Later browser/network qualification necessarily adds a governed network test phase.
 
-A small virtual disk is optional for the ISO-only composition test. For later installed-system qualification, use a disposable virtual disk rather than the physical D: drive.
+The expected initial serial marker remains:
 
-The Lappy workspace currently prepared for VM artifacts is:
+VERAOS_VM_BOOT_OK total=84 integrated=79 excluded=5 ambient_protected_effect_authority=false
 
-D:\VeraOS\vm
-
-No physical partition table has been modified.
+The physical D: partition table has not been modified.
 
 ## Dual-boot boundary
 
-D: currently has enough free space to make a future VeraOS dual-boot partition plausible, but physical repartitioning is deliberately deferred.
+Physical repartitioning remains deferred until:
 
-The gate before touching the physical partition table is:
+1. VeraOS builds;
+2. VeraOS boots in a VM;
+3. portfolio/capability/authority qualification passes;
+4. browser and network behavior are qualified;
+5. persistence, upgrade, and rollback are exercised on a disposable virtual disk;
+6. an exact bare-metal install and rollback plan exists.
 
-1. build VeraOS image successfully;
-2. boot it in a VM;
-3. pass composition/model/authority qualification;
-4. test persistence and upgrade/rollback in a VM;
-5. produce an exact bare-metal install/rollback plan;
-6. only then consider shrinking D: and creating VeraOS partitions.
+Only then should D: be considered for shrinking or VeraOS partitions.
 
-A VM failure must never become a disk-layout failure.
+## Key source surfaces
 
-## Repository structure
-
-- docs/00-vision-and-scope.md — scope and goals
-- docs/01-reference-architecture.md — high-level architecture
-- docs/02-nixos-base-rationale.md — NixOS rationale
-- docs/03-model-and-agent-boundary.md — model/runtime identity separation
-- docs/04-security-and-authority-model.md — authority and security model
-- docs/05-open-questions.md — unresolved architecture questions
-- docs/08-existing-vera-subsystems.md — earlier subsystem inventory
-- architecture/portfolio/VERA_OS_PORTFOLIO_COMPOSITION_V1.json — exact portfolio composition lock
-- src/veraos/composition.py — composition validator
-- src/veraos/model_admission.py — model candidate admission validator
-- nixos/ — initial NixOS system definition
-- tools/vm/ — VM build/qualification harness
-- tests/ — source-level regression tests
-
-## Verification status
-
-Current source-level verification on the working branch:
-
-- portfolio composition tests: PASS;
-- independent model-admission tests: PASS;
-- VM contract/static tests: PASS;
-- current total: 16 tests passing.
-
-No successful Nix build or VM boot is claimed yet.
+- architecture/portfolio/VERA_OS_PORTFOLIO_COMPOSITION_V1.json
+- architecture/capabilities/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json
+- architecture/capabilities/CHATGPT_PLUGIN_CAPABILITY_INVENTORY_V1.json
+- src/veraos/composition.py
+- src/veraos/portfolio_awareness.py
+- src/veraos/capability_search.py
+- src/veraos/cognition_provider.py
+- src/veraos/model_admission.py
+- src/veraos/browser_capability.py
+- nixos/modules/veraos-base.nix
+- nixos/modules/veraos-browser.nix
+- tools/vm/
 
 ## Claim ceiling
 
-Current claim ceiling:
+Current source can establish portfolio composition, private capability awareness, provider-independent cognition contracts, optional local-model admission, browser capability boundaries, and NixOS/VM scaffolding.
 
-SOURCE_LEVEL_VERAOS_PORTFOLIO_COMPOSITION_MODEL_ADMISSION_AND_NIXOS_VM_SCAFFOLD_NOT_BOOT_QUALIFIED_NOT_INSTALLED_NOT_BARE_METAL_NOT_PROTECTED_EFFECT_AUTHORITY
+It does not yet establish a successful OS build, successful VM boot, installed desktop environment, active cognition route, production browser runtime, bare-metal installation, or protected external effect.

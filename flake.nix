@@ -1,5 +1,5 @@
 {
-  description = "VeraOS — governed Vera operating substrate";
+  description = "VeraOS - governed Vera operating substrate";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -14,6 +14,7 @@
         modules = [
           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
           ./nixos/modules/veraos-base.nix
+          ./nixos/modules/veraos-browser.nix
           ./nixos/hosts/vm-qualification.nix
         ];
       };

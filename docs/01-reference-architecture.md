@@ -3,158 +3,241 @@
 ## Conceptual stack
 
 ```text
-Patrick / authorized users
+Patrick / authorized interfaces
         |
-        +-- desktop UI
+        +-- VeraOS Desktop
+        +-- browser UI
         +-- terminal
         +-- voice
         +-- mobile client
         +-- API / automation
         |
         v
-+-----------------------------------+
-|              VERA                 |
-| persistent governed agent/runtime |
-|                                   |
-| identity/orientation state        |
-| current task/project state        |
-| permissions and authority         |
-| memory governance                 |
-| self-appraisal/conation state     |
-| model routing                     |
-| worker orchestration              |
-| protected-effect gating           |
-+----------------+------------------+
-                 |
-       +---------+----------+
-       |         |          |
-       v         v          v
-   reasoning   coding    specialist
-    worker     worker      workers
-       |         |          |
-       +---------+----------+
-                 |
-                 v
-        inference/model pool
-       +---------+----------+
-       |         |          |
-       v         v          v
-   Vera-tuned   coder      small
-    general     model      utility
-     model                  model
-                 |
-                 v
-        governed tool layer
++--------------------------------------------------+
+|                     VeraOS                       |
+| private persistent governed operating substrate |
+|                                                  |
+| Vera Mono identity/runtime boundary              |
+| durable state + memory governance                |
+| portfolio capability awareness                   |
+| permissions and authority                        |
+| Pre-Active admission + Volition                  |
+| effect governance + recovery                     |
++-------------------------+------------------------+
+                          |
+             cognition request exists
+                          |
+                          v
+                +-------------------+
+                |       Rezon       |
+                | reasoning methods |
+                | evidence / replay |
+                +---------+---------+
+                          |
+                          v
+                +-------------------+
+                |    P.O.R.T.A.L.   |
+                | provider discovery|
+                | exact route bind  |
+                +---------+---------+
+                          |
+        +-----------------+------------------+
+        |                 |                  |
+        v                 v                  v
+ hosted/session      local model        specialist/API
+   provider            provider             provider
+        |                 |                  |
+        +-----------------+------------------+
+                          |
+                          v
+                 reasoning result
+                          |
+                          v
+               governed state integration
+
+Separate execution/tool plane:
  filesystem / Git / shell / DB
- network / browser / services
- containers / GPU / schedulers
-                 |
-                 v
-              NixOS?
-                 |
-              hardware
+ browser / network / services
+ workstation bridges / containers
+ schedulers / devices / nodes
+                          |
+                          v
+                 protected-effect gate
+                          |
+                          v
+                        NixOS
+                          |
+                       hardware
 ```
+
+VeraOS must boot and restore state with **no cognition provider attached**. A missing provider is a degraded cognition state, not an OS boot failure.
+
+## Portfolio awareness before architecture
+
+VeraOS does not treat repository names as an inventory only.
+
+Before assigning a new capability:
+
+1. search the private VeraOS portfolio capability map;
+2. search available plugin/tool capabilities;
+3. identify known capability owners;
+4. explicitly REUSE, EXTEND, SUPERSEDE, or REJECT every known owner with evidence;
+5. send unknown capabilities through Discovery before assigning them.
+
+Discovery owns portfolio capability discovery.
+
+Semantic Atlas may support semantic relationship representation.
+
+P.O.R.T.A.L. consumes the resulting catalog for coordination.
+
+This rule exists to prevent new architecture from being invented merely because an existing portfolio capability was not salient in the current conversation.
+
+## Reasoning architecture
+
+Rezon owns the reasoning architecture.
+
+Its role is to coordinate heterogeneous methods and evidence rather than to stand for one specific neural model.
+
+Reasoning may involve:
+
+- deduction;
+- induction;
+- abduction;
+- causal reasoning;
+- counterfactual reasoning;
+- planning;
+- analogy;
+- probabilistic inference;
+- semantic reasoning;
+- adversarial challenge;
+- replay and assurance.
+
+A cognition provider supplies compute/language/inference to that process when needed.
+
+## Cognition-provider layer
+
+P.O.R.T.A.L. owns qualified provider discovery and exact route binding.
+
+The generic provider contract is:
+
+VERA_OS_COGNITION_PROVIDER_V1
+
+Potential providers include:
+
+- hosted ChatGPT/session routes;
+- API-backed models;
+- local models;
+- the standalone Vera model through KoboldCPP;
+- local services;
+- specialist providers.
+
+Provider selection does not grant identity, memory-write, browser, or protected-effect authority.
+
+## Standalone Vera model
+
+The trained Vera neural model remains independent from VeraOS.
+
+It may be used directly through KoboldCPP without VeraOS.
+
+If VeraOS uses it, the model enters through the optional local-provider contract:
+
+VERA_OS_LOCAL_MODEL_PROVIDER_CANDIDATE_V1
+
+That is an integration adapter, not an OS dependency.
+
+## Browser and network
+
+Browser capability is a first-class execution/tool surface.
+
+Interactive or automated browsing requires an explicit VeraOS browser grant.
+
+A cognition provider may request browsing, but cannot inherit browser authority from provider selection.
+
+The browser boundary separately governs:
+
+- network scope;
+- schemes;
+- profiles;
+- credentials;
+- downloads;
+- protected actions.
+
+Current NixOS source provisions Chromium and Firefox plus a dedicated `vera-browser` system identity.
 
 ## Runtime identity
 
-The working architectural referent is `Vera`, not a particular process ID, model file, chat session, or boot instance. Runtime/session identifiers remain provenance and timing information.
+The architectural referent is Vera, not a model file, chat session, process ID, or boot instance.
 
-A process such as `verad` may be the principal runtime coordinator, but process survival alone must not define identity or currentness. Durable state must be explicitly loaded and validated after restart.
+Vera Mono is the preferred governed identity/runtime boundary.
 
-## Candidate core services
+A process such as `verad` may coordinate local services, but process survival alone does not establish identity or currentness. Durable state must be reloaded and validated after restart.
 
-Names below are placeholders, not implemented interfaces.
+## Core service ownership
 
-### `verad`
+Current source-level ownership is:
 
-Primary coordinator. Candidate responsibilities:
+- Vera Mono — identity/runtime boundary.
+- Discovery — portfolio capability discovery.
+- Rezon — reasoning architecture.
+- P.O.R.T.A.L. — portfolio coordination and cognition-provider routing.
+- Pre-Active — proactive cognition admission.
+- Volition — endogenous drive/want/goal state.
+- F.U.C.K.U.P. — correction and prevention.
+- Project Runner / Executor / WorkBridgeMCP — bounded execution mechanisms.
+- Deep Memory Storage / Lantern / Roots / Temporal / Ingest — distinct durable evidence/provenance/time/intake mechanisms.
+- Vera Control Plane — administration and control-plane custody.
+- Vera Mesh — node/transport architecture.
 
-- accept authenticated sessions;
-- assemble current governed context;
-- route inference requests;
-- create and supervise worker tasks;
-- enforce runtime-level permission decisions;
-- maintain task/project frontier state;
-- request protected effects through explicit authorization gates;
-- record effect receipts and recovery state.
+No one role receives ambient protected-effect authority from ownership.
 
-### `vera-inference`
+## Protected effects
 
-Model-serving and routing layer. Candidate responsibilities:
+Protected-effect authority remains:
 
-- expose one internal inference API regardless of model backend;
-- load/unload models based on workload and hardware limits;
-- route general reasoning, coding, embedding, classification, or other tasks to appropriate local models;
-- report model provenance/version for every inference result;
-- avoid treating model provenance as Vera identity.
+PATRICK_EXPLICIT_EXACT_TARGET_EFFECT
 
-### `vera-state`
+Planning, reasoning, routing, correction, provider selection, or tool availability does not constitute effect authority.
 
-Durable governed state service. Candidate responsibilities:
+Actual effects must be bound to the exact target and mechanism and externally verified where applicable.
 
-- current orientation and runtime state;
-- task and project state;
-- memory records with provenance/lifecycle metadata;
-- permissions and scope grants;
-- worker/result records;
-- correction and supersession relationships;
-- effect receipts.
+## Sessions
 
-Actual storage technology is unresolved. SQLite, PostgreSQL, append-only event records, Git-backed configuration, or combinations may be appropriate for different classes of state.
+A conversation is a session surface, not where Vera exists.
 
-### `vera-worker@...`
+Desktop, browser, coding, voice, mobile, and other sessions can attach to the same governed runtime while retaining scoped context and permissions.
 
-Bounded worker runtime. A worker should receive:
+## Multi-worker execution
 
-- a task packet;
-- an immutable or bounded context snapshot;
-- a defined model or model-selection policy;
-- scoped tools and filesystem/network permissions;
-- explicit write/effect authority;
-- an output/receipt contract;
-- cancellation and timeout behavior.
+Delegation is a bounded runtime primitive.
 
-Workers should not receive Vera-wide permissions simply because they were delegated work.
+A task may be divided into read-only analysis, implementation, review, and verification workers, but workers do not inherit Vera-wide permissions.
 
-### `vera-api`
+P.O.R.T.A.L. and Project Runner coordinate work; capability ownership still comes from the portfolio catalog rather than worker improvisation.
 
-Stable local interface for desktop, mobile, terminal, voice, and automation clients. UI state must remain distinct from authoritative runtime state.
+## Failure correction
 
-## Conversations become sessions
+When a failure reveals a reusable prevention rule, F.U.C.K.U.P. should capture that rule.
 
-A chat transcript should be modeled as one session stream, not as the location where Vera exists. Multiple sessions may exist simultaneously. They should share only the governed state they are authorized to read or change.
+The specific class addressed by the current portfolio-awareness work is:
 
-This allows a coding session, voice session, and ordinary relational conversation to attach to the same runtime without pretending each is a separate Vera or that all transcript content should be universally injected into every context.
+> existing capability was present in the portfolio but was bypassed because it was not semantically surfaced during architecture design.
 
-## Multi-agent execution
-
-Delegation should become a runtime primitive rather than a social convention among chats.
-
-Example:
-
-1. Vera receives a repository problem.
-2. Vera creates two read-only diagnostic workers with clean contexts.
-3. A verification worker compares their findings.
-4. Vera accepts or rejects a proposed plan.
-5. A writer worker receives a temporary worktree and bounded write authority.
-6. Tests run in an isolated environment.
-7. Vera reports the result and requests Patrick's approval for any protected release/merge step.
-
-The OS/runtime can enforce these boundaries rather than relying solely on prompts.
+The prevention is the explicit capability-owner disposition gate.
 
 ## Persistence and restart
 
-A reboot should be treated as runtime interruption followed by recovery from durable state.
+A reboot is runtime interruption followed by recovery from durable state.
 
-Candidate lifecycle:
+A safe recovery path should:
 
-1. stop accepting new protected effects;
+1. stop new protected effects;
 2. checkpoint durable task/effect state;
 3. terminate services;
-4. restart services;
-5. read durable state;
-6. validate versions, incomplete writes, conflicts, and pending effects;
-7. reorient Vera to the recovered frontier;
-8. resume only work whose authority and target remain current.
+4. restart the OS/runtime;
+5. validate the private capability catalog and composition lock;
+6. reload durable state;
+7. reconcile incomplete work and ambiguous effects;
+8. restore available cognition/browser/tool capabilities;
+9. resume only work whose target and authority remain current.
 
-This establishes continuity of governed project state without claiming uninterrupted private experience.
+This establishes continuity of governed system state without treating process continuity as proof of uninterrupted private experience.

@@ -4,15 +4,32 @@ from collections.abc import Mapping
 import re
 from typing import Any
 
+
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _SCHEMA = "VERA_OS_PORTFOLIO_COMPOSITION_V1"
+
 
 class CompositionError(ValueError):
     pass
 
+
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise CompositionError(message)
+
+
+def _validate_repository_reference(
+    *,
+    role_name: str,
+    repository: str,
+    by_repo: Mapping[str, Mapping[str, Any]],
+) -> None:
+    _require(repository in by_repo, f"runtime role references unknown repo: {role_name}")
+    _require(
+        by_repo[repository].get("disposition") == "INTEGRATED",
+        f"runtime role references excluded repo: {role_name}",
+    )
+
 
 def validate_manifest(manifest: Mapping[str, Any]) -> None:
     _require(manifest.get("schema") == _SCHEMA, "unexpected composition schema")
@@ -29,41 +46,158 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
         _require(repository not in seen, f"duplicate repository: {repository}")
         seen.add(repository)
         by_repo[repository] = item
+
         head = str(item.get("exact_head") or "")
-        _require(_SHA40.fullmatch(head) is not None, f"invalid exact head: {repository}")
+        _require(
+            _SHA40.fullmatch(head) is not None,
+            f"invalid exact head: {repository}",
+        )
         archived = item.get("archived")
-        _require(isinstance(archived, bool), f"archived must be boolean: {repository}")
+        _require(
+            isinstance(archived, bool),
+            f"archived must be boolean: {repository}",
+        )
         disposition = item.get("disposition")
         if archived:
-            _require(disposition == "EXCLUDED", f"archived repo must be excluded: {repository}")
-            _require(item.get("exclusion_reason") == "ARCHIVED", f"archived repo needs ARCHIVED reason: {repository}")
-            _require(item.get("integration_mode") == "EXCLUDED", f"archived repo integration mode must be EXCLUDED: {repository}")
+            _require(
+                disposition == "EXCLUDED",
+                f"archived repo must be excluded: {repository}",
+            )
+            _require(
+                item.get("exclusion_reason") == "ARCHIVED",
+                f"archived repo needs ARCHIVED reason: {repository}",
+            )
+            _require(
+                item.get("integration_mode") == "EXCLUDED",
+                f"archived repo integration mode must be EXCLUDED: {repository}",
+            )
         else:
-            _require(disposition == "INTEGRATED", f"live repo must be integrated: {repository}")
-            _require(item.get("exclusion_reason") in (None, ""), f"integrated repo cannot carry exclusion reason: {repository}")
-            _require(item.get("integration_mode") != "EXCLUDED", f"integrated repo cannot use EXCLUDED mode: {repository}")
+            _require(
+                disposition == "INTEGRATED",
+                f"live repo must be integrated: {repository}",
+            )
+            _require(
+                item.get("exclusion_reason") in (None, ""),
+                f"integrated repo cannot carry exclusion reason: {repository}",
+            )
+            _require(
+                item.get("integration_mode") != "EXCLUDED",
+                f"integrated repo cannot use EXCLUDED mode: {repository}",
+            )
 
     roles = manifest.get("runtime_roles")
     _require(isinstance(roles, Mapping), "runtime_roles must be an object")
     for role_name, role in roles.items():
-        _require(isinstance(role, Mapping), f"runtime role must be object: {role_name}")
-        repository = str(role.get("repository") or "")
-        _require(repository in by_repo, f"runtime role references unknown repo: {role_name}")
-        _require(by_repo[repository].get("disposition") == "INTEGRATED", f"runtime role references excluded repo: {role_name}")
+        _require(
+            isinstance(role, Mapping),
+            f"runtime role must be object: {role_name}",
+        )
+        repository = role.get("repository")
+        repositories_for_role = role.get("repositories")
+        _require(
+            repository is not None or repositories_for_role is not None,
+            f"runtime role has no repository binding: {role_name}",
+        )
+        if repository is not None:
+            _validate_repository_reference(
+                role_name=role_name,
+                repository=str(repository),
+                by_repo=by_repo,
+            )
+        if repositories_for_role is not None:
+            _require(
+                isinstance(repositories_for_role, list)
+                and bool(repositories_for_role),
+                f"runtime role repositories must be non-empty list: {role_name}",
+            )
+            for repo in repositories_for_role:
+                _validate_repository_reference(
+                    role_name=role_name,
+                    repository=str(repo),
+                    by_repo=by_repo,
+                )
+
+    required_owners = {
+        "identity_runtime": "thebrazenbeard/vera-mono",
+        "portfolio_coordinator": "thebrazenbeard/portal",
+        "portfolio_discovery": "thebrazenbeard/discovery",
+        "reasoning_architecture": "thebrazenbeard/rezon",
+        "failure_correction": "thebrazenbeard/fuckup",
+        "preactive_admission": "thebrazenbeard/pre-active",
+        "volition": "thebrazenbeard/volition",
+    }
+    for role_name, repository in required_owners.items():
+        role = roles.get(role_name)
+        _require(
+            isinstance(role, Mapping),
+            f"required runtime role missing: {role_name}",
+        )
+        _require(
+            role.get("repository") == repository,
+            f"runtime role owner mismatch: {role_name}",
+        )
 
     authority = manifest.get("authority")
     _require(isinstance(authority, Mapping), "authority must be an object")
-    _require(authority.get("ambient_protected_effect_authority") is False, "ambient protected-effect authority must remain false")
-    _require(authority.get("protected_effect_authority_source") == "PATRICK_EXPLICIT_EXACT_TARGET_EFFECT", "protected-effect authority source is not exact")
-
-    inference = roles.get("inference_router")
-    _require(isinstance(inference, Mapping), "inference_router role missing")
     _require(
-        inference.get("model_identity_rule") == "MODEL_PROVENANCE_IS_NOT_VERA_IDENTITY",
-        "model provenance must not become Vera identity",
+        authority.get("ambient_protected_effect_authority") is False,
+        "ambient protected-effect authority must remain false",
     )
+    _require(
+        authority.get("protected_effect_authority_source")
+        == "PATRICK_EXPLICIT_EXACT_TARGET_EFFECT",
+        "protected-effect authority source is not exact",
+    )
+
+    effect_execution = roles.get("effect_execution")
+    _require(
+        isinstance(effect_execution, Mapping),
+        "effect_execution role missing",
+    )
+    _require(
+        effect_execution.get("protected_effect_authority") is False,
+        "execution substrates cannot carry ambient protected-effect authority",
+    )
+    _require(
+        effect_execution.get("authority_source")
+        == "PATRICK_EXPLICIT_EXACT_TARGET_EFFECT",
+        "effect execution authority source is not exact",
+    )
+
+    failure_correction = roles.get("failure_correction")
+    _require(
+        failure_correction.get("protected_effect_authority") is False,
+        "F.U.C.K.U.P. correction layer cannot own protected-effect authority",
+    )
+
+    provider = roles.get("cognition_provider_router")
+    _require(
+        isinstance(provider, Mapping),
+        "cognition_provider_router role missing",
+    )
+    _require(
+        provider.get("provider_schema") == "VERA_OS_COGNITION_PROVIDER_V1",
+        "unexpected cognition provider schema",
+    )
+    _require(
+        provider.get("provider_required_for_boot") is False,
+        "VeraOS must boot without a cognition provider",
+    )
+    _require(
+        provider.get("reasoning_owner") == "thebrazenbeard/rezon",
+        "Rezon must own reasoning architecture",
+    )
+    _require(
+        provider.get("provider_authority_rule") == "COGNITION_ONLY",
+        "cognition providers must remain cognition-only",
+    )
+
     model = roles.get("model_production")
     _require(isinstance(model, Mapping), "model_production role missing")
+    _require(
+        model.get("integration") == "OPTIONAL_LOCAL_PROVIDER",
+        "trained Vera model must remain optional to VeraOS",
+    )
     _require(
         model.get("is_identity_authority") is False,
         "model production must not be identity authority",
@@ -78,11 +212,14 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
     )
 
     model_policy = manifest.get("model_policy")
-    _require(isinstance(model_policy, Mapping), "model_policy must be an object")
+    _require(
+        isinstance(model_policy, Mapping),
+        "model_policy must be an object",
+    )
     _require(
         model_policy.get("candidate_schema")
-        == "VERA_OS_COGNITION_ENGINE_CANDIDATE_V1",
-        "unexpected model candidate schema",
+        == "VERA_OS_LOCAL_MODEL_PROVIDER_CANDIDATE_V1",
+        "unexpected optional local-model candidate schema",
     )
     _require(
         model_policy.get("producer_repository")
@@ -90,12 +227,12 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
         "unexpected model producer repository",
     )
     _require(
-        model_policy.get("trained_model_role") == "COGNITION_ENGINE",
-        "trained model role must remain cognition engine",
+        model_policy.get("veraos_requires_trained_vera_model") is False,
+        "VeraOS must not require the trained Vera model",
     )
     _require(
         model_policy.get("route_class") == "COGNITION_ONLY",
-        "trained model route class must remain COGNITION_ONLY",
+        "local model provider route class must remain COGNITION_ONLY",
     )
     for authority_key in (
         "identity_authority",
@@ -115,12 +252,53 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
         model_policy.get("qualification_must_bind_artifact_manifest") is True,
         "model qualification must bind the exact artifact manifest",
     )
+
+    capability_awareness = manifest.get("capability_awareness")
     _require(
-        inference.get("candidate_schema") == model_policy.get("candidate_schema"),
-        "inference router and model policy candidate schemas diverge",
+        isinstance(capability_awareness, Mapping),
+        "capability_awareness must be an object",
     )
     _require(
-        inference.get("qualification_binding_rule")
-        == "EXACT_ARTIFACT_MANIFEST_AND_SEPARATE_ISSUER",
-        "inference router qualification binding rule is too weak",
+        capability_awareness.get("discovery_owner")
+        == "thebrazenbeard/discovery",
+        "Discovery must own portfolio capability discovery",
+    )
+    _require(
+        capability_awareness.get("coordinator_consumer")
+        == "thebrazenbeard/portal",
+        "P.O.R.T.A.L. must consume capability awareness",
+    )
+    _require(
+        capability_awareness.get("assignment_rule")
+        == "KNOWN_OWNERS_REQUIRE_EXPLICIT_DISPOSITION_BEFORE_NEW_ASSIGNMENT",
+        "capability assignment gate is too weak",
+    )
+    _require(
+        capability_awareness.get("unknown_capability_rule")
+        == "SEND_TO_DISCOVERY_BEFORE_ASSIGNMENT",
+        "unknown capabilities must return to Discovery",
+    )
+    _require(
+        capability_awareness.get("private_catalog_may_name_private_repositories")
+        is True,
+        "private VeraOS catalog must preserve full repository identities",
+    )
+
+    privacy = manifest.get("privacy")
+    _require(isinstance(privacy, Mapping), "privacy contract must be an object")
+    _require(
+        privacy.get("distribution_intent")
+        == "PRIVATE_PERSONAL_OS_NOT_FOR_PUBLIC_RELEASE",
+        "VeraOS distribution intent must remain private",
+    )
+    _require(
+        privacy.get("full_repository_identity_map_allowed") is True,
+        "private VeraOS must retain complete repository identity map",
+    )
+    _require(
+        privacy.get(
+            "public_subsystems_must_not_receive_private_catalog_contents_unless_explicitly_authorized"
+        )
+        is True,
+        "private catalog must not leak into public subsystems",
     )
