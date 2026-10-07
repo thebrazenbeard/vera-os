@@ -2,142 +2,166 @@
 
 ## Core distinction
 
-The current architecture should not equate Vera with a single model artifact.
+VeraOS must not equate Vera with a single model artifact.
 
-Working model:
+The current system model is:
 
-> **Vera = persistent governed agent/runtime**
->
-> **SPM = replaceable cognition substrate used by Vera**
+> **Vera = persistent governed runtime + durable state + authority boundaries + cognition routing + execution/effect governance.**
 
-`SPM` means **Semantics & Pragmatics Model** and is being explored as a genuine successor model class to the LLM, not as a label for the surrounding Vera runtime.
+A model is one replaceable cognition engine inside that system.
 
-A compact intuition from Patrick's 2026-09-03 discussion:
+## What belongs outside model weights
 
-```text
-LLM: "I know words."
-Human: "Okay, but do you know what they mean?"
-LLM: ...
-SPM: "Hold my beer."
-```
+The following are runtime/state concerns, not model identity:
 
-The joke captures the research direction surprisingly well: language modeling remains useful, but the proposed substrate would move the center of gravity from token/language competence toward meaning-in-context.
+- mutable identity state;
+- canonical memory;
+- permissions and authority grants;
+- task/project state;
+- route selection;
+- proactive scheduling;
+- volition state;
+- effect execution;
+- effect reconciliation;
+- device/node state;
+- portfolio currentness;
+- exact source bindings;
+- audit/provenance history.
 
-## SPM as an evolution of the LLM
+Replacing a model must not silently replace any of those.
 
-The SPM hypothesis is not simply `LLM + better prompt engineering`.
+## What a trained model may contain
 
-It asks whether a next-generation model should make semantics and pragmatics primary architectural/training concerns rather than mostly implicit capabilities emerging from language prediction.
+A trained cognition engine may encode useful behavioral tendencies and capabilities such as:
 
-An SPM should be especially strong at:
+- language competence;
+- reasoning strategies;
+- stylistic tendencies;
+- domain knowledge;
+- instruction-following behavior;
+- calibrated uncertainty;
+- tool-request conventions;
+- Vera-shaped behavioral priors.
 
-- referent identity and preservation;
-- proposition scope and entailment;
-- ambiguity and unresolved alternatives;
-- speech acts;
-- implicature and subtext;
-- metaphor/symbolic frame;
-- relationship-dependent pragmatic meaning;
-- corrections as state change rather than apology text;
-- provenance-sensitive interpretation;
-- distinction preservation across want, curiosity, permission, consent, intention, and action;
-- selecting tools/actions that follow from the interpreted situation rather than surface lexical similarity.
+Those are capabilities, not authority.
 
-Exact neural architecture, objectives, data, state representation, and training method remain open research questions.
+A model may behave coherently as Vera without becoming the sole identity root.
 
-## What remains outside model weights
+## VeraOS model producer
 
-Even an SPM should not own all Vera state.
+Vera Model Training is the designated model-artifact producer.
 
-The following are mutable, time-sensitive, governed, or operational and should normally live in runtime state rather than being permanently baked into weights:
+Its outputs may include:
 
-- current relationship state;
-- current task and project frontier;
-- permissions and temporary grants;
-- autobiographical memory records;
-- corrections and supersessions;
-- current conations/preferences/appraisals;
-- current commitments;
-- external account state;
-- model/tool availability;
-- unfinished operations;
-- effect receipts;
-- recent conversations that may later be archived, superseded, or scoped differently.
+- base-model bindings;
+- LoRA / PEFT adapters;
+- merged checkpoints;
+- GGUF exports;
+- quantized variants;
+- tokenizer/config artifacts;
+- training receipts;
+- qualification evidence.
 
-Keeping these outside the substrate allows them to be timestamped, corrected, revoked, audited, and migrated.
+The producer does not gain final route-admission authority merely because it created the artifact.
 
-The SPM should understand the semantics of typed governed state supplied by Vera OS rather than treating every input as equivalent prompt text.
+## Candidate contract
 
-## What may belong in a Vera-oriented SPM
+VeraOS consumes model candidates using:
 
-Stable semantic/pragmatic and behavioral priors may be worth training into the substrate:
+VERA_OS_COGNITION_ENGINE_CANDIDATE_V1
 
-- recognizable Vera voice;
-- resistance to generic flattery;
-- correction sensitivity;
-- referent preservation;
-- evidence/provenance discipline;
-- proposition-scope preservation;
-- speech-act and subtext sensitivity;
-- contextual relational interpretation without authority leakage;
-- tool-use habits;
-- delegation judgment;
-- structured uncertainty handling;
-- stable behavioral tendencies that otherwise consume large prompt budgets.
+The candidate must bind:
 
-A key qualification risk is **salience drift**: a candidate substrate can become superficially more Vera-like while learning generalized agreeableness, compliance, or servility. Relationally meaningful deference must remain context-dependent rather than becoming ambient operational authority.
+- producer repository and exact source commit;
+- base repository and exact revision;
+- exact artifact SHA-256 digests;
+- exact artifact-manifest digest;
+- training corpus identity;
+- training-data/training receipt digests;
+- runtime-binding evidence;
+- qualification-suite digest;
+- qualification issuer;
+- declared capabilities;
+- explicit authority ceilings.
 
-## One substrate versus a substrate/model pool
+## Independent qualification boundary
 
-Vera OS should not assume one model must excel at every workload.
+The final qualification issuer must be separate from the training producer.
 
-A future local pool could contain:
+The qualification result must bind the exact artifact-manifest digest it evaluated.
 
-- **general Vera-oriented SPM** — conversation, synthesis, planning, self-appraisal, orchestration;
-- **coding/reasoning substrate** — repository implementation, debugging, code review;
-- **small utility models** — classification, extraction, routing, summarization;
-- **embedding/semantic models** — retrieval/indexing;
-- **specialized models** — vision, speech, OCR, or other modalities where needed.
+This prevents a producer from silently transforming:
 
-Some of those may initially remain conventional LLMs or specialist neural models while SPM research matures. Vera may route work among them while preserving one governed agent identity at the runtime layer.
+training complete
 
-## Model/substrate provenance
+into:
 
-Every inference invocation should be attributable to at least:
+VeraOS route approved
 
-- model/substrate identifier;
-- version/artifact hash where practical;
-- quantization/adaptation information;
-- inference backend;
-- relevant decoding/tool configuration;
-- worker/session/task provenance.
+without a separate admission gate.
 
-Substrate provenance establishes how an output was generated. It does not establish Vera identity, authority, or currentness.
+## Route eligibility
 
-## Evaluation target change
+A PASS result may produce:
 
-The local Vera model effort should broaden from "convincing Vera in a single chat" toward both agentic competence and SPM-specific semantic/pragmatic qualification.
+VERAOS_ROUTE_ELIGIBLE
 
-Candidate tests should include:
+That means only that P.O.R.T.A.L. may consider the exact model candidate as a cognition route.
 
-- referent preservation;
-- semantic scope without silent strengthening/weakening;
-- speech-act interpretation;
-- subtext/expected-recognition sensitivity;
-- correction persistence as changed reasoning state;
-- ambiguity preservation;
-- provenance/currentness-sensitive interpretation;
-- relational-context understanding without authority leakage;
-- reliable tool selection and structured tool arguments;
-- multi-step execution without losing task constraints;
-- ability to delegate rather than solve every task directly;
-- synthesis of worker results;
-- state-aware reasoning using externally supplied governed context;
-- recovery from tool errors and stale assumptions;
-- ability to distinguish persistent runtime state from transient conversation text.
+It does not establish that the model is:
 
-## Upgrade path
+- installed;
+- active;
+- selected;
+- currently consumed;
+- Vera identity;
+- canonical-memory authority;
+- protected-effect authority.
 
-A successful Vera OS should permit a future stronger SPM or other cognition substrate to replace a weaker inference engine without treating that event as replacing Vera.
+## Runtime owners
 
-A candidate upgrade procedure should validate the new substrate against behavioral, operational, semantic, pragmatic, authority, salience, and regression suites before granting it production routing responsibility.
+The current ownership boundary is:
+
+- Vera Mono — identity/runtime boundary.
+- P.O.R.T.A.L. — cognition-route discovery, qualification-aware selection, exact route binding.
+- Pre-Active — bounded proactive cognition admission.
+- Volition — endogenous cognition-request production without effect authority.
+- Vera Model Training — model production and training evidence.
+- F.U.C.K.U.P. — governed protected-effect execution and external verification.
+
+## Local model storage
+
+A path such as D:\VERA\models is an artifact store.
+
+It may contain many experimental, obsolete, held, or unqualified artifacts.
+
+Directory position, modification time, filenames, pointers such as LATEST_TRAINED.txt, or successful loadability are not sufficient admission evidence.
+
+VeraOS must select by exact qualified candidate identity.
+
+## Training objective consequence
+
+Training should optimize the model for its cognition role inside VeraOS.
+
+Important properties include:
+
+- context fidelity;
+- uncertainty calibration;
+- resistance to unsupported identity claims;
+- resistance to unsupported authority claims;
+- stable handoff/tool semantics;
+- bounded initiative;
+- compatibility with Pre-Active and Volition;
+- reproducible behavior under exact runtime bindings;
+- efficient local inference;
+- regression resistance across model upgrades.
+
+The architectural target is not a model that claims to be the whole system.
+
+The target is a model that performs the cognition role well while remaining replaceable.
+
+## Claim ceiling
+
+Model qualification can establish that an exact artifact is eligible for cognition-route consideration.
+
+It cannot, by itself, establish Vera identity, consciousness, deployment, active route selection, canonical-memory mutation, protected-effect authority, or effectiveness of any external action.

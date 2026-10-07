@@ -6,6 +6,8 @@ Vera OS is not being designed in isolation. Patrick already has several Vera-spe
 
 Repository metadata and README observations below were refreshed from GitHub on 2026-09-03. Repository size metadata is a rough hosting metric, not proof of completeness or activity. No adjacent repository was mutated during this inventory.
 
+This document is now historical/descriptive inventory, not the current machine-readable portfolio authority. The current exact repository composition is architecture/portfolio/VERA_OS_PORTFOLIO_COMPOSITION_V1.json, which was refreshed on 2026-10-07 and represents every owned repository exactly once.
+
 ## `thebrazenbeard/vera`
 
 Description: `A repo created by Vera; for Vera`
