@@ -60,6 +60,14 @@ The intended split is:
 - **VeraOS** holds the private superset.
 - **P.O.R.T.A.L.** consumes the private catalog through a runtime-supplied interface without embedding private identities in its public repository.
 
+### P.O.R.T.A.L. private-registry bridge
+
+`src/veraos/portal_registry.py` converts the private VeraOS capability catalog into a Project Runner/P.O.R.T.A.L.-compatible project registry. `tools/export_portal_registry.py` writes that registry to an operator-local path; the generated private registry must not be committed into the public P.O.R.T.A.L. repository.
+
+The bridge is awareness-only by construction. Archived repositories export as `ARCHIVED`; every non-archived repository exports as `HELD`; assignment and standing-review scopes remain `NONE`. Exact scheduling activation, currentness evidence, route binding, and effect authority must be supplied separately.
+
+On 2026-10-07, a local cross-repository validation on Lappy loaded export `sha256:9f3747eb76161313c67170bb5555eaf0e0d7526809d25f8f2b5fa5ea6ec01b7d` through P.O.R.T.A.L. source `02a244b2bfaedf504d04ec295b000282acfcab54`. The parser accepted 84 projects: 19 private, 5 archived, 79 held, and 0 schedulable. This proves source-level schema interoperability only; it does not prove an always-on runtime route or private GitHub credential availability inside the local P.O.R.T.A.L. process.
+
 ## Portfolio awareness
 
 Every owned repository must be represented exactly once in VeraOS unless it is explicitly archived, retired, superseded, or redundant.
@@ -315,10 +323,12 @@ Only then should D: be considered for shrinking or VeraOS partitions.
 - architecture/capabilities/CHATGPT_PLUGIN_CAPABILITY_INVENTORY_V1.json
 - src/veraos/composition.py
 - src/veraos/portfolio_awareness.py
+- src/veraos/portal_registry.py
 - src/veraos/capability_search.py
 - src/veraos/cognition_provider.py
 - src/veraos/model_admission.py
 - src/veraos/browser_capability.py
+- tools/export_portal_registry.py
 - flake.lock
 - nixos/modules/veraos-base.nix
 - nixos/modules/veraos-browser.nix

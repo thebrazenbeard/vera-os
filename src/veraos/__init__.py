@@ -17,6 +17,11 @@ from .portfolio_awareness import (
     require_current_catalog,
     validate_capability_map,
 )
+from .portal_registry import (
+    PortalRegistryError,
+    build_portal_project_registry,
+    write_portal_project_registry,
+)
 
 __all__ = [
     "BrowserCapabilityError",
@@ -26,6 +31,8 @@ __all__ = [
     "CompositionError",
     "ModelAdmissionError",
     "PortfolioAwarenessError",
+    "PortalRegistryError",
+    "build_portal_project_registry",
     "local_model_route_eligible",
     "provider_route_eligible",
     "require_capability_dispositions",
@@ -35,4 +42,5 @@ __all__ = [
     "validate_local_model_provider_candidate",
     "validate_manifest",
     "validate_provider",
+    "write_portal_project_registry",
 ]
