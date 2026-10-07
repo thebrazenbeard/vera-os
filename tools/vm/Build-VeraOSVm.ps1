@@ -82,6 +82,8 @@ if (-not (Test-Path $kernel) -or -not (Test-Path $rootfs)) {
     KernelSha256 = ((Get-FileHash $kernel -Algorithm SHA256).Hash.ToLowerInvariant())
     Rootfs = $rootfs
     RootfsSha256 = ((Get-FileHash $rootfs -Algorithm SHA256).Hash.ToLowerInvariant())
-    BrowserEngine = "WPE WebKit / Cog"
+    BuildProfile = "CORE_BOOT"
+    BrowserPackaged = $false
+    BrowserProfileDefconfig = "veraos_x86_64_browser_defconfig"
     ProtectedEffectAuthority = $false
 } | ConvertTo-Json -Depth 4

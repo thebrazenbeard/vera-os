@@ -25,7 +25,8 @@ The current working branch contains executable source for:
 - an executable VeraOS boot contract that makes Vera the OS identity;
 - a Buildroot 2024.02.4 image-construction tree with Linux 6.6.69 as kernel/driver substrate;
 - a Python `/sbin/vera-init` PID 1 lifecycle supervisor;
-- WPE WebKit + Cog browser packages in the x86_64 development image;
+- a minimal x86_64 core-boot profile that does not make browser compilation a boot-proof dependency;
+- a separate WPE WebKit + Cog browser-capable Buildroot profile;
 - Buildroot/QEMU VM build and qualification harness scaffolding.
 
 This remains source-level implementation.
@@ -253,7 +254,7 @@ Vera Model Training should not be redirected primarily toward VeraOS plumbing. T
 
 Browser capability is a first-class VeraOS execution/tool surface.
 
-The current Buildroot development image declares WPE WebKit plus Cog with DRM/KMS support. Packaging is now part of the image contract, while browser runtime behavior remains a separate qualification layer.
+The current Buildroot source now separates the minimal core-boot profile from the browser-capable profile. `veraos_x86_64_browser_defconfig` declares WPE WebKit plus Cog with DRM/KMS support; the core `veraos_x86_64_defconfig` deliberately omits that stack so browser compilation cannot block the PID 1 boot proof. Browser packaging and browser runtime behavior are separate qualification layers.
 
 Browser access is governed independently from cognition.
 
@@ -294,7 +295,8 @@ The current x86_64 development path uses:
 - `BR2_INIT_NONE=y`, so no conventional init system owns the boot lifecycle;
 - `/sbin/vera-init` as PID 1;
 - Python 3 for the initial VeraOS process-lifecycle implementation;
-- WPE WebKit + Cog as the initial packaged browser engine/shell;
+- a minimal core-boot defconfig for the PID 1 qualification gate;
+- a separate WPE WebKit + Cog browser profile for later packaging/runtime qualification;
 - QEMU qualification before any physical-disk work.
 
 PID 1 is deliberately a bounded process-lifecycle role. Running as PID 1 does not by itself prove identity, security sovereignty, consciousness, or complete runtime qualification.

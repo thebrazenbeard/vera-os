@@ -18,16 +18,37 @@ class VmContractTests(unittest.TestCase):
             lines[1],
         )
 
-    def test_buildroot_image_uses_vera_pid1_and_browser_stack(self) -> None:
+    def test_buildroot_core_image_uses_vera_pid1_without_browser_stack(self) -> None:
         text = (
             ROOT / "buildroot" / "configs" / "veraos_x86_64_defconfig"
         ).read_text(encoding="utf-8")
         self.assertIn("BR2_INIT_NONE=y", text)
         self.assertIn("BR2_PACKAGE_PYTHON3=y", text)
+        self.assertNotIn("BR2_PACKAGE_WPEWEBKIT=y", text)
+        self.assertNotIn("BR2_PACKAGE_COG=y", text)
+        self.assertIn('BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.6.69"', text)
+
+    def test_buildroot_browser_profile_packages_wpe_and_cog(self) -> None:
+        core_text = (
+            ROOT / "buildroot" / "configs" / "veraos_x86_64_defconfig"
+        ).read_text(encoding="utf-8")
+        text = (
+            ROOT / "buildroot" / "configs" / "veraos_x86_64_browser_defconfig"
+        ).read_text(encoding="utf-8")
         self.assertIn("BR2_PACKAGE_WPEWEBKIT=y", text)
+        self.assertIn("BR2_PACKAGE_WPEWEBKIT_SANDBOX=y", text)
+        self.assertIn("BR2_PACKAGE_WPEWEBKIT_WEBDRIVER=y", text)
         self.assertIn("BR2_PACKAGE_COG=y", text)
         self.assertIn("BR2_PACKAGE_COG_PLATFORM_DRM=y", text)
-        self.assertIn('BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.6.69"', text)
+        core_settings = {
+            line for line in core_text.splitlines()
+            if line and not line.startswith("#")
+        }
+        browser_settings = {
+            line for line in text.splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertTrue(core_settings <= browser_settings)
 
     def test_rootfs_overlay_installs_vera_as_pid1(self) -> None:
         text = (
@@ -60,8 +81,11 @@ class VmContractTests(unittest.TestCase):
         self.assertIn('[System.IO.File]::WriteAllText(', build)
         self.assertNotIn('"-lc", $script', build)
         self.assertIn('BR2_JLEVEL="$VERAOS_JOBS"', build)
+        self.assertIn('BuildProfile = "CORE_BOOT"', build)
+        self.assertIn('BrowserPackaged = $false', build)
         self.assertIn("init=/sbin/vera-init", test)
         self.assertIn("VERAOS_BOOT_READY_V1", test)
+        self.assertIn('browser_packaged = $false', test)
         self.assertNotIn("flake", combined.lower())
         self.assertNotIn("nix ", combined.lower())
 

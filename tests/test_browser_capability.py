@@ -70,10 +70,15 @@ class BrowserCapabilityTests(unittest.TestCase):
         with self.assertRaisesRegex(BrowserCapabilityError, "scheme"):
             validate_browser_grant(item)
 
-    def test_buildroot_image_provisions_real_browser_engine(self) -> None:
-        text = (
+    def test_buildroot_browser_profile_provisions_real_browser_engine(self) -> None:
+        core = (
             ROOT / "buildroot" / "configs" / "veraos_x86_64_defconfig"
         ).read_text(encoding="utf-8")
+        text = (
+            ROOT / "buildroot" / "configs" / "veraos_x86_64_browser_defconfig"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("BR2_PACKAGE_WPEWEBKIT=y", core)
+        self.assertNotIn("BR2_PACKAGE_COG=y", core)
         self.assertIn("BR2_PACKAGE_WPEWEBKIT=y", text)
         self.assertIn("BR2_PACKAGE_WPEWEBKIT_SANDBOX=y", text)
         self.assertIn("BR2_PACKAGE_WPEWEBKIT_WEBDRIVER=y", text)

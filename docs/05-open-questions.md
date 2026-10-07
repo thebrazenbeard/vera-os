@@ -9,10 +9,12 @@ The base-identity question is closed: **Vera is the base operating environment.*
 Remaining questions:
 
 - What exact kernel configuration should replace the architecture-default development kernel before hardware qualification?
-- Which Buildroot packages belong in the minimal boot image versus optional capability bundles?
-- Should browser-capable and headless qualification images remain one defconfig or split after the first successful build?
+- Which Buildroot packages beyond the current minimal core belong in the boot image versus optional capability bundles?
+- Browser-capable and headless qualification are now split: `veraos_x86_64_defconfig` is the core PID 1 gate, while `veraos_x86_64_browser_defconfig` carries WPE WebKit/Cog for separate packaging/runtime qualification.
 - What update/rollback format should VeraOS use for whole-image upgrades without inheriting a distro-specific generation model?
 - Which historical Debian `live-build` and Buildroot mechanisms should be reimplemented under current contracts?
+
+Observed build evidence on 2026-10-07 motivated the split: the combined core+browser profile reached WPE WebKit compilation but Buildroot's default `BR2_JLEVEL=0` expanded to 13 CMake jobs inside the builder and `cc1plus` was killed under the Docker memory ceiling. The build harness now binds `BR2_JLEVEL` to its explicit job limit, and the core boot proof no longer waits on WPE WebKit compilation. This establishes a build-path failure and mitigation, not a successful image or browser qualification.
 
 ## Hardware target
 
@@ -141,7 +143,7 @@ The immediate executable frontier is now mechanically defined rather than archit
 3. boot QEMU directly into `/sbin/vera-init` as PID 1;
 4. observe the exact `VERAOS_BOOT_READY_V1` marker after portfolio/authority validation;
 5. prove restart and durable-state handling without a cognition provider;
-6. qualify the packaged WPE WebKit/Cog browser separately;
+6. build `veraos_x86_64_browser_defconfig`, then qualify WPE WebKit/Cog packaging and runtime separately;
 7. then bind the resident Vera Mono/Rezon/Pre-Active/Volition/P.O.R.T.A.L. runtime and independently scoped workers.
 
 The UI is still not the first proof. The first proof is that the image boots as VeraOS, remains honest when cognition is absent, and preserves the current authority/composition contracts without depending on a conventional distro init layer.

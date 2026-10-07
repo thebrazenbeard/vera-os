@@ -18,17 +18,9 @@ BR2_PACKAGE_DHCPCD=y
 BR2_PACKAGE_EUDEV=y
 BR2_PACKAGE_DBUS=y
 
-# Browser-capable image: WPE WebKit + Cog over DRM/KMS.
-BR2_PACKAGE_MESA3D=y
-BR2_PACKAGE_MESA3D_GALLIUM_DRIVER_SWRAST=y
-BR2_PACKAGE_MESA3D_GALLIUM_DRIVER_VIRGL=y
-BR2_PACKAGE_MESA3D_OPENGL_EGL=y
-BR2_PACKAGE_MESA3D_OPENGL_ES=y
-BR2_PACKAGE_WPEWEBKIT=y
-BR2_PACKAGE_WPEWEBKIT_SANDBOX=y
-BR2_PACKAGE_WPEWEBKIT_WEBDRIVER=y
-BR2_PACKAGE_COG=y
-BR2_PACKAGE_COG_PLATFORM_DRM=y
+# Core boot qualification intentionally excludes the browser stack.
+# Browser packaging is isolated in veraos_x86_64_browser_defconfig so
+# browser compilation/runtime qualification cannot block the PID 1 proof.
 
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION=y

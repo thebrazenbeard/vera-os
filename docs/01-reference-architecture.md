@@ -175,7 +175,7 @@ The browser boundary separately governs:
 - downloads;
 - protected actions.
 
-The current Buildroot development image packages WPE WebKit and Cog as the initial browser engine/shell. Browser runtime qualification is separate from packaging and remains pending until the image is built and exercised.
+The current Buildroot source separates core boot from browser packaging. The minimal `veraos_x86_64_defconfig` omits WPE WebKit/Cog so browser compilation cannot block the PID 1 qualification gate; `veraos_x86_64_browser_defconfig` carries WPE WebKit and Cog as the initial browser engine/shell. Browser packaging and browser runtime qualification are separate evidence and remain pending.
 
 ## Runtime identity
 
