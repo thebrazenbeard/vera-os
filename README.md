@@ -263,6 +263,7 @@ NixOS is the current base-OS implementation candidate.
 Current source includes:
 
 - flake.nix
+- flake.lock, pinning the exact nixpkgs revision used by the VM build;
 - nixos/modules/veraos-base.nix
 - nixos/modules/veraos-browser.nix
 - nixos/hosts/vm-qualification.nix
@@ -318,6 +319,7 @@ Only then should D: be considered for shrinking or VeraOS partitions.
 - src/veraos/cognition_provider.py
 - src/veraos/model_admission.py
 - src/veraos/browser_capability.py
+- flake.lock
 - nixos/modules/veraos-base.nix
 - nixos/modules/veraos-browser.nix
 - tools/vm/

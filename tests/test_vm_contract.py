@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
+import re
 import unittest
 
 
@@ -12,6 +14,15 @@ class VmContractTests(unittest.TestCase):
         text = (ROOT / "flake.nix").read_text(encoding="utf-8")
         self.assertIn("veraos-vm-iso", text)
         self.assertIn("nixos-unstable", text)
+
+    def test_flake_lock_pins_exact_nixpkgs_input(self) -> None:
+        lock = json.loads((ROOT / "flake.lock").read_text(encoding="utf-8"))
+        locked = lock["nodes"]["nixpkgs"]["locked"]
+        self.assertEqual("github", locked["type"])
+        self.assertEqual("NixOS", locked["owner"])
+        self.assertEqual("nixpkgs", locked["repo"])
+        self.assertRegex(locked["rev"], re.compile(r"^[0-9a-f]{40}$"))
+        self.assertTrue(str(locked["narHash"]).startswith("sha256-"))
 
     def test_base_image_embeds_and_validates_portfolio_lock(self) -> None:
         text = (ROOT / "nixos" / "modules" / "veraos-base.nix").read_text(
