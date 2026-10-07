@@ -70,14 +70,15 @@ class BrowserCapabilityTests(unittest.TestCase):
         with self.assertRaisesRegex(BrowserCapabilityError, "scheme"):
             validate_browser_grant(item)
 
-    def test_nix_module_provisions_real_browser_engines(self) -> None:
+    def test_buildroot_image_provisions_real_browser_engine(self) -> None:
         text = (
-            ROOT / "nixos" / "modules" / "veraos-browser.nix"
+            ROOT / "buildroot" / "configs" / "veraos_x86_64_defconfig"
         ).read_text(encoding="utf-8")
-        self.assertIn("chromium", text)
-        self.assertIn("firefox", text)
-        self.assertIn("vera-browser", text)
-        self.assertIn("protectedEffectAuthority = false", text)
+        self.assertIn("BR2_PACKAGE_WPEWEBKIT=y", text)
+        self.assertIn("BR2_PACKAGE_WPEWEBKIT_SANDBOX=y", text)
+        self.assertIn("BR2_PACKAGE_WPEWEBKIT_WEBDRIVER=y", text)
+        self.assertIn("BR2_PACKAGE_COG=y", text)
+        self.assertIn("BR2_PACKAGE_COG_PLATFORM_DRM=y", text)
 
 
 if __name__ == "__main__":

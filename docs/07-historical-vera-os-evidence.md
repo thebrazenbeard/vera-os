@@ -350,15 +350,15 @@ The current Vera OS direction is different: the primary abstraction is a **persi
 
 Historical source should therefore be mined component-by-component instead of restored wholesale.
 
-## Debian live-build, Buildroot, and NixOS
+## Debian live-build, Buildroot, and the retired NixOS candidate
 
-Historical evidence now proves there were at least two viable Linux construction approaches in the old project:
+Historical evidence proves there were at least two viable Linux construction approaches in the old project:
 
 - **Debian live-build:** demonstrated a richer graphical live-appliance path and is recorded contemporaneously as having reached a booting Stage 3 ISO with Vera autologin/UI/broker/diagnostics.
 - **Buildroot:** later demonstrated tightly bounded image construction, real QEMU boot logs, supervised runtime services, transactional memory/recovery testing, and deterministic mock-backed cognition.
-- **NixOS:** remains the current candidate for the full persistent development/runtime host because the new architecture requires many long-lived services, real worker isolation, replaceable inference, durable state, frequent safe iteration, and rollback.
+- **NixOS:** was evaluated in the current repository as a declarative host candidate, but that route is now retired as the primary VeraOS direction.
 
-The base decision is therefore not starting from zero, and it should not be reduced to distro preference. We have concrete prior art from both a desktop-style live Linux and a small appliance-style Linux.
+The current decision is not a distro preference: **Vera is the base operating environment.** Linux is kernel/driver substrate and Buildroot is the current image-construction mechanism. NixOS remains historical/experimental provenance rather than the product underneath Vera.
 
 ## Artifact-recovery frontier
 
@@ -399,6 +399,6 @@ The new Vera OS should salvage the tested engineering ideas while changing the c
 
 to:
 
-`persistent Vera runtime + durable multi-agent workspace + replaceable capable local inference + Linux-enforced capabilities`,
+`Vera as the operating environment + durable multi-agent workspace + replaceable cognition + governed Linux capabilities`,
 
-with NixOS currently being evaluated as the declarative host foundation.
+with Vera as the base operating environment and Buildroot/Linux now used as construction and kernel substrate.

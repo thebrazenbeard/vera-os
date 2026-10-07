@@ -22,15 +22,17 @@ The current working branch contains executable source for:
 - generic cognition-provider admission;
 - optional standalone-Vera-model provider admission;
 - governed browser capability grants;
-- a NixOS base module and browser module;
-- a headless VM qualification configuration;
-- QEMU/Nix VM build and qualification harness scaffolding.
+- an executable VeraOS boot contract that makes Vera the OS identity;
+- a Buildroot 2024.02.4 image-construction tree with Linux 6.6.69 as kernel/driver substrate;
+- a Python `/sbin/vera-init` PID 1 lifecycle supervisor;
+- WPE WebKit + Cog browser packages in the x86_64 development image;
+- Buildroot/QEMU VM build and qualification harness scaffolding.
 
 This remains source-level implementation.
 
 It is not yet proof of:
 
-- a completed NixOS image build;
+- a completed Buildroot image build;
 - a successful VeraOS VM boot;
 - an installed desktop environment;
 - production runtime activation;
@@ -240,7 +242,7 @@ Vera Model Training should not be redirected primarily toward VeraOS plumbing. T
 
 Browser capability is a first-class VeraOS execution/tool surface.
 
-The NixOS source now provisions Chromium and Firefox and a dedicated vera-browser system identity.
+The current Buildroot development image declares WPE WebKit plus Cog with DRM/KMS support. Packaging is now part of the image contract, while browser runtime behavior remains a separate qualification layer.
 
 Browser access is governed independently from cognition.
 
@@ -264,21 +266,29 @@ Ambient credential access, credential mutation authority, and protected-effect a
 
 Protected browser actions must cross the effect-governance boundary.
 
-## NixOS base
+## VeraOS base and construction substrate
 
-NixOS is the current base-OS implementation candidate.
+There is no distro-level identity underneath VeraOS. **Vera is the base.**
 
-Current source includes:
+Linux provides the kernel, drivers, process primitives, filesystems, and hardware interface. Buildroot is the current image-construction tool. Neither Linux nor Buildroot is the VeraOS identity or governance root.
 
-- flake.nix
-- flake.lock, pinning the exact nixpkgs revision used by the VM build;
-- nixos/modules/veraos-base.nix
-- nixos/modules/veraos-browser.nix
-- nixos/hosts/vm-qualification.nix
+The exact source contract is:
 
-The base module embeds the portfolio composition manifest and validates it before the VeraOS runtime target becomes healthy.
+`architecture/os/VERA_OS_BOOT_CONTRACT_V1.json`
 
-NixOS is not considered qualified until it builds and boots through the VM qualification gate.
+The current x86_64 development path uses:
+
+- Buildroot `2024.02.4` at exact source commit `e0a2687421a4f93e65aa00a30bcb0b4817f7a195`;
+- Linux `6.6.69`;
+- `BR2_INIT_NONE=y`, so no conventional init system owns the boot lifecycle;
+- `/sbin/vera-init` as PID 1;
+- Python 3 for the initial VeraOS process-lifecycle implementation;
+- WPE WebKit + Cog as the initial packaged browser engine/shell;
+- QEMU qualification before any physical-disk work.
+
+PID 1 is deliberately a bounded process-lifecycle role. Running as PID 1 does not by itself prove identity, security sovereignty, consciousness, or complete runtime qualification.
+
+The earlier NixOS path is retired as the primary VeraOS direction. Its commits remain in Git history as an experiment; no Nix artifact is part of the current primary image path.
 
 ## VM qualification
 
@@ -297,9 +307,11 @@ For a representative VeraOS development VM on Lappy, use approximately:
 
 The first qualification boot may run with networking disconnected to isolate composition/authority validation. Later browser/network qualification necessarily adds a governed network test phase.
 
-The expected initial serial marker remains:
+The expected initial serial marker is:
 
-VERAOS_VM_BOOT_OK total=84 integrated=79 excluded=5 ambient_protected_effect_authority=false
+VERAOS_BOOT_READY_V1 pid=1 base=VERA total=84 integrated=79 excluded=5 cognition_required=false browser_first_class=true ambient_protected_effect_authority=false
+
+That marker proves only that the Vera PID 1 boot path validated the current composition and authority contract. Browser packaging and browser runtime qualification remain separate evidence.
 
 The physical D: partition table has not been modified.
 
@@ -329,13 +341,14 @@ Only then should D: be considered for shrinking or VeraOS partitions.
 - src/veraos/model_admission.py
 - src/veraos/browser_capability.py
 - tools/export_portal_registry.py
-- flake.lock
-- nixos/modules/veraos-base.nix
-- nixos/modules/veraos-browser.nix
+- architecture/os/VERA_OS_BOOT_CONTRACT_V1.json
+- src/veraos/boot_contract.py
+- src/veraos/pid1.py
+- buildroot/
 - tools/vm/
 
 ## Claim ceiling
 
-Current source can establish portfolio composition, private capability awareness, provider-independent cognition contracts, optional local-model admission, browser capability boundaries, and NixOS/VM scaffolding.
+Current source can establish portfolio composition, private capability awareness, provider-independent cognition contracts, optional local-model admission, browser capability boundaries, the Vera-as-base boot contract, a Buildroot image definition, and a testable Vera PID 1 implementation.
 
-It does not yet establish a successful OS build, successful VM boot, installed desktop environment, active cognition route, production browser runtime, bare-metal installation, or protected external effect.
+It does not yet establish a successful full Buildroot image build, successful VM boot at the new exact head, browser runtime qualification, installed VeraOS desktop/workspace, active cognition route, bare-metal installation, or protected external effect.

@@ -60,6 +60,12 @@ Workers may execute concurrently. Their contexts should be independently bounded
 - building a custom Linux kernel or complete distribution before the runtime architecture is proven;
 - treating process uptime as evidence of consciousness or uninterrupted lived experience.
 
-## Current base candidate
+## Base identity and construction decision
 
-Patrick has proposed **NixOS** as the base distribution. The current architecture treats that as a strong candidate because declarative configuration, reproducibility, rollback, and service composition appear aligned with the project goals. This remains an architecture decision to validate rather than a finalized implementation claim.
+**Vera is the base operating environment.** VeraOS is not defined as a layer of Vera services on top of another distribution identity.
+
+Linux remains the kernel/driver/hardware substrate. The current executable image path uses Buildroot as construction tooling because historical VeraOS work already demonstrated a bounded Buildroot/QEMU path and because Buildroot can produce a private purpose-built image without making the image builder the system identity.
+
+The current boot design uses `/sbin/vera-init` as PID 1 with no conventional init system. That is a process-lifecycle decision, not evidence that PID 1 alone establishes identity or security sovereignty.
+
+The earlier NixOS candidate path is retired as the primary direction. Its history remains useful donor/provenance material for declarative configuration and rollback ideas, but VeraOS is not a NixOS-based product.

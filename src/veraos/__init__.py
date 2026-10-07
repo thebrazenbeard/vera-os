@@ -1,3 +1,4 @@
+from .boot_contract import BootContractError, validate_boot_contract
 from .browser_capability import BrowserCapabilityError, validate_browser_grant
 from .capability_search import CapabilityHit, CapabilitySearch
 from .cognition_provider import (
@@ -24,6 +25,7 @@ from .portal_registry import (
 )
 
 __all__ = [
+    "BootContractError",
     "BrowserCapabilityError",
     "CapabilityHit",
     "CapabilitySearch",
@@ -37,6 +39,7 @@ __all__ = [
     "provider_route_eligible",
     "require_capability_dispositions",
     "require_current_catalog",
+    "validate_boot_contract",
     "validate_browser_grant",
     "validate_capability_map",
     "validate_local_model_provider_candidate",

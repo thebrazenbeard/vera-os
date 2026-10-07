@@ -150,7 +150,7 @@ Its target is not "one permanent Vera chat." Its primary abstraction is a **pers
 - multiple attachable human-facing sessions;
 - explicit restart/recovery semantics.
 
-NixOS is currently a candidate host foundation, not an adopted fact.
+Vera is the base operating environment. Linux is kernel/driver substrate, and Buildroot is the current image-construction tooling; neither defines Vera's identity.
 
 ## Socio-psychological / functional definition
 

@@ -65,7 +65,11 @@ Separate execution/tool plane:
                  protected-effect gate
                           |
                           v
-                        NixOS
+                VeraOS lifecycle/runtime
+                    /sbin/vera-init
+                          |
+                          v
+                 Linux kernel/drivers
                           |
                        hardware
 ```
@@ -162,7 +166,7 @@ The browser boundary separately governs:
 - downloads;
 - protected actions.
 
-Current NixOS source provisions Chromium and Firefox plus a dedicated `vera-browser` system identity.
+The current Buildroot development image packages WPE WebKit and Cog as the initial browser engine/shell. Browser runtime qualification is separate from packaging and remains pending until the image is built and exercised.
 
 ## Runtime identity
 

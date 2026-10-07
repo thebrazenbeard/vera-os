@@ -2,13 +2,17 @@
 
 This file tracks unresolved architecture decisions. Items should be promoted to decisions only after explicit review/validation.
 
-## Base operating system
+## Construction substrate and boot
 
-- Is NixOS the confirmed base, or should it first be compared against Debian/Ubuntu/Fedora/immutable alternatives?
-- Which NixOS channel/flakes policy should Vera OS use?
-- Should Vera OS eventually ship as an installer/image, or remain a reproducible configuration layered onto stock NixOS?
-- Which historical construction approach should remain useful prior art: Debian `live-build`, Buildroot, both in different roles, or neither?
-- Should Buildroot retain a role for recovery/test/appliance images even if NixOS becomes the primary host?
+The base-identity question is closed: **Vera is the base operating environment.** Linux and Buildroot are implementation substrate.
+
+Remaining questions:
+
+- What exact kernel configuration should replace the architecture-default development kernel before hardware qualification?
+- Which Buildroot packages belong in the minimal boot image versus optional capability bundles?
+- Should browser-capable and headless qualification images remain one defconfig or split after the first successful build?
+- What update/rollback format should VeraOS use for whole-image upgrades without inheriting a distro-specific generation model?
+- Which historical Debian `live-build` and Buildroot mechanisms should be reimplemented under current contracts?
 
 ## Hardware target
 
@@ -124,20 +128,20 @@ Missing bytes must remain missing; do not recreate them from prose/logs and then
 - Should this repository use a standing development branch and Patrick-approved PR workflow?
 - What qualifies an architecture document as accepted versus exploratory?
 - What automated tests can validate authority boundaries and recovery semantics before real model integration?
-- Should a VM-based NixOS prototype be the first executable milestone?
+- Which exact Buildroot/QEMU qualification sequence should become the required executable gate before hardware tests?
 - Which historical Stage 3/4, Stage 5 specification tests, and Buildroot tests should be ported as regression tests independent of the base distribution?
 - Which historical source should be imported verbatim if exact bytes are recovered, versus reimplemented under current contracts with provenance back to the old design?
 
 ## Immediate next decision
 
-The next high-value decision is probably not the UI. It is to define the **minimal executable Vera runtime** and target hardware, then prove a NixOS host can declaratively start:
+The immediate executable frontier is now mechanically defined rather than architectural:
 
-1. a local inference server;
-2. a minimal `verad` coordinator;
-3. durable local state;
-4. multiple independently scoped workers, with at least one able to run concurrently with another;
-5. one real tool path (likely Git/shell) through an explicit capability boundary;
-6. a CLI session that can detach/reconnect without owning the workspace lifecycle;
-7. task/workspace state that survives a runtime restart by explicit state recovery.
+1. resolve the Buildroot `veraos_x86_64_defconfig` against exact Buildroot 2024.02.4;
+2. build the Linux 6.6.69 kernel and VeraOS root filesystem;
+3. boot QEMU directly into `/sbin/vera-init` as PID 1;
+4. observe the exact `VERAOS_BOOT_READY_V1` marker after portfolio/authority validation;
+5. prove restart and durable-state handling without a cognition provider;
+6. qualify the packaged WPE WebKit/Cog browser separately;
+7. then bind the resident Vera Mono/Rezon/Pre-Active/Volition/P.O.R.T.A.L. runtime and independently scoped workers.
 
-That proof should reuse the good lessons already present in Stage 3/4, Stage 5 planning, and ISO-B—explicit degraded states, typed capability boundaries, replaceable inference, observable readiness, memory provenance/ownership, reset/recovery discipline—without mistaking any historical implementation or specification for the current architecture.
+The UI is still not the first proof. The first proof is that the image boots as VeraOS, remains honest when cognition is absent, and preserves the current authority/composition contracts without depending on a conventional distro init layer.

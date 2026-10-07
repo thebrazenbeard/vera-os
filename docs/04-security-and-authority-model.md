@@ -101,7 +101,7 @@ Historical role, model intelligence, or a previous successful task should not si
 
 Secrets should be supplied at execution time through a mechanism designed for secrets. They should not be committed to Git, embedded in model files, or placed into globally readable runtime prompts.
 
-A NixOS implementation must specifically avoid accidentally placing sensitive values into the world-readable Nix store.
+The Buildroot/Linux implementation must keep secrets out of image layers, repository source, globally readable configuration, and build caches; secrets belong in runtime-injected protected storage.
 
 ## Logging and privacy
 
@@ -129,4 +129,4 @@ A safer initial pattern is:
 4. Patrick approves or rejects protected deployment;
 5. deployment produces a receipt and rollback point.
 
-NixOS generations could eventually make this especially useful, but that must be validated in practice before relying on it as a safety mechanism.
+VeraOS therefore needs its own explicit staged-update and rollback mechanism. Buildroot image reproducibility helps produce immutable candidates, but rollback safety must be proven at the VeraOS state/runtime layer rather than borrowed from a distro feature.
