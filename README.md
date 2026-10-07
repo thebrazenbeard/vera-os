@@ -29,13 +29,13 @@ The current working branch contains executable source for:
 - a separate WPE WebKit + Cog browser-capable Buildroot profile;
 - Buildroot/QEMU VM build and qualification harness scaffolding.
 
-This remains source-level implementation.
+The branch has now crossed the first executable qualification gate: the core Buildroot profile has completed an image build and booted under QEMU/TCG directly into `/sbin/vera-init` as PID 1, with the expected `VERAOS_BOOT_READY_V1` composition/authority marker observed. Exact-head and artifact-digest evidence remains external to the Git tree so the evidence can bind the commit being qualified without a self-referential commit hash.
 
-It is not yet proof of:
+This is not yet proof of:
 
-- a completed Buildroot image build;
-- a successful VeraOS VM boot;
-- an installed desktop environment;
+- browser-profile build or browser runtime qualification;
+- restart/persistence recovery qualification;
+- an installed desktop/workspace environment;
 - production runtime activation;
 - bare-metal installation;
 - dual-boot readiness;
@@ -318,9 +318,9 @@ For a representative VeraOS development VM on Lappy, use approximately:
 - 64 GiB dynamically allocated virtual disk;
 - serial console ttyS0 at 115200 baud.
 
-The first qualification boot may run with networking disconnected to isolate composition/authority validation. Later browser/network qualification necessarily adds a governed network test phase.
+The first qualification boot runs with networking disconnected to isolate composition/authority validation. That headless core gate has now been observed successfully under QEMU TCG. Later browser/network qualification necessarily adds a governed network test phase.
 
-The expected initial serial marker is:
+The required initial serial marker is:
 
 VERAOS_BOOT_READY_V1 pid=1 base=VERA total=84 integrated=79 excluded=5 cognition_required=false browser_first_class=true ambient_protected_effect_authority=false
 
@@ -362,6 +362,6 @@ Only then should D: be considered for shrinking or VeraOS partitions.
 
 ## Claim ceiling
 
-Current source can establish portfolio composition, private capability awareness, provider-independent cognition contracts, optional local-model admission, browser capability boundaries, the Vera-as-base boot contract, a Buildroot image definition, and a testable Vera PID 1 implementation.
+Current evidence establishes portfolio composition, private capability awareness, provider-independent cognition contracts, optional local-model admission, browser capability boundaries, the Vera-as-base boot contract, a completed core Buildroot image build, and a successful QEMU/TCG Vera PID 1 boot with guest-side composition/authority validation.
 
-It does not yet establish a successful full Buildroot image build, successful VM boot at the new exact head, browser runtime qualification, installed VeraOS desktop/workspace, active cognition route, bare-metal installation, or protected external effect.
+It does not yet establish browser-profile build/runtime qualification, restart/persistence recovery, installed VeraOS desktop/workspace, active cognition-route consumption by the resident runtime, bare-metal installation, or protected external effect.

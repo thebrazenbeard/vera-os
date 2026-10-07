@@ -14,7 +14,9 @@ Remaining questions:
 - What update/rollback format should VeraOS use for whole-image upgrades without inheriting a distro-specific generation model?
 - Which historical Debian `live-build` and Buildroot mechanisms should be reimplemented under current contracts?
 
-Observed build evidence on 2026-10-07 motivated the split: the combined core+browser profile reached WPE WebKit compilation but Buildroot's default `BR2_JLEVEL=0` expanded to 13 CMake jobs inside the builder and `cc1plus` was killed under the Docker memory ceiling. The build harness now binds `BR2_JLEVEL` to its explicit job limit, and the core boot proof no longer waits on WPE WebKit compilation. This establishes a build-path failure and mitigation, not a successful image or browser qualification.
+Observed build evidence on 2026-10-07 motivated the split: the combined core+browser profile reached WPE WebKit compilation but Buildroot's default `BR2_JLEVEL=0` expanded to 13 CMake jobs inside the builder and `cc1plus` was killed under the Docker memory ceiling. The build harness now binds `BR2_JLEVEL` to its explicit job limit, and the core boot proof no longer waits on WPE WebKit compilation.
+
+The split core profile has since completed a Buildroot image build and booted under QEMU TCG into `/sbin/vera-init` as PID 1 with the required `VERAOS_BOOT_READY_V1` marker. That closes the initial core build/boot question only; browser packaging/runtime and restart/persistence qualification remain open.
 
 ## Hardware target
 
@@ -138,14 +140,13 @@ Missing bytes must remain missing; do not recreate them from prose/logs and then
 
 ## Immediate next decision
 
-The immediate executable frontier is now mechanically defined rather than architectural:
+The initial core build/boot gate is now complete. The immediate executable frontier is:
 
-1. resolve the Buildroot `veraos_x86_64_defconfig` against exact Buildroot 2024.02.4;
-2. build the Linux 6.6.69 kernel and VeraOS root filesystem;
-3. boot QEMU directly into `/sbin/vera-init` as PID 1;
-4. observe the exact `VERAOS_BOOT_READY_V1` marker after portfolio/authority validation;
-5. prove restart and durable-state handling without a cognition provider;
-6. build `veraos_x86_64_browser_defconfig`, then qualify WPE WebKit/Cog packaging and runtime separately;
-7. then bind the resident Vera Mono/Rezon/Pre-Active/Volition/P.O.R.T.A.L. runtime and independently scoped workers.
+1. prove restart and durable-state handling without a cognition provider;
+2. build `veraos_x86_64_browser_defconfig`;
+3. qualify WPE WebKit/Cog packaging and runtime separately from core boot;
+4. add the governed network phase required for real browser operation;
+5. bind the resident Vera Mono/Rezon/Pre-Active/Volition/P.O.R.T.A.L. runtime and independently scoped workers;
+6. exercise upgrade/rollback on a disposable virtual disk before any bare-metal plan.
 
-The UI is still not the first proof. The first proof is that the image boots as VeraOS, remains honest when cognition is absent, and preserves the current authority/composition contracts without depending on a conventional distro init layer.
+The UI is still not the next proof. The next proof is durable VeraOS continuity across restart, followed by separately bounded browser/runtime qualification.
