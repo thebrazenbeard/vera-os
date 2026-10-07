@@ -12,6 +12,11 @@ from typing import Any, Callable
 
 from .boot_contract import validate_boot_contract
 from .composition import validate_manifest
+from .lifecycle_state import (
+    DEFAULT_LIFECYCLE_ROOT,
+    advance_lifecycle_state,
+    persistence_marker,
+)
 
 
 DEFAULT_BOOT_CONTRACT = Path("/etc/veraos/architecture/VERA_OS_BOOT_CONTRACT_V1.json")
@@ -156,6 +161,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--boot-contract", type=Path, default=DEFAULT_BOOT_CONTRACT)
     parser.add_argument("--composition", type=Path, default=DEFAULT_COMPOSITION)
     parser.add_argument("--run-root", type=Path, default=DEFAULT_RUN_ROOT)
+    parser.add_argument(
+        "--lifecycle-root",
+        type=Path,
+        default=DEFAULT_LIFECYCLE_ROOT,
+    )
     parser.add_argument("--allow-non-pid1", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
 
@@ -169,12 +179,14 @@ def main(argv: list[str] | None = None) -> int:
     contract = _load_json(args.boot_contract)
     composition = _load_json(args.composition)
     state = prepare_boot_state(contract, composition)
+    lifecycle_state = advance_lifecycle_state(args.lifecycle_root)
     (args.run_root / "boot-state.json").write_text(
         json.dumps(asdict(state), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
     marker = boot_marker(state)
     print(marker, flush=True)
+    print(persistence_marker(lifecycle_state), flush=True)
 
     if args.allow_non_pid1:
         return 0

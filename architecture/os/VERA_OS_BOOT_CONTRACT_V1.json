@@ -34,6 +34,13 @@
     "capability_map": "/etc/veraos/architecture/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json",
     "validate_before_ready": true
   },
+  "persistence": {
+    "lifecycle_state_schema": "VERAOS_LIFECYCLE_STATE_V1",
+    "lifecycle_state_root": "/var/lib/veraos/lifecycle",
+    "required_before_ready": true,
+    "canonical_memory": false,
+    "supabase_replacement": false
+  },
   "browser": {
     "first_class_capability_required": true,
     "required_for_core_boot": false,
@@ -47,6 +54,8 @@
   },
   "qualification": {
     "boot_marker_schema": "VERAOS_BOOT_READY_V1",
+    "persistence_marker_schema": "VERAOS_PERSISTENCE_READY_V1",
+    "restart_persistence_required": true,
     "vm_before_bare_metal": true,
     "disk_partitioning_before_vm_qualification": false
   }

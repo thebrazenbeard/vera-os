@@ -10,6 +10,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from veraos.boot_contract import BootContractError, validate_boot_contract
+from veraos.lifecycle_state import (
+    LifecycleStateError,
+    STATE_FILENAME,
+    advance_lifecycle_state,
+    persistence_marker,
+)
 from veraos.pid1 import boot_marker, main as pid1_main, prepare_boot_state
 
 
@@ -44,6 +50,75 @@ class VeraOsBootContractTests(unittest.TestCase):
         self.assertFalse(runtime["cognition_provider_required_for_boot"])
         self.assertFalse(runtime["trained_vera_model_required_for_boot"])
 
+    def test_lifecycle_persistence_is_required_but_not_canonical_memory(self) -> None:
+        persistence = self.contract["persistence"]
+        self.assertEqual(
+            "VERAOS_LIFECYCLE_STATE_V1",
+            persistence["lifecycle_state_schema"],
+        )
+        self.assertEqual(
+            "/var/lib/veraos/lifecycle",
+            persistence["lifecycle_state_root"],
+        )
+        self.assertTrue(persistence["required_before_ready"])
+        self.assertFalse(persistence["canonical_memory"])
+        self.assertFalse(persistence["supabase_replacement"])
+
+    def test_lifecycle_state_advances_without_claiming_memory_continuity(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            first = advance_lifecycle_state(root, now=lambda: 100.0)
+            second = advance_lifecycle_state(root, now=lambda: 200.0)
+            self.assertEqual(1, first.boot_ordinal)
+            self.assertEqual(0, first.previous_boot_ordinal)
+            self.assertEqual(2, second.boot_ordinal)
+            self.assertEqual(1, second.previous_boot_ordinal)
+            self.assertIn("boot_ordinal=2", persistence_marker(second))
+            self.assertIn("canonical_memory=false", persistence_marker(second))
+            self.assertIn("supabase_replacement=false", persistence_marker(second))
+            persisted = json.loads((root / STATE_FILENAME).read_text(encoding="utf-8"))
+            self.assertEqual(2, persisted["boot_ordinal"])
+
+    def test_lifecycle_state_fails_closed_on_invalid_existing_state(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / STATE_FILENAME).write_text(
+                json.dumps({
+                    "schema": "WRONG",
+                    "boot_ordinal": 9,
+                    "canonical_memory": False,
+                    "supabase_replacement": False,
+                }),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(LifecycleStateError, "schema mismatch"):
+                advance_lifecycle_state(root)
+
+    def test_persistence_cannot_be_promoted_to_canonical_memory(self) -> None:
+        bad = json.loads(json.dumps(self.contract))
+        bad["persistence"]["canonical_memory"] = True
+        with self.assertRaisesRegex(
+            BootContractError,
+            "cannot claim canonical memory",
+        ):
+            validate_boot_contract(bad)
+
+    def test_restart_persistence_is_an_explicit_vm_gate(self) -> None:
+        qualification = self.contract["qualification"]
+        self.assertEqual(
+            "VERAOS_BOOT_READY_V1",
+            qualification["boot_marker_schema"],
+        )
+        self.assertEqual(
+            "VERAOS_PERSISTENCE_READY_V1",
+            qualification["persistence_marker_schema"],
+        )
+        self.assertTrue(qualification["restart_persistence_required"])
+        self.assertTrue(qualification["vm_before_bare_metal"])
+        self.assertFalse(
+            qualification["disk_partitioning_before_vm_qualification"]
+        )
+
     def test_browser_is_required_product_capability_not_boot_dependency(self) -> None:
         browser = self.contract["browser"]
         self.assertTrue(browser["first_class_capability_required"])
@@ -75,6 +150,7 @@ class VeraOsBootContractTests(unittest.TestCase):
             contract = temp_path / "boot.json"
             composition = temp_path / "composition.json"
             run_root = temp_path / "run"
+            lifecycle_root = temp_path / "lifecycle"
             contract.write_text(json.dumps(self.contract), encoding="utf-8")
             composition.write_text(json.dumps(self.composition), encoding="utf-8")
             result = pid1_main([
@@ -82,10 +158,17 @@ class VeraOsBootContractTests(unittest.TestCase):
                 "--boot-contract", str(contract),
                 "--composition", str(composition),
                 "--run-root", str(run_root),
+                "--lifecycle-root", str(lifecycle_root),
             ])
             self.assertEqual(0, result)
             state = json.loads((run_root / "boot-state.json").read_text(encoding="utf-8"))
             self.assertEqual("VERA", state["base_identity"])
+            lifecycle = json.loads(
+                (lifecycle_root / STATE_FILENAME).read_text(encoding="utf-8")
+            )
+            self.assertEqual(1, lifecycle["boot_ordinal"])
+            self.assertFalse(lifecycle["canonical_memory"])
+            self.assertFalse(lifecycle["supabase_replacement"])
 
 
 if __name__ == "__main__":

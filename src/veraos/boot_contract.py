@@ -99,6 +99,28 @@ def validate_boot_contract(contract: Mapping[str, Any]) -> None:
     )
     _require(portfolio.get("validate_before_ready") is True, "portfolio must validate before ready")
 
+    persistence = _mapping(data.get("persistence"), "persistence")
+    _require(
+        persistence.get("lifecycle_state_schema") == "VERAOS_LIFECYCLE_STATE_V1",
+        "unexpected lifecycle-state schema",
+    )
+    _require(
+        persistence.get("lifecycle_state_root") == "/var/lib/veraos/lifecycle",
+        "unexpected lifecycle-state root",
+    )
+    _require(
+        persistence.get("required_before_ready") is True,
+        "lifecycle persistence must succeed before ready",
+    )
+    _require(
+        persistence.get("canonical_memory") is False,
+        "lifecycle persistence cannot claim canonical memory",
+    )
+    _require(
+        persistence.get("supabase_replacement") is False,
+        "lifecycle persistence cannot claim Supabase replacement",
+    )
+
     browser = _mapping(data.get("browser"), "browser")
     _require(browser.get("first_class_capability_required") is True, "browser must be first-class")
     _require(browser.get("required_for_core_boot") is False, "browser cannot block core boot")
@@ -118,4 +140,27 @@ def validate_boot_contract(contract: Mapping[str, Any]) -> None:
         authority.get("protected_effect_authority_source")
         == "PATRICK_EXPLICIT_EXACT_TARGET_EFFECT",
         "protected-effect authority source must remain exact",
+    )
+
+    qualification = _mapping(data.get("qualification"), "qualification")
+    _require(
+        qualification.get("boot_marker_schema") == "VERAOS_BOOT_READY_V1",
+        "unexpected boot marker schema",
+    )
+    _require(
+        qualification.get("persistence_marker_schema")
+        == "VERAOS_PERSISTENCE_READY_V1",
+        "unexpected persistence marker schema",
+    )
+    _require(
+        qualification.get("restart_persistence_required") is True,
+        "restart persistence must be qualified before advancing the core gate",
+    )
+    _require(
+        qualification.get("vm_before_bare_metal") is True,
+        "VM qualification must precede bare metal",
+    )
+    _require(
+        qualification.get("disk_partitioning_before_vm_qualification") is False,
+        "disk partitioning cannot precede VM qualification",
     )
