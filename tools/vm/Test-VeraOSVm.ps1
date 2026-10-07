@@ -25,7 +25,10 @@ $dockerfile = Join-Path $repo "tools\vm\qemu-runner.Dockerfile"
 if ($LASTEXITCODE -ne 0) { throw "QEMU runner image build failed" }
 
 $name = "veraos-vm-qualification"
-& docker rm -f $name *> $null
+$existingContainer = (& docker ps -aq --filter "name=^/$name$" | Select-Object -First 1)
+if ($existingContainer) {
+    & docker rm -f $existingContainer | Out-Null
+}
 
 $stdout = Join-Path $logs "veraos-vm.stdout.log"
 $stderr = Join-Path $logs "veraos-vm.stderr.log"
@@ -44,6 +47,7 @@ $dockerArgs = @(
     "-accel", "tcg",
     "-machine", "q35",
     "-kernel", "/artifacts/veraos-bzImage",
+    "-snapshot",
     "-drive", "file=/artifacts/veraos-rootfs.ext2,format=raw,if=virtio",
     "-append", $quotedAppend,
     "-nic", "none",
@@ -72,7 +76,10 @@ try {
     }
 }
 finally {
-    & docker stop -t 1 $name *> $null
+    $runningContainer = (& docker ps -q --filter "name=^/$name$" | Select-Object -First 1)
+    if ($runningContainer) {
+        & docker stop -t 1 $runningContainer | Out-Null
+    }
     if (-not $process.HasExited) { $process.WaitForExit(5000) | Out-Null }
 }
 
