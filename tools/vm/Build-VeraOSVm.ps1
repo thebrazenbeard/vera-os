@@ -43,6 +43,12 @@ sha256sum /artifacts/veraos-bzImage > /artifacts/veraos-bzImage.sha256
 sha256sum /artifacts/veraos-rootfs.ext2 > /artifacts/veraos-rootfs.ext2.sha256
 '@
 $script = $script -replace "`r`n", "`n"
+$scriptPath = Join-Path $artifacts "veraos-buildroot-build.sh"
+[System.IO.File]::WriteAllText(
+    $scriptPath,
+    $script,
+    [System.Text.UTF8Encoding]::new($false)
+)
 
 $dockerArgs = @(
     "run", "--rm",
@@ -52,7 +58,7 @@ $dockerArgs = @(
     "--mount", "type=volume,source=$BuildVolume,target=/work",
     "--entrypoint", "/bin/sh",
     $BuilderImage,
-    "-lc", $script
+    "/artifacts/veraos-buildroot-build.sh"
 )
 
 & docker @dockerArgs
