@@ -23,6 +23,7 @@ class VmContractTests(unittest.TestCase):
             ROOT / "buildroot" / "configs" / "veraos_x86_64_defconfig"
         ).read_text(encoding="utf-8")
         self.assertIn("BR2_INIT_NONE=y", text)
+        self.assertIn('BR2_PRIMARY_SITE="https://sources.buildroot.net"', text)
         self.assertIn("BR2_PACKAGE_PYTHON3=y", text)
         self.assertNotIn("BR2_PACKAGE_WPEWEBKIT=y", text)
         self.assertNotIn("BR2_PACKAGE_COG=y", text)
@@ -36,6 +37,7 @@ class VmContractTests(unittest.TestCase):
         text = (
             ROOT / "buildroot" / "configs" / "veraos_x86_64_browser_defconfig"
         ).read_text(encoding="utf-8")
+        self.assertIn('BR2_PRIMARY_SITE="https://sources.buildroot.net"', text)
         self.assertIn("BR2_PACKAGE_WPEWEBKIT=y", text)
         self.assertIn("BR2_PACKAGE_WPEWEBKIT_SANDBOX=y", text)
         self.assertIn("BR2_PACKAGE_WPEWEBKIT_WEBDRIVER=y", text)

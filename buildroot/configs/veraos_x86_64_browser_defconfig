@@ -3,6 +3,7 @@
 # VeraOS is the OS identity; Linux and Buildroot are implementation substrate.
 
 BR2_x86_64=y
+BR2_PRIMARY_SITE="https://sources.buildroot.net"
 BR2_TOOLCHAIN_BUILDROOT_GLIBC=y
 BR2_TOOLCHAIN_BUILDROOT_CXX=y
 BR2_INIT_NONE=y
