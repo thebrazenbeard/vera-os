@@ -45,6 +45,8 @@ Observed build evidence on 2026-10-07 motivated the split: the combined core+bro
 
 ## Memory
 
+Fresh Supabase metadata inspection on 2026-10-07 narrows the local-compatibility requirement. Current Vera state contracts include append-only save/context events; lifecycle, epistemic, privacy, supersession, and source-evidence fields; memory-epoch state versions and currentness rules; exact SHA/provenance bindings; provider readback receipts with monotonic observation ordinals; archive readback receipts; and separately governed engineered affective-runtime state/events. A local replacement may change storage technology, but it must not silently discard those semantics.
+
 - Which memory classes require relational/document databases versus files/Git?
 - What is the local replacement or continuation path for current Supabase-backed systems?
 - How are memory admission, correction, supersession, deletion, privacy, and readback represented?
