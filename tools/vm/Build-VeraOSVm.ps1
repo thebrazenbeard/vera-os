@@ -11,6 +11,12 @@ $ErrorActionPreference = "Stop"
 $repo = [System.IO.Path]::GetFullPath($RepoRoot)
 $artifacts = [System.IO.Path]::GetFullPath($ArtifactRoot)
 $builderDockerfile = Join-Path $repo "tools\vm\buildroot-builder.Dockerfile"
+$sourceHead = (& git -C $repo rev-parse HEAD | Select-Object -First 1)
+if (-not $sourceHead) { throw "Unable to resolve VeraOS source head" }
+$sourceStatus = @(& git -C $repo status --porcelain=v1)
+if ($sourceStatus.Count -gt 0) {
+    throw "VeraOS image build requires a clean source tree for exact-head provenance"
+}
 
 New-Item -ItemType Directory -Force $artifacts | Out-Null
 
@@ -72,9 +78,11 @@ if (-not (Test-Path $kernel) -or -not (Test-Path $rootfs)) {
     throw "VeraOS Buildroot artifacts were not produced"
 }
 
-[pscustomobject]@{
+$result = [ordered]@{
     Schema = "VERA_OS_BUILDROOT_BUILD_RESULT_V1"
     ProductBase = "VERA"
+    SourceHead = $sourceHead
+    SourceTreeClean = $true
     ImageBuilder = "Buildroot"
     BuildrootVersion = "2024.02.4"
     BuildrootCommit = "e0a2687421a4f93e65aa00a30bcb0b4817f7a195"
@@ -86,4 +94,12 @@ if (-not (Test-Path $kernel) -or -not (Test-Path $rootfs)) {
     BrowserPackaged = $false
     BrowserProfileDefconfig = "veraos_x86_64_browser_defconfig"
     ProtectedEffectAuthority = $false
-} | ConvertTo-Json -Depth 4
+}
+$resultJson = $result | ConvertTo-Json -Depth 4
+$resultPath = Join-Path $artifacts "veraos-build-result.json"
+[System.IO.File]::WriteAllText(
+    $resultPath,
+    $resultJson + [Environment]::NewLine,
+    [System.Text.UTF8Encoding]::new($false)
+)
+$resultJson

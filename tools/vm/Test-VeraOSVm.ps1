@@ -17,8 +17,28 @@ New-Item -ItemType Directory -Force $logs | Out-Null
 
 $kernel = Join-Path $artifacts "veraos-bzImage"
 $rootfs = Join-Path $artifacts "veraos-rootfs.ext2"
+$buildReceiptPath = Join-Path $artifacts "veraos-build-result.json"
 if (-not (Test-Path $kernel)) { throw "Missing VeraOS kernel: $kernel" }
 if (-not (Test-Path $rootfs)) { throw "Missing VeraOS rootfs: $rootfs" }
+if (-not (Test-Path $buildReceiptPath)) { throw "Missing VeraOS build receipt: $buildReceiptPath" }
+
+$currentHead = (& git -C $repo rev-parse HEAD | Select-Object -First 1)
+$sourceStatus = @(& git -C $repo status --porcelain=v1)
+if ($sourceStatus.Count -gt 0) {
+    throw "VeraOS qualification requires a clean source tree for exact-head provenance"
+}
+$buildReceipt = Get-Content $buildReceiptPath -Raw | ConvertFrom-Json
+if ($buildReceipt.Schema -ne "VERA_OS_BUILDROOT_BUILD_RESULT_V1") {
+    throw "Unexpected VeraOS build receipt schema"
+}
+if ($buildReceipt.SourceHead -ne $currentHead) {
+    throw "VeraOS build receipt source head does not match current source head"
+}
+$kernelSha256 = ((Get-FileHash $kernel -Algorithm SHA256).Hash.ToLowerInvariant())
+$rootfsSha256 = ((Get-FileHash $rootfs -Algorithm SHA256).Hash.ToLowerInvariant())
+if ($buildReceipt.KernelSha256 -ne $kernelSha256) { throw "VeraOS kernel hash does not match build receipt" }
+if ($buildReceipt.RootfsSha256 -ne $rootfsSha256) { throw "VeraOS rootfs hash does not match build receipt" }
+$buildReceiptSha256 = ((Get-FileHash $buildReceiptPath -Algorithm SHA256).Hash.ToLowerInvariant())
 
 $dockerfile = Join-Path $repo "tools\vm\qemu-runner.Dockerfile"
 & docker build -t $RunnerImage -f $dockerfile $repo
@@ -99,8 +119,11 @@ $receipt = [ordered]@{
     product_base = "VERA"
     linux_role = "KERNEL_DRIVER_HARDWARE_SUBSTRATE"
     image_builder = "BUILDROOT_2024_02_4"
-    kernel_sha256 = ((Get-FileHash $kernel -Algorithm SHA256).Hash.ToLowerInvariant())
-    rootfs_sha256 = ((Get-FileHash $rootfs -Algorithm SHA256).Hash.ToLowerInvariant())
+    source_head = $currentHead
+    source_tree_clean = $true
+    build_receipt_sha256 = $buildReceiptSha256
+    kernel_sha256 = $kernelSha256
+    rootfs_sha256 = $rootfsSha256
     qemu = $qemuVersion
     acceleration = "TCG_SOFTWARE_EMULATION"
     network = "NONE"
