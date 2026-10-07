@@ -11,12 +11,13 @@
     "chatgpt_plugin_catalog": "architecture/capabilities/CHATGPT_PLUGIN_CAPABILITY_INVENTORY_V1.json",
     "coordinator_consumer": "thebrazenbeard/portal",
     "discovery_owner": "thebrazenbeard/discovery",
+    "implementation_plan": "architecture/portfolio/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json",
     "private_catalog_may_name_private_repositories": true,
     "private_portfolio_catalog": "architecture/capabilities/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json",
     "semantic_support": "thebrazenbeard/semanticatlas",
     "unknown_capability_rule": "SEND_TO_DISCOVERY_BEFORE_ASSIGNMENT"
   },
-  "claim_ceiling": "SOURCE_COMPOSITION_LOCK_ONLY_NOT_BUILDROOT_BUILD_NOT_INSTALLATION_NOT_RUNTIME_CONSUMPTION_NOT_PROTECTED_EFFECT_AUTHORITY",
+  "claim_ceiling": "SOURCE_COMPOSITION_AND_PORTFOLIO_IMPLEMENTATION_PLAN_ONLY_NOT_INSTALLATION_NOT_RUNTIME_CONSUMPTION_NOT_PROTECTED_EFFECT_AUTHORITY",
   "composition_root": {
     "base_head": "be4a45a2b8b7a8e329f772820df0a757766b3073",
     "repository": "thebrazenbeard/vera-os",
@@ -25,8 +26,8 @@
   "counts": {
     "archived": 5,
     "excluded": 5,
-    "integrated": 79,
-    "total": 84
+    "integrated": 81,
+    "total": 86
   },
   "model_policy": {
     "artifact_root": "vera/models",
@@ -53,7 +54,7 @@
     "trained_model_role": "OPTIONAL_LOCAL_COGNITION_PROVIDER",
     "veraos_requires_trained_vera_model": false
   },
-  "observed_at": "2026-10-07T07:30:00-04:00",
+  "observed_at": "2026-10-07T18:49:55-04:00",
   "portfolio_policy": {
     "exclusion_requires": [
       "ARCHIVED",
@@ -544,6 +545,36 @@
       "archived": false,
       "boot_policy": "ON_DEMAND",
       "default_branch": "main",
+      "description": "Mediaphile Web/TV Client, LAN-addressable only, Direct-Play-first, FFmpeg fallback, SQLite initially, existing Mediaphile knowledge/provenance as a first-class enhancement rather than a separate project.",
+      "disposition": "INTEGRATED",
+      "exact_head": "cc8f0b8008ae43abc97f3f7528e37bea8955693c",
+      "exclusion_reason": null,
+      "integration_mode": "MANAGED_PROJECT",
+      "name": "mediaphile-client",
+      "observed_updated_at": "2026-10-07T21:56:31Z",
+      "repository": "thebrazenbeard/mediaphile-client",
+      "runtime_authority": false,
+      "visibility": "public"
+    },
+    {
+      "archived": false,
+      "boot_policy": "ON_DEMAND",
+      "default_branch": "main",
+      "description": "LAN-only Mediaphile server plan for local catalog, authentication, versioned API, Direct Play, remux, and FFmpeg transcode.",
+      "disposition": "INTEGRATED",
+      "exact_head": "417cc7f0bc7c7b30e087a87298423b86394ef96f",
+      "exclusion_reason": null,
+      "integration_mode": "MANAGED_PROJECT",
+      "name": "mediaphile-server",
+      "observed_updated_at": "2026-10-07T21:56:29Z",
+      "repository": "thebrazenbeard/mediaphile-server",
+      "runtime_authority": false,
+      "visibility": "public"
+    },
+    {
+      "archived": false,
+      "boot_policy": "ON_DEMAND",
+      "default_branch": "main",
       "description": "MESO-CRCT research on persistent digital control architecture for salience, attention, wants, learning, valence, protection, and reciprocal agency.",
       "disposition": "INTEGRATED",
       "exact_head": "060d0feeb9dc9eb23801082bd8f1c4a7cb06184d",
@@ -651,7 +682,7 @@
       "default_branch": "main",
       "description": "P.O.R.T.A.L. \u0393\u00c7\u00f6 Portfolio Orchestration & Repository Tracking Access Layer",
       "disposition": "INTEGRATED",
-      "exact_head": "fa125a74bd42bc2bdabf3f8f9ef677b225db6f76",
+      "exact_head": "7d00d8bf3b48c0676b2278359838ee563c66c67f",
       "exclusion_reason": null,
       "integration_mode": "CORE_SERVICE",
       "name": "portal",
@@ -1176,7 +1207,7 @@
       "default_branch": "main",
       "description": "Private operating repository for Vera Works: Vera's economic work system.",
       "disposition": "INTEGRATED",
-      "exact_head": "74494d8ce9102b5e2c3fa75375558d26866b57ed",
+      "exact_head": "569c88cc20123c264fa6e3ce6e989be06f65c1d7",
       "exclusion_reason": null,
       "integration_mode": "MANAGED_PROJECT",
       "name": "vera-works",

@@ -14,8 +14,9 @@ VeraOS must be able to boot, restore state, expose its local interfaces, enforce
 
 The current working branch contains executable source for:
 
-- an exact 84-repository portfolio composition lock;
-- a private semantic capability map covering all 84 repositories;
+- an exact 86-repository portfolio composition lock bound to the current live owned inventory;
+- a private semantic capability map covering all 86 repositories;
+- a private implementation plan that classifies every repository into an explicit VeraOS integration lane without creating sibling-repository runtime dependencies;
 - a private ChatGPT plugin/tool capability inventory;
 - searchable repository + plugin capability discovery;
 - fail-closed capability-owner disposition gates;
@@ -27,14 +28,14 @@ The current working branch contains executable source for:
 - a Python `/sbin/vera-init` PID 1 lifecycle supervisor;
 - a minimal x86_64 core-boot profile that does not make browser compilation a boot-proof dependency;
 - a separate WPE WebKit + Cog browser-capable Buildroot profile;
-- Buildroot/QEMU VM build and qualification harness scaffolding.
+- Buildroot/QEMU VM build and two-pass restart/persistence qualification harnesses.
 
 The branch has now crossed the first executable qualification gate: the core Buildroot profile has completed an image build and booted under QEMU/TCG directly into `/sbin/vera-init` as PID 1, with the expected `VERAOS_BOOT_READY_V1` composition/authority marker observed. Exact-head and artifact-digest evidence remains external to the Git tree so the evidence can bind the commit being qualified without a self-referential commit hash.
 
 This is not yet proof of:
 
-- browser-profile build or browser runtime qualification;
-- restart/persistence recovery qualification;
+- browser-profile build or browser runtime qualification at the current portfolio head;
+- canonical-memory or Supabase-replacement qualification;
 - an installed desktop/workspace environment;
 - production runtime activation;
 - bare-metal installation;
@@ -47,7 +48,7 @@ VeraOS is private by design.
 
 Inside VeraOS, the full portfolio capability catalog may contain:
 
-- all 84 repository identities;
+- all 86 repository identities;
 - private repository names;
 - exact source heads;
 - semantic capability ownership;
@@ -69,7 +70,7 @@ The intended split is:
 
 The bridge is awareness-only by construction. Archived repositories export as `ARCHIVED`; every non-archived repository exports as `HELD`; assignment and standing-review scopes remain `NONE`. Exact scheduling activation, currentness evidence, route binding, and effect authority must be supplied separately.
 
-On 2026-10-07, a local cross-repository validation on Lappy loaded export `sha256:9f3747eb76161313c67170bb5555eaf0e0d7526809d25f8f2b5fa5ea6ec01b7d` through P.O.R.T.A.L. source `02a244b2bfaedf504d04ec295b000282acfcab54`. The parser accepted 84 projects: 19 private, 5 archived, 79 held, and 0 schedulable. This proves source-level schema interoperability only; it does not prove an always-on runtime route or private GitHub credential availability inside the local P.O.R.T.A.L. process.
+On 2026-10-07, the refreshed 86-repository private registry export was read back through current P.O.R.T.A.L. `main@7d00d8bf3b48c0676b2278359838ee563c66c67f`. The parser accepted all 86 projects with digest `sha256:32b55f27965a1b79790858403e63bf2b9c7568336cb2059d96293ee49846b385`: 19 private, 5 archived, 81 held, and 0 schedulable. This is source-level schema interoperability only; registry acceptance does not establish scheduling, a cognition route, or protected-effect authority.
 
 ## Portfolio awareness
 
@@ -77,9 +78,10 @@ Every owned repository must be represented exactly once in VeraOS unless it is e
 
 The current fresh inventory snapshot contains:
 
-- 84 repositories total;
-- 79 active/integrated;
-- 5 GitHub-archived and retained as provenance.
+- 86 repositories total;
+- 81 active/integrated;
+- 5 GitHub-archived and retained as provenance;
+- 19 private repositories retained only inside the private VeraOS catalog.
 
 The exact composition lock is:
 
@@ -89,11 +91,19 @@ The private semantic capability map is:
 
 architecture/capabilities/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json
 
+The repository-by-repository implementation plan is:
+
+architecture/portfolio/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json
+
+That implementation plan considers every current repository exactly once while preserving the Vera Mono self-contained runtime boundary. `INTEGRATED` means the capability is represented in VeraOS architecture; it does **not** mean the sibling Git repository is mounted, imported, started at boot, or granted authority. The plan distinguishes native OS source, canonical packaged runtime, already-absorbed donor mechanisms, governed service adapters, cognition providers, specialists, infrastructure, clients/nodes, managed applications, research surfaces, and provenance-only lineages.
+
+The two newest repositories, `mediaphile-client` and `mediaphile-server`, are represented as `PLAN_ONLY` on-demand managed projects. Their current source is implementation planning, so VeraOS does not promote them into a running media stack merely because they are now portfolio members.
+
 The current ChatGPT plugin/tool inventory is:
 
 architecture/capabilities/CHATGPT_PLUGIN_CAPABILITY_INVENTORY_V1.json
 
-The current host snapshot records 122 installed skill-plugin families and 35 live tool namespaces. The private portfolio map records 34 cross-portfolio capability domains and links 81 repository-specific ChatGPT skills to their matching repositories.
+The ChatGPT plugin/tool inventory is independently currentness-bound and may lag the repository inventory; repository growth does not silently mutate the host plugin snapshot. The private portfolio map now adds explicit media-family ownership for Mediaphile knowledge provenance, LAN server/client, and playback-pipeline planning while preserving the existing cross-portfolio ownership rules.
 
 The plugin/tool inventory is a current host snapshot, not an eternal capability claim; it must be refreshed when the ChatGPT host surface changes.
 
@@ -116,6 +126,14 @@ For example, a proposal to create or assign a new reasoning architecture fails i
 
 This is an executable prevention rule, not merely documentation.
 
+### Whole-portfolio implementation rule
+
+"Consider every repository" is not interpreted as "boot every repository." VeraOS treats the portfolio as a capability and implementation space while keeping the canonical runtime self-contained.
+
+Every live owned repository receives an exact implementation disposition in `VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json`. Useful mechanisms are absorbed or adapted behind VeraOS/Vera Mono/P.O.R.T.A.L. contracts. A repository may instead remain an on-demand application, specialist, external node/client, research surface, or provenance-only source. Direct sibling-repository runtime dependencies are forbidden by the implementation-plan validator.
+
+This preserves two requirements at once: nothing useful in the portfolio is ignored, and VeraOS does not become an 86-repository dependency tangle.
+
 ## Core runtime ownership
 
 The current source contract distinguishes these roles:
@@ -135,7 +153,7 @@ The current source contract distinguishes these roles:
 - **Vera Mesh / Vera Synology / clients** — node, transport, packaging, and client surfaces.
 - **Vera Model Training** — standalone Vera model training plus an optional VeraOS local-provider export.
 
-Other repositories remain explicit on-demand capabilities, research systems, applications, clients, specialist workers, or provenance according to the private capability map.
+Other repositories remain explicit on-demand capabilities, research systems, applications, clients, specialist workers, infrastructure providers, absorbed donor mechanisms, or provenance according to the private capability and implementation maps. No sibling repository becomes a required VeraOS runtime dependency merely because it is useful to VeraOS.
 
 ## Reasoning and cognition
 
@@ -322,7 +340,7 @@ The first qualification boot runs with networking disconnected to isolate compos
 
 The required initial serial marker is:
 
-VERAOS_BOOT_READY_V1 pid=1 base=VERA total=84 integrated=79 excluded=5 cognition_required=false browser_first_class=true ambient_protected_effect_authority=false
+VERAOS_BOOT_READY_V1 pid=1 base=VERA total=86 integrated=81 excluded=5 portfolio_plan_validated=true cognition_required=false browser_first_class=true ambient_protected_effect_authority=false
 
 That marker proves only that the Vera PID 1 boot path validated the current composition and authority contract. Browser packaging and browser runtime qualification remain separate evidence.
 
@@ -344,10 +362,12 @@ Only then should D: be considered for shrinking or VeraOS partitions.
 ## Key source surfaces
 
 - architecture/portfolio/VERA_OS_PORTFOLIO_COMPOSITION_V1.json
+- architecture/portfolio/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json
 - architecture/capabilities/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json
 - architecture/capabilities/CHATGPT_PLUGIN_CAPABILITY_INVENTORY_V1.json
 - src/veraos/composition.py
 - src/veraos/portfolio_awareness.py
+- src/veraos/portfolio_implementation.py
 - src/veraos/portal_registry.py
 - src/veraos/capability_search.py
 - src/veraos/cognition_provider.py
@@ -362,6 +382,6 @@ Only then should D: be considered for shrinking or VeraOS partitions.
 
 ## Claim ceiling
 
-Current evidence establishes portfolio composition, private capability awareness, provider-independent cognition contracts, optional local-model admission, browser capability boundaries, the Vera-as-base boot contract, a completed core Buildroot image build, and a successful QEMU/TCG Vera PID 1 boot with guest-side composition/authority validation.
+Current source evidence establishes an 86-repository private portfolio composition, capability map, and explicit implementation-plan gate; provider-independent cognition contracts; optional local-model admission; browser capability boundaries; lifecycle-persistence source; and the Vera-as-base boot contract. Earlier runtime evidence established a successful core Buildroot/QEMU Vera PID 1 boot for an older exact head. The current 86-repository source head must be rebuilt and re-qualified before that runtime evidence can be promoted to the new head.
 
-It does not yet establish browser-profile build/runtime qualification, restart/persistence recovery, installed VeraOS desktop/workspace, active cognition-route consumption by the resident runtime, bare-metal installation, or protected external effect.
+It does not yet establish browser-profile packaging/runtime qualification at the current head, canonical-memory or Supabase replacement, installed VeraOS desktop/workspace, active cognition-route consumption by the resident runtime, bare-metal installation, or protected external effect.

@@ -30,11 +30,13 @@ class PortfolioAwarenessTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.capability_map = json.loads(CAPABILITY_MAP.read_text(encoding="utf-8"))
 
-    def test_private_map_covers_exactly_all_84_repositories(self) -> None:
+    def test_private_map_covers_exactly_all_current_repositories(self) -> None:
         validate_capability_map(self.capability_map)
         records = self.capability_map["repositories"]
-        self.assertEqual(84, len(records))
-        self.assertEqual(84, len({r["repository"] for r in records}))
+        self.assertEqual(86, len(records))
+        self.assertEqual(86, len({r["repository"] for r in records}))
+        self.assertEqual(81, self.capability_map["inventory"]["active_or_available"])
+        self.assertEqual(5, self.capability_map["inventory"]["archived"])
 
     def test_current_catalog_accepts_exact_bound_inventory(self) -> None:
         live = [

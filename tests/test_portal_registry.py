@@ -33,8 +33,8 @@ class PortalRegistryTests(unittest.TestCase):
         registry = build_portal_project_registry(self.capability_map)
         projects = registry["projects"]
 
-        self.assertEqual(84, len(projects))
-        self.assertEqual(84, len({project["id"] for project in projects}))
+        self.assertEqual(86, len(projects))
+        self.assertEqual(86, len({project["id"] for project in projects}))
         self.assertEqual(
             {
                 row["repository"]

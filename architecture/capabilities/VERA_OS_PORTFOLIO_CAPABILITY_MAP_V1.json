@@ -126,6 +126,23 @@
         "thebrazenbeard/axle"
       ]
     },
+    "lan_media_client": {
+      "owners": [
+        "thebrazenbeard/mediaphile-client"
+      ],
+      "supporting": [
+        "thebrazenbeard/mediaphile-server",
+        "thebrazenbeard/mediaphile"
+      ]
+    },
+    "lan_media_server": {
+      "owners": [
+        "thebrazenbeard/mediaphile-server"
+      ],
+      "supporting": [
+        "thebrazenbeard/mediaphile"
+      ]
+    },
     "language_semantics_research": {
       "owners": [
         "thebrazenbeard/spm"
@@ -135,6 +152,23 @@
         "thebrazenbeard/semanticatlas",
         "thebrazenbeard/semiotics",
         "thebrazenbeard/unvtrslr"
+      ]
+    },
+    "media_knowledge_provenance": {
+      "owners": [
+        "thebrazenbeard/mediaphile"
+      ],
+      "supporting": [
+        "thebrazenbeard/mediaphile-client",
+        "thebrazenbeard/mediaphile-server"
+      ]
+    },
+    "media_playback_pipeline": {
+      "owners": [
+        "thebrazenbeard/mediaphile-server"
+      ],
+      "supporting": [
+        "thebrazenbeard/mediaphile-client"
       ]
     },
     "mobile_client": {
@@ -331,17 +365,17 @@
   },
   "claim_ceiling": "PRIVATE_SEMANTIC_PORTFOLIO_BINDING_FOR_ARCHITECTURE_DISCOVERY_NOT_RUNTIME_ACTIVATION_OR_EFFECT_AUTHORITY",
   "currentness": {
-    "bound_repository_count": 84,
+    "bound_repository_count": 86,
     "observed_date": "2026-10-07",
     "rule": "VERIFY_LIVE_INVENTORY_AND_RELEVANT_EXACT_HEADS_BEFORE_ARCHITECTURE_ASSIGNMENT",
     "stale_behavior": "HOLD_ASSIGNMENT_AND_REFRESH"
   },
   "inventory": {
-    "active_or_available": 79,
+    "active_or_available": 81,
     "all_repository_identities_retained": true,
     "archived": 5,
     "private_repository_names_allowed_here": true,
-    "total": 84
+    "total": 86
   },
   "observed_date": "2026-10-07",
   "policy": {
@@ -1013,22 +1047,70 @@
     {
       "archived": false,
       "capabilities": [
-        "domain_or_product_specific"
+        "domain_or_product_specific",
+        "media_knowledge_provenance"
       ],
       "chatgpt_repo_skill": "repo-mediaphile",
       "description": "Workspace for source-aware movie and television information, metadata, analysis, continuity, and future media tooling.",
       "disposition": "ACTIVE_OR_AVAILABLE",
       "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
       "exact_head": "5540d7e2f0b07c0e91a1158c9c00f63be9d9587a",
-      "family_id": null,
+      "family_id": "media-runtime",
       "private": true,
-      "purpose": null,
+      "purpose": "Provenance-aware movie/TV knowledge and analysis authority for the Mediaphile family.",
       "repository": "thebrazenbeard/mediaphile",
       "semantic_signals": [
         "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
         "mediaphile",
         "A provenance-aware knowledge corpus for movies and television: metadata, plot structure, character development, continuity, themes, production context, historical ChatGPT read provenance, and original analysis.",
         "Durable operation"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific",
+        "lan_media_client"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Mediaphile Web/TV Client, LAN-addressable only, Direct-Play-first, FFmpeg fallback, SQLite initially, existing Mediaphile knowledge/provenance as a first-class enhancement rather than a separate project.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_IMPLEMENTATION_PLAN_EXACT_HEAD",
+      "exact_head": "cc8f0b8008ae43abc97f3f7528e37bea8955693c",
+      "family_id": "media-runtime",
+      "implementation_status": "PLAN_ONLY",
+      "private": false,
+      "purpose": "LAN-only Mediaphile web/TV client consuming the versioned Mediaphile Server API.",
+      "repository": "thebrazenbeard/mediaphile-client",
+      "semantic_signals": [
+        "Mediaphile Client V1 Implementation Plan",
+        "Connects only to a LAN Mediaphile Server.",
+        "Consumes only the versioned server OpenAPI contract.",
+        "No Plex/cloud account, public discovery, CDN, analytics SaaS, or remote runtime asset dependency."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific",
+        "lan_media_server",
+        "media_playback_pipeline"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "LAN-only Mediaphile server plan for local catalog, authentication, versioned API, Direct Play, remux, and FFmpeg transcode.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_IMPLEMENTATION_PLAN_EXACT_HEAD",
+      "exact_head": "417cc7f0bc7c7b30e087a87298423b86394ef96f",
+      "family_id": "media-runtime",
+      "implementation_status": "PLAN_ONLY",
+      "private": false,
+      "purpose": "LAN-only Mediaphile server owning local catalog, auth, media serving, and deterministic playback decisions.",
+      "repository": "thebrazenbeard/mediaphile-server",
+      "semantic_signals": [
+        "Mediaphile Server V1 Implementation Plan",
+        "One Go process owns the LAN boundary, local authentication, SQLite catalog, scanner/probe pipeline, playback/session state, event delivery, and media serving.",
+        "Direct Play is preferred over Remux, which is preferred over Transcode.",
+        "The private thebrazenbeard/mediaphile repo remains the provenance/knowledge authority."
       ]
     },
     {
@@ -1193,7 +1275,7 @@
       "description": "P.O.R.T.A.L. \u0393\u00c7\u00f6 Portfolio Orchestration & Repository Tracking Access Layer",
       "disposition": "ACTIVE_OR_AVAILABLE",
       "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
-      "exact_head": "fd55ae74db582294e5c2eba9349831e6f1404ca3",
+      "exact_head": "7d00d8bf3b48c0676b2278359838ee563c66c67f",
       "family_id": "live-discovery",
       "private": false,
       "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
@@ -1969,7 +2051,7 @@
       "description": "Private operating repository for Vera Works: Vera's economic work system.",
       "disposition": "ACTIVE_OR_AVAILABLE",
       "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
-      "exact_head": "74494d8ce9102b5e2c3fa75375558d26866b57ed",
+      "exact_head": "569c88cc20123c264fa6e3ce6e989be06f65c1d7",
       "family_id": null,
       "private": true,
       "purpose": null,

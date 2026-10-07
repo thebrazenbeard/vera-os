@@ -12,6 +12,10 @@ from .model_admission import (
     local_model_route_eligible,
     validate_local_model_provider_candidate,
 )
+from .portfolio_implementation import (
+    PortfolioImplementationError,
+    validate_implementation_plan,
+)
 from .portfolio_awareness import (
     PortfolioAwarenessError,
     require_capability_dispositions,
@@ -33,6 +37,7 @@ __all__ = [
     "CompositionError",
     "ModelAdmissionError",
     "PortfolioAwarenessError",
+    "PortfolioImplementationError",
     "PortalRegistryError",
     "build_portal_project_registry",
     "local_model_route_eligible",
@@ -42,6 +47,7 @@ __all__ = [
     "validate_boot_contract",
     "validate_browser_grant",
     "validate_capability_map",
+    "validate_implementation_plan",
     "validate_local_model_provider_candidate",
     "validate_manifest",
     "validate_provider",

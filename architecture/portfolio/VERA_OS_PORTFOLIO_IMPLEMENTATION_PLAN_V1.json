@@ -1,0 +1,1511 @@
+{
+  "claim_ceiling": "ALL_LIVE_PORTFOLIO_REPOSITORIES_CONSIDERED_FOR_IMPLEMENTATION_AT_SOURCE_PLANNING_LEVEL_ONLY_NOT_INSTALLATION_NOT_RUNTIME_ACTIVATION",
+  "inventory": {
+    "active_or_available": 81,
+    "archived": 5,
+    "private": 19,
+    "total": 86
+  },
+  "lanes": {
+    "BOUNDED_SERVICE_OR_TOOL": "Use through a bounded service/tool adapter with separate authority.",
+    "COGNITION_PROVIDER_CONTRACT": "Admit only through the generic cognition-provider contract after qualification.",
+    "EXTERNAL_NODE_OR_CLIENT": "Treat as a client/device/node surface, not a boot dependency.",
+    "OPTIONAL_RESEARCH_ADAPTER": "Research/donor capability; adapt only after evidence and qualification.",
+    "PACKAGE_SELF_CONTAINED_RUNTIME": "Package the self-contained Vera Mono runtime into VeraOS.",
+    "PORTAL_MANAGED_PROJECT": "Keep available as a managed project/application rather than resident OS machinery.",
+    "PORTAL_ON_DEMAND_SPECIALIST": "Expose through P.O.R.T.A.L. as an on-demand specialist.",
+    "PROVENANCE_RECORD_ONLY": "Retain source/provenance only; never activate as runtime.",
+    "ROOTFS_NATIVE_OS": "VeraOS-owned operating-environment source.",
+    "VERAOS_SERVICE_ADAPTER": "Bind through a governed VeraOS service/adapter boundary.",
+    "VERA_MONO_ABSORBED_REASONING": "Use Vera Mono's absorbed Rezon package while preserving Rezon source ownership/provenance.",
+    "VERA_MONO_ABSORPTION": "Reuse mechanisms already absorbed into Vera Mono; do not depend on donor repo at runtime."
+  },
+  "observed_at": "2026-10-07T18:49:55-04:00",
+  "policy": {
+    "all_owned_repositories_considered_exactly_once": true,
+    "canonical_runtime_repository": "thebrazenbeard/vera-mono",
+    "direct_sibling_runtime_dependencies_forbidden": true,
+    "implementation_rule": "ABSORB_OR_ADAPT_USEFUL_MECHANISMS_WITHOUT_MAKING_SIBLING_REPOSITORIES_REQUIRED_RUNTIME_DEPENDENCIES",
+    "operating_environment_repository": "thebrazenbeard/vera-os",
+    "portfolio_membership_is_not_boot_activation": true,
+    "protected_effect_authority_source": "PATRICK_EXPLICIT_EXACT_TARGET_EFFECT",
+    "source_presence_is_not_runtime_consumption": true
+  },
+  "repositories": [
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "industrial_intelligence"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "c842c9058d8a4d1e4caf4bf7cdfad7e3c678ce6b",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/abil",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "adaptive_interaction",
+        "cognitive_subsystem"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "46461057e4d9ea25ec91a051fc17020e1113329a",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/Attune",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "industrial_intelligence",
+        "industrial_intelligence:supporting"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "d470544fb64875cb4789472ad4ef1b30f1fa65ee",
+      "implementation_class": "DEVICE_OR_CLIENT",
+      "implementation_path": "EXTERNAL_NODE_OR_CLIENT",
+      "repository": "thebrazenbeard/axle",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "CLIENT_OR_ADAPTER",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "9f24b88fe5154e073a6f79a6c71e8f484c9fec79",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/brigit",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": true,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "RETAIN_PROVENANCE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "f1350ef794acd0e8a657bb38d21e66f4775501a0",
+      "implementation_class": "ARCHIVED_PROVENANCE",
+      "implementation_path": "PROVENANCE_RECORD_ONLY",
+      "repository": "thebrazenbeard/brigit-unbound",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "EXCLUDED",
+      "source_maturity": "ARCHIVED"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture_research",
+        "portfolio_spine"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "8d9b07d165350c341538be56cdfc919b729fe96b",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/bt2",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": true,
+      "capabilities": [
+        "assurance",
+        "repair"
+      ],
+      "decision": "RETAIN_PROVENANCE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "1d35bcbd16da24c7635a004845de1390de850b4e",
+      "implementation_class": "ARCHIVED_PROVENANCE",
+      "implementation_path": "PROVENANCE_RECORD_ONLY",
+      "repository": "thebrazenbeard/bugops",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "EXCLUDED",
+      "source_maturity": "ARCHIVED"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": true,
+      "capabilities": [
+        "portfolio_spine"
+      ],
+      "decision": "RETAIN_PROVENANCE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "950112a697550b689049da807f2d8176a507c38f",
+      "implementation_class": "ARCHIVED_PROVENANCE",
+      "implementation_path": "PROVENANCE_RECORD_ONLY",
+      "repository": "thebrazenbeard/build-team-2.0",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "EXCLUDED",
+      "source_maturity": "ARCHIVED"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "coordination",
+        "cross_agent_coordination"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "0b542a78ebf5827a518e0731a63f17a7ac8a2727",
+      "implementation_class": "PLATFORM_SERVICE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/ccb-core",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "cross_agent_coordination:supporting"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "e0bcb5eb18630693de55a1af2066411c7af079bb",
+      "implementation_class": "PLATFORM_SERVICE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/chat-communication-bus",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "cognitive_subsystem",
+        "volition_and_drive:supporting"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "51948aac796936f0e7c437722e6f52c883e544e9",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/conations",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": true,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "RETAIN_PROVENANCE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "1b969cde2e1905dc87f4f3c2dda95a040c180781",
+      "implementation_class": "ARCHIVED_PROVENANCE",
+      "implementation_path": "PROVENANCE_RECORD_ONLY",
+      "repository": "thebrazenbeard/conditioning",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "EXCLUDED",
+      "source_maturity": "ARCHIVED"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "conscience_hostile_review",
+        "reasoning_architecture:supporting",
+        "recently_discovered_capability",
+        "security_adversarial_review:supporting"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "c2342648c72aa9faefd9c5441c654ad8239afe33",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/cricket",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "durable_memory_provenance",
+        "memory_provenance"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "3199b05a24411ed1b3a3561fe90866adf9c74d14",
+      "implementation_class": "INFRASTRUCTURE_PROVIDER",
+      "implementation_path": "BOUNDED_SERVICE_OR_TOOL",
+      "repository": "thebrazenbeard/deepmemorystorage",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "INFRASTRUCTURE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "portfolio_capability_discovery",
+        "portfolio_orchestration:supporting",
+        "portfolio_spine"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_CORE_ROLE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "620c09b2a1c96256cc7523877f3e986ad75f8f0a",
+      "implementation_class": "CORE_CONTROL_ROLE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/discovery",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "SPECIALIST_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "assurance",
+        "drift_and_regression_admission",
+        "failure_correction_prevention:supporting",
+        "repair",
+        "temporal_currentness:supporting"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "52fa829c629fa0f3e729204912db9f9f783f322a",
+      "implementation_class": "SPECIALIST_PROVIDER",
+      "implementation_path": "PORTAL_ON_DEMAND_SPECIALIST",
+      "repository": "thebrazenbeard/driftguard",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "SPECIALIST_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "c313c41b2ae53488623d193ef664f1f14504189c",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/ears",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "adaptive_interaction:supporting",
+        "cognitive_subsystem"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "76ebb492827a79b20b3be76fe9f9f48ab860ef1d",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/empathy",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "6d68c36bb7ab3adecc5c34902b310a7ef1f7c0d9",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/entropyinc",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "bounded_project_execution:supporting",
+        "recently_discovered_capability",
+        "workstation_execution"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "2b9b4e9456c6481b1d5fe9be0a142d01ce804d8f",
+      "implementation_class": "PLATFORM_SERVICE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/executor",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "d0685b5184ea39eed3a6114f8cbaffc671f2c3f0",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/firesafe",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "assurance",
+        "failure_correction_prevention",
+        "repair",
+        "repair_tracking:supporting"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_CORE_ROLE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "a87dea38a58c4cff75bc7d123d87f63a5e110895",
+      "implementation_class": "CORE_CONTROL_ROLE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/fuckup",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "speculative_cognition"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "495c2b42932153cba0926744d04a69bc34557f81",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/god-brain",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture",
+        "cognitive_architecture_research"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "80a55949b0bb7549b7f678fba8ecedce854e3c0e",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/hc-brain",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "specialist_worker"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "030494fa2cc4c875013a9a4842abe60588c9c709",
+      "implementation_class": "SPECIALIST_PROVIDER",
+      "implementation_path": "PORTAL_ON_DEMAND_SPECIALIST",
+      "repository": "thebrazenbeard/hephaestus",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "SPECIALIST_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "memory_provenance",
+        "provenance_reconstruction:supporting",
+        "universal_intake"
+      ],
+      "decision": "REUSE_ABSORBED_MECHANISMS",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "27764c9fb97c84d178a3f66e0da2d669df645ed6",
+      "implementation_class": "ABSORBED_DONOR",
+      "implementation_path": "VERA_MONO_ABSORPTION",
+      "repository": "thebrazenbeard/ingest",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "INFRASTRUCTURE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "cross_agent_coordination:supporting"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "677a1612e8a956760a40b942650b01cf0b22dd33",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/intranel",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture",
+        "cognitive_architecture_research:supporting"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "0043c60419de9ef0b52363b62aed8c0a52ef63f5",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/lgcm",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "9ea4eaefe5229ca90d7ae6099dbf30d9e13b64b2",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/lou-pole",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "debugging_root_cause",
+        "failure_correction_prevention:supporting",
+        "repair_tracking:supporting",
+        "specialist_worker"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "25653790d59080cda0b6d6e57b8a4cd64d1ee2b5",
+      "implementation_class": "SPECIALIST_PROVIDER",
+      "implementation_path": "PORTAL_ON_DEMAND_SPECIALIST",
+      "repository": "thebrazenbeard/masamune",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "SPECIALIST_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific",
+        "media_knowledge_provenance"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "5540d7e2f0b07c0e91a1158c9c00f63be9d9587a",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/mediaphile",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific",
+        "lan_media_client"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "cc8f0b8008ae43abc97f3f7528e37bea8955693c",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/mediaphile-client",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "PLAN_ONLY"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific",
+        "lan_media_server",
+        "media_playback_pipeline"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "417cc7f0bc7c7b30e087a87298423b86394ef96f",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/mediaphile-server",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "PLAN_ONLY"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "synthetic_affect",
+        "volition_and_drive:supporting"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "060d0feeb9dc9eb23801082bd8f1c4a7cb06184d",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/meso-crct",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "model_composition"
+      ],
+      "decision": "QUALIFY_ON_DEMAND_PROVIDER",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "3a442e94b4f5b8fa365e2206c40405df6961e18d",
+      "implementation_class": "OPTIONAL_COGNITION",
+      "implementation_path": "COGNITION_PROVIDER_CONTRACT",
+      "repository": "thebrazenbeard/mosaic",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture",
+        "cognitive_architecture_research:supporting"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "697d1fac6f9fea158994888a861e651ac8fac282",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/noema",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability",
+        "synology_runtime_packaging:supporting"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "30c49f0a5ebe99d217e66e985893b3b109dc2e2f",
+      "implementation_class": "DEVICE_OR_CLIENT",
+      "implementation_path": "EXTERNAL_NODE_OR_CLIENT",
+      "repository": "thebrazenbeard/ocd",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "CLIENT_OR_ADAPTER",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "source_critical_research"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "2fdc9614fa4f45eb038772d736b146809e10a7f1",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/on-theo",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "8ca06c91a0dd8f2ca33cc221d815027aa8b084b5",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/orgasm",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "adaptive_interaction:supporting",
+        "cognitive_subsystem"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "31610e915047af46aa3242190a57baedaed7fbfb",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/personification",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "CORE",
+      "archived": false,
+      "capabilities": [
+        "portfolio_orchestration",
+        "proactive_cognition_admission:supporting",
+        "recently_discovered_capability"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_CORE_ROLE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "7d00d8bf3b48c0676b2278359838ee563c66c67f",
+      "implementation_class": "CORE_CONTROL_ROLE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/portal",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "CORE",
+      "archived": false,
+      "capabilities": [
+        "proactive_cognition_admission",
+        "recently_discovered_capability"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_CORE_ROLE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "1f23a809d7274df506e03e2d9052525538c3bcf6",
+      "implementation_class": "CORE_CONTROL_ROLE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/pre-active",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "assurance",
+        "forensic_assurance:supporting",
+        "reasoning_architecture:supporting",
+        "repair",
+        "security_adversarial_review"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "99bc4e8cf7bd60d022fb25222d701a8cf42f80c0",
+      "implementation_class": "SPECIALIST_PROVIDER",
+      "implementation_path": "PORTAL_ON_DEMAND_SPECIALIST",
+      "repository": "thebrazenbeard/project-achilles",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "SPECIALIST_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "durable_memory_provenance:supporting",
+        "memory_provenance",
+        "provenance_reconstruction:supporting",
+        "universal_intake:supporting"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "79b730ed4d1d3d7486902a725ced39854e0ffb47",
+      "implementation_class": "SPECIALIST_PROVIDER",
+      "implementation_path": "PORTAL_ON_DEMAND_SPECIALIST",
+      "repository": "thebrazenbeard/project-lantern",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "SPECIALIST_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "bounded_project_execution",
+        "crash_recovery:supporting",
+        "portfolio_capability_discovery:supporting",
+        "portfolio_orchestration:supporting",
+        "portfolio_spine"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "04702abbf51aa2920b7d054275619253ea6fa748",
+      "implementation_class": "PLATFORM_SERVICE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/project-runner",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "assurance",
+        "debugging_root_cause:supporting",
+        "failure_correction_prevention:supporting",
+        "repair",
+        "repair_tracking"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "cd7c6f27d27a03130d6e793d69634005a130dc3a",
+      "implementation_class": "DEVICE_OR_CLIENT",
+      "implementation_path": "EXTERNAL_NODE_OR_CLIENT",
+      "repository": "thebrazenbeard/RepairTracker",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "CLIENT_OR_ADAPTER",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "4c463a97263587e40b8caedb5e7c37b988886dba",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/retro-gamer",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "conscience_hostile_review:supporting",
+        "drift_and_regression_admission:supporting",
+        "forensic_assurance:supporting",
+        "reasoning_architecture",
+        "reasoning_assurance"
+      ],
+      "decision": "USE_ABSORBED_RUNTIME_PACKAGE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "ec401810990337bf07a5d6473782ba13eba1bb3f",
+      "implementation_class": "REASONING_ARCHITECTURE",
+      "implementation_path": "VERA_MONO_ABSORBED_REASONING",
+      "repository": "thebrazenbeard/rezon",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "SPECIALIST_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "durable_memory_provenance:supporting",
+        "memory_provenance",
+        "provenance_reconstruction"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "1bc3af6aec0bebe383f60f56ad3070e83f0f40b5",
+      "implementation_class": "SPECIALIST_PROVIDER",
+      "implementation_path": "PORTAL_ON_DEMAND_SPECIALIST",
+      "repository": "thebrazenbeard/roots",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "SPECIALIST_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": true,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "RETAIN_PROVENANCE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "f97e5696938586211c24367e9462b896fa7b7932",
+      "implementation_class": "ARCHIVED_PROVENANCE",
+      "implementation_path": "PROVENANCE_RECORD_ONLY",
+      "repository": "thebrazenbeard/self",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "EXCLUDED",
+      "source_maturity": "ARCHIVED"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "ebcea11beea64bfcee386893464f573cdbeada17",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/selfimage",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "cognitive_subsystem",
+        "language_semantics_research:supporting",
+        "portfolio_capability_discovery:supporting",
+        "semantic_mapping"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "895677a64af5d29b580306ca52ecc0e0607a9ccc",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/semanticatlas",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "language_semantics_research:supporting",
+        "recently_discovered_capability",
+        "semantic_mapping:supporting"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "37117a2097f7f2aa35968fc9db24eacf7240826e",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/semiotics",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "0c5dc52e984cbdaa87fc9fe75fd03c212f477c87",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/sexuality",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "industrial_intelligence:supporting"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "102d365b2b22c0c4c6fefa269a075e3ae5164148",
+      "implementation_class": "DEVICE_OR_CLIENT",
+      "implementation_path": "EXTERNAL_NODE_OR_CLIENT",
+      "repository": "thebrazenbeard/skeletonkey",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "CLIENT_OR_ADAPTER",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability",
+        "synology_runtime_packaging:supporting"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "01d1b637f262f8e1890e59362b236e677ab48b85",
+      "implementation_class": "INFRASTRUCTURE_PROVIDER",
+      "implementation_path": "BOUNDED_SERVICE_OR_TOOL",
+      "repository": "thebrazenbeard/spk-packager",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "INFRASTRUCTURE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "language_semantics",
+        "language_semantics_research",
+        "semantic_mapping:supporting"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "d9ea72798ac892ac75f858177b6ed0c5a6b4c37c",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/spm",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "language_semantics"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "b609fcec50fe5a135ca1d8139f5563f5631582b2",
+      "implementation_class": "INFRASTRUCTURE_PROVIDER",
+      "implementation_path": "BOUNDED_SERVICE_OR_TOOL",
+      "repository": "thebrazenbeard/sql-connectome",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "INFRASTRUCTURE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "host_observation",
+        "recently_discovered_capability"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "d091584cf1bb514dcf1ba786ed16f705fabf807d",
+      "implementation_class": "INFRASTRUCTURE_PROVIDER",
+      "implementation_path": "BOUNDED_SERVICE_OR_TOOL",
+      "repository": "thebrazenbeard/tattler",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "INFRASTRUCTURE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "memory_provenance",
+        "temporal_currentness"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "0fc7071a6b01e609fb2cdc76a32c73276ab27094",
+      "implementation_class": "INFRASTRUCTURE_PROVIDER",
+      "implementation_path": "BOUNDED_SERVICE_OR_TOOL",
+      "repository": "thebrazenbeard/temporal",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "INFRASTRUCTURE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "source_critical_research"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "20517788763e76863a35e02ba3cc9051d0a227bb",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/testament",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "83ea2e083ccbf83ad5215ca53a9d5a00d16bb0d0",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/thebrazenbeard",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture_research:supporting",
+        "speculative_cognition"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "69dacb467e94fb73ce106cd5176c39800c64e195",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/transcendence",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "58f25f8c45e8379df0ef7c7b5db546e037d1c050",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/trek-data-core",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": false,
+      "capabilities": [
+        "identity_runtime_lineage",
+        "vera_identity_runtime:supporting"
+      ],
+      "decision": "RETAIN_PROVENANCE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "d4284dd1f044e506bb85554856c00497d6790d44",
+      "implementation_class": "LINEAGE_PROVENANCE",
+      "implementation_path": "PROVENANCE_RECORD_ONLY",
+      "repository": "thebrazenbeard/unbound-sol",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "PROVENANCE",
+      "source_maturity": "LINEAGE_SOURCE"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "language_semantics",
+        "language_semantics_research:supporting"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "33edef682181e1bea6b36c5afc588d261f0c1289",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/unvtrslr",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": false,
+      "capabilities": [
+        "vera_identity_runtime:supporting",
+        "vera_runtime"
+      ],
+      "decision": "RETAIN_PROVENANCE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "788b14bb97ccd5f81506d892fbdd557323680bb0",
+      "implementation_class": "LINEAGE_PROVENANCE",
+      "implementation_path": "PROVENANCE_RECORD_ONLY",
+      "repository": "thebrazenbeard/vera",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "PROVENANCE",
+      "source_maturity": "LINEAGE_SOURCE"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "mobile_client"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "ec2f69a3946eb63c47d39e6c729aa70ec5c29542",
+      "implementation_class": "DEVICE_OR_CLIENT",
+      "implementation_path": "EXTERNAL_NODE_OR_CLIENT",
+      "repository": "thebrazenbeard/vera-apk",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "CLIENT_OR_ADAPTER",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "vera_control_plane",
+        "vera_runtime"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "b86143e50ba41d05eab19d5a300662afeda60d6e",
+      "implementation_class": "PLATFORM_SERVICE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/vera-control-plane",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "vera_runtime",
+        "virtual_habitat"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "82cf6a625e417ced00205f66be1e76dc396ab617",
+      "implementation_class": "DEVICE_OR_CLIENT",
+      "implementation_path": "EXTERNAL_NODE_OR_CLIENT",
+      "repository": "thebrazenbeard/vera-habitat",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "CLIENT_OR_ADAPTER",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "vera_device_mesh",
+        "vera_runtime"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "98b74ff77981a5478e20a748bbb94565ad9140c8",
+      "implementation_class": "PLATFORM_SERVICE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/vera-mesh",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "CORE",
+      "archived": false,
+      "capabilities": [
+        "vera_control_plane:supporting",
+        "vera_identity_runtime",
+        "vera_runtime"
+      ],
+      "decision": "PACKAGE_CANONICAL_RUNTIME",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "e5af8cb740267bb5674864571e915842bf5e6677",
+      "implementation_class": "CANONICAL_RUNTIME",
+      "implementation_path": "PACKAGE_SELF_CONTAINED_RUNTIME",
+      "repository": "thebrazenbeard/vera-mono",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "HOST",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "BUILD_INTO_OS",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "be4a45a2b8b7a8e329f772820df0a757766b3073",
+      "implementation_class": "OPERATING_ENVIRONMENT",
+      "implementation_path": "ROOTFS_NATIVE_OS",
+      "repository": "thebrazenbeard/vera-os",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": false,
+      "capabilities": [
+        "vera_identity_runtime:supporting",
+        "vera_lineage"
+      ],
+      "decision": "RETAIN_PROVENANCE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "287a85cb5f2f6f553cfbb336cb2e03aa7b1c8d01",
+      "implementation_class": "LINEAGE_PROVENANCE",
+      "implementation_path": "PROVENANCE_RECORD_ONLY",
+      "repository": "thebrazenbeard/vera-R9A0",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "PROVENANCE",
+      "source_maturity": "LINEAGE_SOURCE"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "synology_runtime_packaging",
+        "vera_device_mesh:supporting",
+        "vera_runtime"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "d13cdefbf817aeba60c673fa4a517575c311da2c",
+      "implementation_class": "DEVICE_OR_CLIENT",
+      "implementation_path": "EXTERNAL_NODE_OR_CLIENT",
+      "repository": "thebrazenbeard/vera-synology",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "CLIENT_OR_ADAPTER",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "569c88cc20123c264fa6e3ce6e989be06f65c1d7",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/vera-works",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "1734bf636b70e7cab36e2aeabbe0451338099147",
+      "implementation_class": "DEVICE_OR_CLIENT",
+      "implementation_path": "EXTERNAL_NODE_OR_CLIENT",
+      "repository": "thebrazenbeard/vera_ark",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "CLIENT_OR_ADAPTER",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": false,
+      "capabilities": [
+        "model_composition:supporting",
+        "standalone_vera_model_training",
+        "vera_runtime"
+      ],
+      "decision": "QUALIFY_ON_DEMAND_PROVIDER",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "0e1546bd8a5e0f2fbf46ca3e901e0d2cf0de11c9",
+      "implementation_class": "OPTIONAL_COGNITION",
+      "implementation_path": "COGNITION_PROVIDER_CONTRACT",
+      "repository": "thebrazenbeard/vera_model_training",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MODEL_PIPELINE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "CORE",
+      "archived": false,
+      "capabilities": [
+        "proactive_cognition_admission:supporting",
+        "recently_discovered_capability",
+        "volition_and_drive"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_CORE_ROLE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "dbc628d376515a0a523b1eecdf62129cca5d6b08",
+      "implementation_class": "CORE_CONTROL_ROLE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/volition",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "conscience_hostile_review:supporting",
+        "forensic_assurance",
+        "reasoning_architecture:supporting",
+        "security_adversarial_review:supporting",
+        "specialist_worker"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "36a623d3a158e5aef521d42e378bafacd67d3de5",
+      "implementation_class": "SPECIALIST_PROVIDER",
+      "implementation_path": "PORTAL_ON_DEMAND_SPECIALIST",
+      "repository": "thebrazenbeard/voss",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "SPECIALIST_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "crash_recovery",
+        "portfolio_spine"
+      ],
+      "decision": "PACKAGE_OR_ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "3b93b64c09f5ed704b21a9db28cb918df181947e",
+      "implementation_class": "PLATFORM_SERVICE",
+      "implementation_path": "VERAOS_SERVICE_ADAPTER",
+      "repository": "thebrazenbeard/wip",
+      "runtime_authority_declared": true,
+      "source_integration_mode": "CORE_SERVICE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability",
+        "synology_runtime_packaging:supporting",
+        "workstation_execution:supporting"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "e88e14ea25f25abd723bb50909b3e25e67f889fd",
+      "implementation_class": "INFRASTRUCTURE_PROVIDER",
+      "implementation_path": "BOUNDED_SERVICE_OR_TOOL",
+      "repository": "thebrazenbeard/workbridge",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "INFRASTRUCTURE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability",
+        "workstation_execution:supporting"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "c2b95be79ca011a539c20bfee60fcbc46cfea177",
+      "implementation_class": "INFRASTRUCTURE_PROVIDER",
+      "implementation_path": "BOUNDED_SERVICE_OR_TOOL",
+      "repository": "thebrazenbeard/workbridgecommander",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "INFRASTRUCTURE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "vera_device_mesh:supporting",
+        "vera_runtime",
+        "workstation_execution"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "f091f6be6e85f489e3e7839e10612204b89a4a9e",
+      "implementation_class": "INFRASTRUCTURE_PROVIDER",
+      "implementation_path": "BOUNDED_SERVICE_OR_TOOL",
+      "repository": "thebrazenbeard/WorkBridgeMCP",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "INFRASTRUCTURE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "scientific_modeling"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "07c5b998d081cbe61091ac3ae5592f8ac33b4bbf",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/world-zero",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "dc8a889d68d1fb8d064aadff1cf8c2b8d97d6ace",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/wreckforge",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    }
+  ],
+  "schema": "VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1",
+  "visibility": "PRIVATE_VERAOS_INTERNAL"
+}

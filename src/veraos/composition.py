@@ -85,6 +85,16 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
                 f"integrated repo cannot use EXCLUDED mode: {repository}",
             )
 
+    counts = manifest.get("counts")
+    _require(isinstance(counts, Mapping), "counts must be an object")
+    archived_count = sum(bool(item.get("archived")) for item in repositories)
+    integrated_count = sum(item.get("disposition") == "INTEGRATED" for item in repositories)
+    excluded_count = sum(item.get("disposition") == "EXCLUDED" for item in repositories)
+    _require(counts.get("total") == len(repositories), "composition total count mismatch")
+    _require(counts.get("archived") == archived_count, "composition archived count mismatch")
+    _require(counts.get("integrated") == integrated_count, "composition integrated count mismatch")
+    _require(counts.get("excluded") == excluded_count, "composition excluded count mismatch")
+
     roles = manifest.get("runtime_roles")
     _require(isinstance(roles, Mapping), "runtime_roles must be an object")
     for role_name, role in roles.items():

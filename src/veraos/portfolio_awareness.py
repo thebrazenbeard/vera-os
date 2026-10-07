@@ -44,7 +44,10 @@ def validate_capability_map(capability_map: Mapping[str, Any]) -> None:
         len(records) == inventory.get("total"),
         "repository count does not match inventory total",
     )
-    _require(len(records) == 84, "current capability map must bind all 84 repositories")
+    _require(
+        isinstance(inventory.get("total"), int) and inventory.get("total") > 0,
+        "inventory total must be a positive integer",
+    )
 
     names: set[str] = set()
     active_names: set[str] = set()
@@ -84,6 +87,14 @@ def validate_capability_map(capability_map: Mapping[str, Any]) -> None:
     _require(
         archived_count == inventory.get("archived"),
         "archived repository count mismatch",
+    )
+    _require(
+        len(active_names) == inventory.get("active_or_available"),
+        "active repository count mismatch",
+    )
+    _require(
+        archived_count + len(active_names) == len(records),
+        "inventory active/archive partition mismatch",
     )
 
     capabilities = _mapping(data.get("capabilities"), "capabilities")

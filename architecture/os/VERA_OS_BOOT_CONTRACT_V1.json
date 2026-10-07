@@ -32,6 +32,7 @@
   "portfolio": {
     "composition_manifest": "/etc/veraos/architecture/VERA_OS_PORTFOLIO_COMPOSITION_V1.json",
     "capability_map": "/etc/veraos/architecture/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json",
+    "implementation_plan": "/etc/veraos/architecture/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json",
     "validate_before_ready": true
   },
   "persistence": {

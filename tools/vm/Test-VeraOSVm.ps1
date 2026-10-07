@@ -81,7 +81,14 @@ $append = "root=/dev/vda rw console=ttyS0,115200 init=/sbin/vera-init"
 # Windows PowerShell Start-Process joins ArgumentList entries into a command line.
 # Quote the QEMU kernel command line explicitly so it remains one docker argument.
 $quotedAppend = '"' + $append + '"'
-$expectedBoot = "VERAOS_BOOT_READY_V1 pid=1 base=VERA total=84 integrated=79 excluded=5 cognition_required=false browser_first_class=true ambient_protected_effect_authority=false"
+$compositionPath = Join-Path $repo "architecture\portfolio\VERA_OS_PORTFOLIO_COMPOSITION_V1.json"
+$implementationPlanPath = Join-Path $repo "architecture\portfolio\VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json"
+if (-not (Test-Path $implementationPlanPath)) { throw "Missing VeraOS portfolio implementation plan" }
+$sourceComposition = Get-Content $compositionPath -Raw | ConvertFrom-Json
+$portfolioTotal = @($sourceComposition.repositories).Count
+$portfolioIntegrated = @($sourceComposition.repositories | Where-Object { $_.disposition -eq "INTEGRATED" }).Count
+$portfolioExcluded = @($sourceComposition.repositories | Where-Object { $_.disposition -eq "EXCLUDED" }).Count
+$expectedBoot = "VERAOS_BOOT_READY_V1 pid=1 base=VERA total=$portfolioTotal integrated=$portfolioIntegrated excluded=$portfolioExcluded portfolio_plan_validated=true cognition_required=false browser_first_class=true ambient_protected_effect_authority=false"
 
 function Invoke-VeraBootPass {
     param(
@@ -189,6 +196,10 @@ $receipt = [ordered]@{
     memory_mib = $MemoryMiB
     cpu_count = $CpuCount
     marker = $secondBoot.boot_marker
+    portfolio_total = $portfolioTotal
+    portfolio_integrated = $portfolioIntegrated
+    portfolio_excluded = $portfolioExcluded
+    portfolio_implementation_plan_validated = $true
     lifecycle_persistence_marker = $secondBoot.persistence_marker
     lifecycle_persistence_qualified = $true
     restart_persistence_qualified = $true
@@ -206,7 +217,7 @@ $receipt = [ordered]@{
     browser_runtime_qualified = $false
     ambient_protected_effect_authority = $false
     host_partition_table_modified = $false
-    claim_ceiling = "VM_BOOT_RESTART_LIFECYCLE_PERSISTENCE_AND_GUEST_COMPOSITION_VALIDATION_ONLY_NOT_CANONICAL_MEMORY_NOT_SUPABASE_REPLACEMENT_NOT_BROWSER_RUNTIME_NOT_BARE_METAL_NOT_PROTECTED_EFFECT"
+    claim_ceiling = "VM_BOOT_RESTART_LIFECYCLE_PERSISTENCE_GUEST_COMPOSITION_AND_PORTFOLIO_IMPLEMENTATION_PLAN_VALIDATION_ONLY_NOT_CANONICAL_MEMORY_NOT_SUPABASE_REPLACEMENT_NOT_BROWSER_RUNTIME_NOT_BARE_METAL_NOT_PROTECTED_EFFECT"
 }
 
 $receiptPath = Join-Path $artifacts "veraos-vm-qualification.json"

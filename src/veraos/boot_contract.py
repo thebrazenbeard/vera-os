@@ -97,6 +97,16 @@ def validate_boot_contract(contract: Mapping[str, Any]) -> None:
         == "/etc/veraos/architecture/VERA_OS_PORTFOLIO_COMPOSITION_V1.json",
         "unexpected composition path",
     )
+    _require(
+        portfolio.get("capability_map")
+        == "/etc/veraos/architecture/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json",
+        "unexpected capability-map path",
+    )
+    _require(
+        portfolio.get("implementation_plan")
+        == "/etc/veraos/architecture/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json",
+        "unexpected implementation-plan path",
+    )
     _require(portfolio.get("validate_before_ready") is True, "portfolio must validate before ready")
 
     persistence = _mapping(data.get("persistence"), "persistence")

@@ -12,6 +12,8 @@ from typing import Any, Callable
 
 from .boot_contract import validate_boot_contract
 from .composition import validate_manifest
+from .portfolio_awareness import validate_capability_map
+from .portfolio_implementation import validate_implementation_plan
 from .lifecycle_state import (
     DEFAULT_LIFECYCLE_ROOT,
     advance_lifecycle_state,
@@ -21,6 +23,8 @@ from .lifecycle_state import (
 
 DEFAULT_BOOT_CONTRACT = Path("/etc/veraos/architecture/VERA_OS_BOOT_CONTRACT_V1.json")
 DEFAULT_COMPOSITION = Path("/etc/veraos/architecture/VERA_OS_PORTFOLIO_COMPOSITION_V1.json")
+DEFAULT_CAPABILITY_MAP = Path("/etc/veraos/architecture/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json")
+DEFAULT_IMPLEMENTATION_PLAN = Path("/etc/veraos/architecture/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json")
 DEFAULT_RUN_ROOT = Path("/run/veraos")
 
 
@@ -39,6 +43,7 @@ class BootState:
     portfolio_total: int
     portfolio_integrated: int
     portfolio_excluded: int
+    portfolio_implementation_plan_validated: bool
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -51,11 +56,15 @@ def _load_json(path: Path) -> dict[str, Any]:
 def prepare_boot_state(
     boot_contract: dict[str, Any],
     composition: dict[str, Any],
+    capability_map: dict[str, Any],
+    implementation_plan: dict[str, Any],
     *,
     pid: int | None = None,
 ) -> BootState:
     validate_boot_contract(boot_contract)
     validate_manifest(composition)
+    validate_capability_map(capability_map)
+    validate_implementation_plan(implementation_plan, capability_map, composition)
 
     repositories = composition["repositories"]
     integrated = sum(item["disposition"] == "INTEGRATED" for item in repositories)
@@ -79,6 +88,7 @@ def prepare_boot_state(
         portfolio_total=len(repositories),
         portfolio_integrated=integrated,
         portfolio_excluded=excluded,
+        portfolio_implementation_plan_validated=True,
     )
 
 
@@ -90,6 +100,7 @@ def boot_marker(state: BootState) -> str:
         f"total={state.portfolio_total} "
         f"integrated={state.portfolio_integrated} "
         f"excluded={state.portfolio_excluded} "
+        f"portfolio_plan_validated={str(state.portfolio_implementation_plan_validated).lower()} "
         "cognition_required=false "
         f"browser_first_class={str(state.browser_first_class).lower()} "
         "ambient_protected_effect_authority=false"
@@ -160,6 +171,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--boot-contract", type=Path, default=DEFAULT_BOOT_CONTRACT)
     parser.add_argument("--composition", type=Path, default=DEFAULT_COMPOSITION)
+    parser.add_argument("--capability-map", type=Path, default=DEFAULT_CAPABILITY_MAP)
+    parser.add_argument("--implementation-plan", type=Path, default=DEFAULT_IMPLEMENTATION_PLAN)
     parser.add_argument("--run-root", type=Path, default=DEFAULT_RUN_ROOT)
     parser.add_argument(
         "--lifecycle-root",
@@ -178,7 +191,14 @@ def main(argv: list[str] | None = None) -> int:
     args.run_root.mkdir(parents=True, exist_ok=True)
     contract = _load_json(args.boot_contract)
     composition = _load_json(args.composition)
-    state = prepare_boot_state(contract, composition)
+    capability_map = _load_json(args.capability_map)
+    implementation_plan = _load_json(args.implementation_plan)
+    state = prepare_boot_state(
+        contract,
+        composition,
+        capability_map,
+        implementation_plan,
+    )
     lifecycle_state = advance_lifecycle_state(args.lifecycle_root)
     (args.run_root / "boot-state.json").write_text(
         json.dumps(asdict(state), indent=2, sort_keys=True) + "\n",

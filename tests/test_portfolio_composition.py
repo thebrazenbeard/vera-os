@@ -24,10 +24,12 @@ class PortfolioCompositionTests(unittest.TestCase):
     def test_manifest_validates(self) -> None:
         validate_manifest(self.manifest)
 
-    def test_all_84_live_inventory_repositories_are_represented_once(self) -> None:
+    def test_all_current_inventory_repositories_are_represented_once(self) -> None:
         repos = [item["repository"] for item in self.manifest["repositories"]]
-        self.assertEqual(len(repos), 84)
+        self.assertEqual(86, len(repos))
         self.assertEqual(len(repos), len(set(repos)))
+        self.assertEqual(81, self.manifest["counts"]["integrated"])
+        self.assertEqual(5, self.manifest["counts"]["excluded"])
 
     def test_archived_repositories_are_excluded_and_nonarchived_are_integrated(self) -> None:
         for item in self.manifest["repositories"]:

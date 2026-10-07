@@ -21,6 +21,8 @@ from veraos.pid1 import boot_marker, main as pid1_main, prepare_boot_state
 
 BOOT_CONTRACT = ROOT / "architecture" / "os" / "VERA_OS_BOOT_CONTRACT_V1.json"
 COMPOSITION = ROOT / "architecture" / "portfolio" / "VERA_OS_PORTFOLIO_COMPOSITION_V1.json"
+CAPABILITY_MAP = ROOT / "architecture" / "capabilities" / "VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json"
+IMPLEMENTATION_PLAN = ROOT / "architecture" / "portfolio" / "VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json"
 
 
 class VeraOsBootContractTests(unittest.TestCase):
@@ -28,6 +30,8 @@ class VeraOsBootContractTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.contract = json.loads(BOOT_CONTRACT.read_text(encoding="utf-8"))
         cls.composition = json.loads(COMPOSITION.read_text(encoding="utf-8"))
+        cls.capability_map = json.loads(CAPABILITY_MAP.read_text(encoding="utf-8"))
+        cls.implementation_plan = json.loads(IMPLEMENTATION_PLAN.read_text(encoding="utf-8"))
 
     def test_vera_is_base_and_linux_buildroot_are_substrate(self) -> None:
         validate_boot_contract(self.contract)
@@ -49,6 +53,22 @@ class VeraOsBootContractTests(unittest.TestCase):
         self.assertEqual("thebrazenbeard/portal", runtime["provider_router"])
         self.assertFalse(runtime["cognition_provider_required_for_boot"])
         self.assertFalse(runtime["trained_vera_model_required_for_boot"])
+
+    def test_portfolio_boot_gate_binds_composition_capabilities_and_implementation(self) -> None:
+        portfolio = self.contract["portfolio"]
+        self.assertEqual(
+            "/etc/veraos/architecture/VERA_OS_PORTFOLIO_COMPOSITION_V1.json",
+            portfolio["composition_manifest"],
+        )
+        self.assertEqual(
+            "/etc/veraos/architecture/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json",
+            portfolio["capability_map"],
+        )
+        self.assertEqual(
+            "/etc/veraos/architecture/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json",
+            portfolio["implementation_plan"],
+        )
+        self.assertTrue(portfolio["validate_before_ready"])
 
     def test_lifecycle_persistence_is_required_but_not_canonical_memory(self) -> None:
         persistence = self.contract["persistence"]
@@ -133,13 +153,21 @@ class VeraOsBootContractTests(unittest.TestCase):
             validate_boot_contract(bad)
 
     def test_pid1_ready_marker_binds_portfolio_and_authority(self) -> None:
-        state = prepare_boot_state(self.contract, self.composition, pid=1)
-        self.assertEqual(84, state.portfolio_total)
-        self.assertEqual(79, state.portfolio_integrated)
+        state = prepare_boot_state(
+            self.contract,
+            self.composition,
+            self.capability_map,
+            self.implementation_plan,
+            pid=1,
+        )
+        self.assertEqual(86, state.portfolio_total)
+        self.assertEqual(81, state.portfolio_integrated)
         self.assertEqual(5, state.portfolio_excluded)
+        self.assertTrue(state.portfolio_implementation_plan_validated)
         marker = boot_marker(state)
         self.assertIn("pid=1", marker)
         self.assertIn("base=VERA", marker)
+        self.assertIn("portfolio_plan_validated=true", marker)
         self.assertIn("cognition_required=false", marker)
         self.assertIn("browser_first_class=true", marker)
         self.assertIn("ambient_protected_effect_authority=false", marker)
@@ -149,20 +177,28 @@ class VeraOsBootContractTests(unittest.TestCase):
             temp_path = Path(temp)
             contract = temp_path / "boot.json"
             composition = temp_path / "composition.json"
+            capability_map = temp_path / "capability-map.json"
+            implementation_plan = temp_path / "implementation-plan.json"
             run_root = temp_path / "run"
             lifecycle_root = temp_path / "lifecycle"
             contract.write_text(json.dumps(self.contract), encoding="utf-8")
             composition.write_text(json.dumps(self.composition), encoding="utf-8")
+            capability_map.write_text(json.dumps(self.capability_map), encoding="utf-8")
+            implementation_plan.write_text(json.dumps(self.implementation_plan), encoding="utf-8")
             result = pid1_main([
                 "--allow-non-pid1",
                 "--boot-contract", str(contract),
                 "--composition", str(composition),
+                "--capability-map", str(capability_map),
+                "--implementation-plan", str(implementation_plan),
                 "--run-root", str(run_root),
                 "--lifecycle-root", str(lifecycle_root),
             ])
             self.assertEqual(0, result)
             state = json.loads((run_root / "boot-state.json").read_text(encoding="utf-8"))
             self.assertEqual("VERA", state["base_identity"])
+            self.assertTrue(state["portfolio_implementation_plan_validated"])
+            self.assertEqual(86, state["portfolio_total"])
             lifecycle = json.loads(
                 (lifecycle_root / STATE_FILENAME).read_text(encoding="utf-8")
             )
