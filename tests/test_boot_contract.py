@@ -36,6 +36,10 @@ class VeraOsBootContractTests(unittest.TestCase):
         runtime = self.contract["runtime"]
         self.assertEqual("thebrazenbeard/vera-mono", runtime["identity_runtime_owner"])
         self.assertEqual("thebrazenbeard/rezon", runtime["reasoning_owner"])
+        self.assertEqual(
+            "thebrazenbeard/mosaic",
+            runtime["model_composition_owner"],
+        )
         self.assertEqual("thebrazenbeard/portal", runtime["provider_router"])
         self.assertFalse(runtime["cognition_provider_required_for_boot"])
         self.assertFalse(runtime["trained_vera_model_required_for_boot"])

@@ -122,6 +122,7 @@ The current source contract distinguishes these roles:
 - **Vera Mono** — governed Vera identity/runtime boundary.
 - **Discovery** — portfolio capability discovery and classification.
 - **Rezon** — heterogeneous reasoning architecture and reasoning assurance.
+- **Mosaic** — optional cognition-composition/residency research for swappable specialist model capacity under constrained hardware; not Vera identity, not the canonical runtime, and not reasoning ownership.
 - **P.O.R.T.A.L.** — whole-portfolio coordination and qualified cognition-provider routing.
 - **Pre-Active** — bounded proactive cognition admission.
 - **Volition** — endogenous wants, goals, and cognition requests without implied authority.
@@ -145,7 +146,7 @@ Volition / user / event
 -> Pre-Active cognition admission
 -> Rezon reasoning architecture
 -> P.O.R.T.A.L. provider discovery and exact route binding
--> qualified cognition provider(s)
+-> qualified cognition provider(s), optionally including a future Mosaic specialist-composition route
 -> Rezon evaluation / reasoning integration as applicable
 -> Vera Mono governed state integration
 
@@ -187,6 +188,16 @@ as the owner of:
 reasoning_architecture
 
 A replacement or competing reasoning architecture must explicitly REUSE, EXTEND, SUPERSEDE, or REJECT Rezon with evidence before assignment.
+
+## Mosaic
+
+Mosaic owns the portfolio's **model_composition** research surface: specialist parameter residency, swapping, handoff, and composition of a logical capability pool larger than the currently resident accelerator set.
+
+That is useful to VeraOS, but its boundary is strict. Mosaic's internal "Boot / Core" terminology does not replace VeraOS boot, Vera Mono identity/runtime, Rezon reasoning, or P.O.R.T.A.L. route selection. In VeraOS it is an optional cognition-composition layer that may eventually sit behind the generic `VERA_OS_COGNITION_PROVIDER_V1` contract.
+
+Current stable Mosaic `main` is research architecture plus deterministic residency/handoff harnesses. Draft PR #7 extends that research into multi-resolution shared-state residency and explicitly says Mosaic should not become the canonical Vera runtime implementation. No trained Mosaic model, real accelerator specialist swap, or measured VRAM saving is currently treated as established.
+
+The manifest therefore marks Mosaic `RESEARCH_ONLY_NOT_ROUTE_ELIGIBLE` until separate qualification evidence exists.
 
 ## Failure correction
 

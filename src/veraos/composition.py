@@ -122,6 +122,7 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
         "portfolio_coordinator": "thebrazenbeard/portal",
         "portfolio_discovery": "thebrazenbeard/discovery",
         "reasoning_architecture": "thebrazenbeard/rezon",
+        "model_composition": "thebrazenbeard/mosaic",
         "failure_correction": "thebrazenbeard/fuckup",
         "preactive_admission": "thebrazenbeard/pre-active",
         "volition": "thebrazenbeard/volition",
@@ -191,6 +192,43 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
         provider.get("provider_authority_rule") == "COGNITION_ONLY",
         "cognition providers must remain cognition-only",
     )
+
+    mosaic = roles.get("model_composition")
+    _require(isinstance(mosaic, Mapping), "model_composition role missing")
+    _require(
+        mosaic.get("integration") == "OPTIONAL_COGNITION_COMPOSITION",
+        "Mosaic must remain optional cognition composition",
+    )
+    _require(
+        mosaic.get("provider_contract") == "VERA_OS_COGNITION_PROVIDER_V1",
+        "Mosaic must enter through the cognition-provider contract",
+    )
+    _require(
+        mosaic.get("canonical_runtime_owner") == "thebrazenbeard/vera-mono",
+        "Mosaic cannot replace the Vera Mono runtime boundary",
+    )
+    _require(
+        mosaic.get("reasoning_owner") == "thebrazenbeard/rezon",
+        "Mosaic cannot replace Rezon reasoning ownership",
+    )
+    _require(
+        mosaic.get("route_owner") == "thebrazenbeard/portal",
+        "Mosaic cannot replace P.O.R.T.A.L. route ownership",
+    )
+    _require(
+        mosaic.get("qualification_state") == "RESEARCH_ONLY_NOT_ROUTE_ELIGIBLE",
+        "current Mosaic integration must remain research-only",
+    )
+    for authority_key in (
+        "runtime_authority",
+        "identity_authority",
+        "canonical_memory_write_authority",
+        "protected_effect_authority",
+    ):
+        _require(
+            mosaic.get(authority_key) is False,
+            f"Mosaic cannot hold {authority_key}",
+        )
 
     model = roles.get("model_production")
     _require(isinstance(model, Mapping), "model_production role missing")

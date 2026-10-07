@@ -74,6 +74,7 @@ def validate_boot_contract(contract: Mapping[str, Any]) -> None:
     expected_owners = {
         "identity_runtime_owner": "thebrazenbeard/vera-mono",
         "reasoning_owner": "thebrazenbeard/rezon",
+        "model_composition_owner": "thebrazenbeard/mosaic",
         "provider_router": "thebrazenbeard/portal",
         "preactive_owner": "thebrazenbeard/pre-active",
         "volition_owner": "thebrazenbeard/volition",

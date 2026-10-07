@@ -16,7 +16,7 @@
     "semantic_support": "thebrazenbeard/semanticatlas",
     "unknown_capability_rule": "SEND_TO_DISCOVERY_BEFORE_ASSIGNMENT"
   },
-  "claim_ceiling": "SOURCE_COMPOSITION_LOCK_ONLY_NOT_NIXOS_BUILD_NOT_INSTALLATION_NOT_RUNTIME_CONSUMPTION_NOT_PROTECTED_EFFECT_AUTHORITY",
+  "claim_ceiling": "SOURCE_COMPOSITION_LOCK_ONLY_NOT_BUILDROOT_BUILD_NOT_INSTALLATION_NOT_RUNTIME_CONSUMPTION_NOT_PROTECTED_EFFECT_AUTHORITY",
   "composition_root": {
     "base_head": "be4a45a2b8b7a8e329f772820df0a757766b3073",
     "repository": "thebrazenbeard/vera-os",
@@ -1388,6 +1388,21 @@
     "mobile_client": {
       "repository": "thebrazenbeard/vera-apk",
       "service": "vera-mobile-client"
+    },
+    "model_composition": {
+      "boot_policy": "ON_DEMAND",
+      "canonical_memory_write_authority": false,
+      "canonical_runtime_owner": "thebrazenbeard/vera-mono",
+      "identity_authority": false,
+      "integration": "OPTIONAL_COGNITION_COMPOSITION",
+      "protected_effect_authority": false,
+      "provider_contract": "VERA_OS_COGNITION_PROVIDER_V1",
+      "qualification_state": "RESEARCH_ONLY_NOT_ROUTE_ELIGIBLE",
+      "reasoning_owner": "thebrazenbeard/rezon",
+      "repository": "thebrazenbeard/mosaic",
+      "route_owner": "thebrazenbeard/portal",
+      "runtime_authority": false,
+      "service": "vera-mosaic"
     },
     "model_production": {
       "boot_policy": "NEVER",

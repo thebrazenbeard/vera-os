@@ -56,6 +56,10 @@ class PortfolioCompositionTests(unittest.TestCase):
             "thebrazenbeard/rezon",
         )
         self.assertEqual(
+            roles["model_composition"]["repository"],
+            "thebrazenbeard/mosaic",
+        )
+        self.assertEqual(
             roles["failure_correction"]["repository"],
             "thebrazenbeard/fuckup",
         )
@@ -122,6 +126,29 @@ class PortfolioCompositionTests(unittest.TestCase):
             policy["final_qualification_issuer_must_differ_from_producer"]
         )
         self.assertTrue(policy["qualification_must_bind_artifact_manifest"])
+
+    def test_mosaic_is_optional_composition_not_identity_or_reasoning_owner(self) -> None:
+        mosaic = self.manifest["runtime_roles"]["model_composition"]
+        self.assertEqual(mosaic["repository"], "thebrazenbeard/mosaic")
+        self.assertEqual(mosaic["integration"], "OPTIONAL_COGNITION_COMPOSITION")
+        self.assertEqual(
+            mosaic["provider_contract"],
+            "VERA_OS_COGNITION_PROVIDER_V1",
+        )
+        self.assertEqual(
+            mosaic["canonical_runtime_owner"],
+            "thebrazenbeard/vera-mono",
+        )
+        self.assertEqual(mosaic["reasoning_owner"], "thebrazenbeard/rezon")
+        self.assertEqual(mosaic["route_owner"], "thebrazenbeard/portal")
+        self.assertEqual(
+            mosaic["qualification_state"],
+            "RESEARCH_ONLY_NOT_ROUTE_ELIGIBLE",
+        )
+        self.assertFalse(mosaic["runtime_authority"])
+        self.assertFalse(mosaic["identity_authority"])
+        self.assertFalse(mosaic["canonical_memory_write_authority"])
+        self.assertFalse(mosaic["protected_effect_authority"])
 
     def test_historical_lineages_are_integrated_as_provenance_not_runtime_authority(self) -> None:
         by_repo = {

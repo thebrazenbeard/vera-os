@@ -133,9 +133,18 @@ Potential providers include:
 - local models;
 - the standalone Vera model through KoboldCPP;
 - local services;
-- specialist providers.
+- specialist providers;
+- a future qualified Mosaic service that composes/swaps specialists internally.
 
 Provider selection does not grant identity, memory-write, browser, or protected-effect authority.
+
+## Mosaic model composition
+
+Mosaic owns the portfolio's model-composition/residency research surface. Its logical-whole/resident-set split, specialist swapping, shared-state handoff, and constrained-VRAM experiments are directly relevant to VeraOS cognition.
+
+Mosaic does not own Vera identity, VeraOS boot, the canonical Vera runtime, reasoning architecture, or provider-route selection. Those remain Vera Mono, VeraOS, Rezon, and P.O.R.T.A.L. responsibilities respectively. Mosaic's internal `Boot / Core` is therefore treated as a provider-internal composition mechanism, not as the VeraOS core.
+
+Stable Mosaic `main` remains research architecture plus deterministic harnesses. Active Draft PR #7 explores multi-resolution state residency and explicitly keeps canonical Vera runtime implementation outside Mosaic. Until a separate qualification demonstrates a usable specialist runtime, VeraOS marks Mosaic research-only and not route-eligible.
 
 ## Standalone Vera model
 
@@ -183,6 +192,7 @@ Current source-level ownership is:
 - Vera Mono — identity/runtime boundary.
 - Discovery — portfolio capability discovery.
 - Rezon — reasoning architecture.
+- Mosaic — optional specialist model composition/residency research; no identity/runtime/route authority.
 - P.O.R.T.A.L. — portfolio coordination and cognition-provider routing.
 - Pre-Active — proactive cognition admission.
 - Volition — endogenous drive/want/goal state.
