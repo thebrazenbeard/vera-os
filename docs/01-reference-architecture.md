@@ -96,6 +96,18 @@ P.O.R.T.A.L. consumes the resulting catalog for coordination.
 
 This rule exists to prevent new architecture from being invented merely because an existing portfolio capability was not salient in the current conversation.
 
+## Whole-portfolio implementation
+
+VeraOS considers the full live portfolio, but consideration is not activation.
+
+`architecture/portfolio/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json` assigns every repository exactly one implementation path. The invariant is:
+
+> absorb or adapt useful mechanisms without making sibling repositories required runtime dependencies.
+
+The canonical resident runtime source remains Vera Mono. Rezon reasoning is consumed through the package already absorbed into Vera Mono. Donor mechanisms already absorbed into Vera Mono remain provenance-bound donors rather than new runtime imports. Other repositories enter through governed service, cognition-provider, specialist, infrastructure, client/node, managed-project, research, or provenance lanes.
+
+The implementation plan is validated together with the private capability map and portfolio composition before `/sbin/vera-init` emits its ready marker. This proves only that the intended portfolio disposition is internally consistent at the bound source cut; it does not prove that every optional capability is installed or running.
+
 ## Reasoning architecture
 
 Rezon owns the reasoning architecture.
