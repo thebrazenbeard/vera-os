@@ -32,6 +32,9 @@ $stderr = Join-Path $logs "veraos-vm.stderr.log"
 Remove-Item $stdout,$stderr -Force -ErrorAction SilentlyContinue
 
 $append = "root=/dev/vda rw console=ttyS0,115200 init=/sbin/vera-init"
+# Windows PowerShell Start-Process joins ArgumentList entries into a command line.
+# Quote the QEMU kernel command line explicitly so it remains one docker argument.
+$quotedAppend = '"' + $append + '"'
 $dockerArgs = @(
     "run", "--rm", "--name", $name,
     "--mount", "type=bind,source=$artifacts,target=/artifacts,readonly",
@@ -42,7 +45,7 @@ $dockerArgs = @(
     "-machine", "q35",
     "-kernel", "/artifacts/veraos-bzImage",
     "-drive", "file=/artifacts/veraos-rootfs.ext2,format=raw,if=virtio",
-    "-append", $append,
+    "-append", $quotedAppend,
     "-nic", "none",
     "-nographic",
     "-no-reboot"
