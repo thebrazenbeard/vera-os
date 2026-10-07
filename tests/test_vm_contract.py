@@ -26,6 +26,7 @@ class VmContractTests(unittest.TestCase):
         self.assertIn("BR2_PACKAGE_PYTHON3=y", text)
         self.assertNotIn("BR2_PACKAGE_WPEWEBKIT=y", text)
         self.assertNotIn("BR2_PACKAGE_COG=y", text)
+        self.assertNotIn("BR2_PACKAGE_HOST_QEMU=y", text)
         self.assertIn('BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.6.69"', text)
 
     def test_buildroot_browser_profile_packages_wpe_and_cog(self) -> None:
@@ -40,6 +41,7 @@ class VmContractTests(unittest.TestCase):
         self.assertIn("BR2_PACKAGE_WPEWEBKIT_WEBDRIVER=y", text)
         self.assertIn("BR2_PACKAGE_COG=y", text)
         self.assertIn("BR2_PACKAGE_COG_PLATFORM_DRM=y", text)
+        self.assertNotIn("BR2_PACKAGE_HOST_QEMU=y", text)
         core_settings = {
             line for line in core_text.splitlines()
             if line and not line.startswith("#")
