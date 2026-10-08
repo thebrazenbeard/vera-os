@@ -1,4 +1,47 @@
 {
+  "canonical_runtime_absorption": {
+    "canonical_runtime_repository": "thebrazenbeard/vera-mono",
+    "canonical_runtime_source_head": "e5af8cb740267bb5674864571e915842bf5e6677",
+    "direct_sibling_runtime_dependency": false,
+    "rule": "ABSORPTION_DOES_NOT_REPLACE_THE_DONOR_REPOSITORY_PRIMARY_PORTFOLIO_ROLE",
+    "sources": [
+      {
+        "repository": "thebrazenbeard/Attune",
+        "scope": "ABSORBED_MECHANISMS_ONLY",
+        "vera_mono_package": "packages/portfolio_runtime/src/portfolio_runtime/attune"
+      },
+      {
+        "repository": "thebrazenbeard/ingest",
+        "scope": "ABSORBED_IMPLEMENTATION",
+        "vera_mono_package": "packages/vera_ingest"
+      },
+      {
+        "repository": "thebrazenbeard/intranel",
+        "scope": "ABSORBED_MECHANISMS_ONLY",
+        "vera_mono_package": "packages/portfolio_runtime/src/portfolio_runtime/intranel"
+      },
+      {
+        "repository": "thebrazenbeard/project-lantern",
+        "scope": "ABSORBED_MECHANISMS_ONLY",
+        "vera_mono_package": "packages/portfolio_runtime/src/portfolio_runtime/lantern"
+      },
+      {
+        "repository": "thebrazenbeard/roots",
+        "scope": "ABSORBED_MECHANISMS_ONLY",
+        "vera_mono_package": "packages/portfolio_runtime/src/portfolio_runtime/roots"
+      },
+      {
+        "repository": "thebrazenbeard/skeletonkey",
+        "scope": "ABSORBED_MECHANISMS_ONLY",
+        "vera_mono_package": "packages/portfolio_runtime/src/portfolio_runtime/skeletonkey"
+      },
+      {
+        "repository": "thebrazenbeard/vera-works",
+        "scope": "ABSORBED_MECHANISMS_ONLY",
+        "vera_mono_package": "packages/portfolio_runtime/src/portfolio_runtime/vera_works"
+      }
+    ]
+  },
   "claim_ceiling": "ALL_LIVE_PORTFOLIO_REPOSITORIES_CONSIDERED_FOR_IMPLEMENTATION_AT_SOURCE_PLANNING_LEVEL_ONLY_NOT_INSTALLATION_NOT_RUNTIME_ACTIVATION",
   "inventory": {
     "active_or_available": 81,

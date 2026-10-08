@@ -162,6 +162,72 @@ def validate_implementation_plan(
         == "VERA_MONO_ABSORBED_REASONING",
         "Rezon runtime use must flow through the absorbed Vera Mono reasoning package",
     )
+    absorption = _mapping(data.get("canonical_runtime_absorption"), "canonical runtime absorption")
+    _require(
+        absorption.get("canonical_runtime_repository") == "thebrazenbeard/vera-mono",
+        "canonical runtime absorption must be owned by Vera Mono",
+    )
+    _require(
+        absorption.get("canonical_runtime_source_head")
+        == plan_by_repo["thebrazenbeard/vera-mono"].get("exact_head"),
+        "canonical runtime absorption must bind the exact Vera Mono source head",
+    )
+    _require(
+        absorption.get("direct_sibling_runtime_dependency") is False,
+        "canonical runtime absorption cannot create sibling runtime dependencies",
+    )
+    _require(
+        absorption.get("rule")
+        == "ABSORPTION_DOES_NOT_REPLACE_THE_DONOR_REPOSITORY_PRIMARY_PORTFOLIO_ROLE",
+        "canonical runtime absorption must preserve donor primary roles",
+    )
+
+    absorption_sources = _records_by_repo(
+        absorption.get("sources"),
+        "canonical runtime absorption sources",
+    )
+    expected_portfolio_runtime = {
+        "thebrazenbeard/Attune":
+            "packages/portfolio_runtime/src/portfolio_runtime/attune",
+        "thebrazenbeard/intranel":
+            "packages/portfolio_runtime/src/portfolio_runtime/intranel",
+        "thebrazenbeard/project-lantern":
+            "packages/portfolio_runtime/src/portfolio_runtime/lantern",
+        "thebrazenbeard/roots":
+            "packages/portfolio_runtime/src/portfolio_runtime/roots",
+        "thebrazenbeard/skeletonkey":
+            "packages/portfolio_runtime/src/portfolio_runtime/skeletonkey",
+        "thebrazenbeard/vera-works":
+            "packages/portfolio_runtime/src/portfolio_runtime/vera_works",
+    }
+    expected_absorptions = set(expected_portfolio_runtime) | {"thebrazenbeard/ingest"}
+    _require(
+        set(absorption_sources) == expected_absorptions,
+        "canonical runtime absorption source set mismatch",
+    )
+    for repository, package in expected_portfolio_runtime.items():
+        source = absorption_sources[repository]
+        _require(
+            source.get("vera_mono_package") == package,
+            f"portfolio-runtime absorption package mismatch: {repository}",
+        )
+        _require(
+            source.get("scope") == "ABSORBED_MECHANISMS_ONLY",
+            f"portfolio-runtime donor must preserve its primary portfolio role: {repository}",
+        )
+        _require(
+            repository in plan_by_repo,
+            f"canonical runtime absorption references unknown repository: {repository}",
+        )
+    ingest_absorption = absorption_sources["thebrazenbeard/ingest"]
+    _require(
+        ingest_absorption.get("vera_mono_package") == "packages/vera_ingest",
+        "Ingest absorption must bind the native vera_ingest package",
+    )
+    _require(
+        ingest_absorption.get("scope") == "ABSORBED_IMPLEMENTATION",
+        "Ingest absorption scope mismatch",
+    )
     for repository in (
         "thebrazenbeard/mediaphile-client",
         "thebrazenbeard/mediaphile-server",

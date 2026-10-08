@@ -108,6 +108,8 @@ The canonical resident runtime source remains Vera Mono. Rezon reasoning is cons
 
 The implementation plan is validated together with the private capability map and portfolio composition before `/sbin/vera-init` emits its ready marker. This proves only that the intended portfolio disposition is internally consistent at the bound source cut; it does not prove that every optional capability is installed or running.
 
+Mechanism absorption is tracked separately from a repository's primary implementation lane. Vera Mono's vera_ingest package and portfolio_runtime package contain local absorbed implementation/mechanisms from Ingest, Attune, Intranel, Lantern, Roots, SkeletonKey, and Vera Works. That does not turn those sibling repositories into VeraOS runtime dependencies or erase their independent portfolio roles.
+
 ## Reasoning architecture
 
 Rezon owns the reasoning architecture.

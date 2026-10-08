@@ -54,6 +54,39 @@ class PortfolioImplementationTests(unittest.TestCase):
         self.assertEqual(81, self.plan["inventory"]["active_or_available"])
         self.assertEqual(5, self.plan["inventory"]["archived"])
 
+    def test_canonical_runtime_absorption_preserves_repository_primary_roles(self) -> None:
+        absorption = self.plan["canonical_runtime_absorption"]
+        self.assertFalse(absorption["direct_sibling_runtime_dependency"])
+        by_source = {
+            row["repository"]: row
+            for row in absorption["sources"]
+        }
+        self.assertEqual(
+            {
+                "thebrazenbeard/Attune",
+                "thebrazenbeard/ingest",
+                "thebrazenbeard/intranel",
+                "thebrazenbeard/project-lantern",
+                "thebrazenbeard/roots",
+                "thebrazenbeard/skeletonkey",
+                "thebrazenbeard/vera-works",
+            },
+            set(by_source),
+        )
+        by_repo = {row["repository"]: row for row in self.plan["repositories"]}
+        self.assertEqual(
+            "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+            by_repo["thebrazenbeard/Attune"]["implementation_class"],
+        )
+        self.assertEqual(
+            "PORTAL_MANAGED_PROJECT",
+            by_repo["thebrazenbeard/vera-works"]["implementation_path"],
+        )
+        self.assertEqual(
+            "ABSORBED_MECHANISMS_ONLY",
+            by_source["thebrazenbeard/vera-works"]["scope"],
+        )
+
     def test_direct_sibling_runtime_dependency_is_rejected(self) -> None:
         bad = copy.deepcopy(self.plan)
         bad["repositories"][0]["direct_sibling_runtime_dependency"] = True

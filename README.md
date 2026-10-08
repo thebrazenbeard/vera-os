@@ -134,6 +134,8 @@ Every live owned repository receives an exact implementation disposition in `VER
 
 This preserves two requirements at once: nothing useful in the portfolio is ignored, and VeraOS does not become an 86-repository dependency tangle.
 
+Vera Mono already contains specific absorbed mechanisms from Attune, Ingest, Intranel, Lantern, Roots, SkeletonKey, and Vera Works. The implementation plan records that absorption separately from each donor repository's primary VeraOS role: absorbed mechanisms are reusable local runtime source, while the donor repository can still remain a research system, specialist, client, or managed project.
+
 ## Core runtime ownership
 
 The current source contract distinguishes these roles:
