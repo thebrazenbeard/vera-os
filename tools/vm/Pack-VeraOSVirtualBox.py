@@ -106,7 +106,7 @@ def validate(repo,artifacts):
 def run(*args):
     subprocess.run(list(args),check=True)
 
-def package(repo,artifacts,output):
+def package(repo,artifacts,output,*,noapic=False):
     repo=repo.resolve(); artifacts=artifacts.resolve(); output=output.resolve()
     if (output==repo or repo in output.parents or
         output==artifacts or artifacts in output.parents):
@@ -129,7 +129,7 @@ def package(repo,artifacts,output):
                        "search --no-floppy --label VERAESP --set=root\n"+
                        "menuentry \"VeraOS\" {\n"+
                        " linux /veraos-bzImage root=PARTUUID="+str(rootid)+
-                       " rw console=tty0 console=ttyS0,115200 init=/sbin/vera-init\n}\n")
+                       " rw console=tty0 console=ttyS0,115200 init=/sbin/vera-init"+(" noapic" if noapic else "")+"\n}\n")
         efi=work/"BOOTX64.EFI"
         run("grub-mkstandalone","-O","x86_64-efi","-o",str(efi),
             "--modules=part_gpt fat search search_label linux",
@@ -161,7 +161,7 @@ def package(repo,artifacts,output):
                 vdi_sha256=digest,vdi_bytes=size,disk_guid=str(diskid),
                 esp_partuuid=str(espid),root_partuuid=str(rootid),
                 disk_layout="GPT_ESP_FAT32_LINUX_ROOTFS",boot_mode="UEFI_X86_64",
-                boot_qualified=False,protected_effect_authority=False)
+                boot_qualified=False,virtualbox_noapic=noapic,protected_effect_authority=False)
     with outreceipt.open("x",encoding="utf-8") as f:
         json.dump(result,f,indent=2); f.write("\n")
     return result
@@ -171,5 +171,6 @@ if __name__=="__main__":
     parser.add_argument("repo",type=Path)
     parser.add_argument("artifacts",type=Path)
     parser.add_argument("output_vdi",type=Path)
+    parser.add_argument("--virtualbox-noapic",action="store_true",help="Work around VirtualBox IO-APIC timer failures on affected hosts")
     args=parser.parse_args()
-    print(json.dumps(package(args.repo,args.artifacts,args.output_vdi),indent=2))
+    print(json.dumps(package(args.repo,args.artifacts,args.output_vdi,noapic=args.virtualbox_noapic),indent=2))
