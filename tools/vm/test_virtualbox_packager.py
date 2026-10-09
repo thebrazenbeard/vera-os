@@ -130,6 +130,25 @@ class PackagingTests(unittest.TestCase):
         self.assertEqual(calls[0][0],"grub-mkstandalone")
         self.assertEqual(calls[-1][0],"qemu-img")
         self.assertTrue(self.out.with_suffix(".vdi.receipt.json").is_file())
+        self.assertFalse(receipt["virtualbox_noapic"])
+
+
+    def test_host_specific_noapic_option_embeds_grub_arg(self):
+        seen=[]
+        def fake_run(*args):
+            if args[0]=="grub-mkstandalone":
+                cfg=Path(args[-1].split("=",1)[1]).read_text()
+                seen.append(cfg)
+                Path(args[args.index("-o")+1]).write_bytes(b"EFI boot")
+            elif args[0]=="qemu-img":
+                Path(args[-1]).write_bytes(b"FAKE VDI"*128)
+        with mock.patch.object(p,"ESP_BYTES",4*1024*1024),\
+             mock.patch.object(p.shutil,"which",return_value="/usr/bin/mock"),\
+             mock.patch.object(p,"run",side_effect=fake_run):
+            receipt=p.package(self.repo,self.art,self.out,noapic=True)
+        self.assertTrue(receipt["virtualbox_noapic"])
+        self.assertEqual(len(seen),1)
+        self.assertIn("init=/sbin/vera-init noapic",seen[0])
 
 if __name__=="__main__":
     unittest.main()
