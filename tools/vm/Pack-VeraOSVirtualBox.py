@@ -132,7 +132,7 @@ def package(repo,artifacts,output):
                        " rw console=tty0 console=ttyS0,115200 init=/sbin/vera-init\n}\n")
         efi=work/"BOOTX64.EFI"
         run("grub-mkstandalone","-O","x86_64-efi","-o",str(efi),
-            "--modules=part_gpt fat search search_fs_label linux",
+            "--modules=part_gpt fat search search_label linux",
             "boot/grub/grub.cfg="+str(cfg))
         esp=work/"esp.fat"
         with esp.open("wb") as f: f.truncate(ESP_BYTES)
