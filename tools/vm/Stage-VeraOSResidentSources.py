@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
+import tarfile
 import os
 from pathlib import Path
 import shutil
@@ -80,33 +82,35 @@ def stage(
             exact = _git(checkpoint, "rev-parse", "HEAD")
             if exact != catalog["exact_head"] or exact != implementation["exact_head"]:
                 raise StageError(f"Exact source head mismatch: {repo_name} ({exact})")
-            if _git(checkpoint, "status", "--porcelain=v1"):
-                raise StageError(f"Dirty source checkout: {repo_name}")
+            # Archive exactly the pinned Git tree, not the mutable checkout bytes.
+            # Git's CRLF/smudge filters and unrelated untracked files therefore
+            # cannot silently change what is packaged.
+            archive = subprocess.check_output(
+                ["git", "-C", str(checkpoint), "archive", "--format=tar", "HEAD", *source_subdirs],
+            )
             copied = {}
-            for rel in source_subdirs:
-                path = checkpoint / rel
-                if not path.is_dir() or path.is_symlink():
-                    raise StageError(f"Missing source subtree: {repo_name}/{rel}")
-                for base, dirs, files in os.walk(path, followlinks=False):
-                    base_path = Path(base)
-                    if base_path.is_symlink():
-                        raise StageError(f"Symlinked source tree forbidden: {base_path}")
-                    for d in dirs:
-                        if (base_path/d).is_symlink():
-                            raise StageError(f"Symlinked source directory forbidden: {base_path/d}")
-                    dirs[:] = [d for d in dirs if d not in ("__pycache__", ".pytest_cache", "node_modules")]
-                    for filename in sorted(files):
-                        input_file = base_path / filename
-                        if input_file.is_symlink():
-                            raise StageError(f"Symlinked source file forbidden: {input_file}")
-                        if input_file.suffix not in EXTENSIONS:
-                            continue
-                        relative = input_file.relative_to(checkpoint)
-                        target = tmp_path / "components" / name / relative
-                        target.parent.mkdir(parents=True, exist_ok=True)
-                        raw = input_file.read_bytes()
-                        target.write_bytes(raw)
-                        copied[target.relative_to(tmp_path).as_posix()] = _digest(raw)
+            with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as files:
+                for member in files:
+                    if member.isdir():
+                        continue
+                    if not member.isfile() or member.issym() or member.islnk():
+                        raise StageError(f"Nonregular committed entry forbidden: {repo_name}/{member.name}")
+                    parts = Path(member.name)
+                    if parts.is_absolute() or ".." in parts.parts or not any(
+                        parts == Path(parent) or Path(parent) in parts.parents
+                        for parent in source_subdirs
+                    ):
+                        raise StageError(f"Archive path escapes allowlist: {repo_name}/{member.name}")
+                    if parts.suffix not in EXTENSIONS:
+                        continue
+                    entry = files.extractfile(member)
+                    if entry is None:
+                        raise StageError(f"Cannot read committed file: {repo_name}/{member.name}")
+                    raw = entry.read()
+                    target = tmp_path / "components" / name / parts
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(raw)
+                    copied[target.relative_to(tmp_path).as_posix()] = _digest(raw)
             if not copied:
                 raise StageError(f"No source files staged: {repo_name}")
             marker = {
@@ -131,7 +135,7 @@ def stage(
         receipt = {
             "schema": "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1",
             "components": sorted(rows, key=lambda x: x["repository"]),
-            "scope": "READ_ONLY_STAGED_SOURCES_NOT_INSTALLED_OR_ACTIVATED",
+            "scope": "PINNED_COMMITTED_GIT_ARCHIVE_NOT_INSTALLED_OR_ACTIVATED",
             "authority": False,
         }
         encoded = json.dumps(receipt, sort_keys=True, indent=2) + "\n"
@@ -147,6 +151,7 @@ def stage(
             for row in rows
         ],
         "receipt_sha256": _digest(encoded.encode()),
+        "source_material": "EXACT_COMMITTED_GIT_TREE_IGNORE_MUTABLE_WORKTREE",
         "installed": False,
         "runtime_qualified": False,
         "protected_effect_authority": False,
