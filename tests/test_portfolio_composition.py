@@ -26,9 +26,9 @@ class PortfolioCompositionTests(unittest.TestCase):
 
     def test_all_current_inventory_repositories_are_represented_once(self) -> None:
         repos = [item["repository"] for item in self.manifest["repositories"]]
-        self.assertEqual(86, len(repos))
+        self.assertEqual(90, len(repos))
         self.assertEqual(len(repos), len(set(repos)))
-        self.assertEqual(81, self.manifest["counts"]["integrated"])
+        self.assertEqual(85, self.manifest["counts"]["integrated"])
         self.assertEqual(5, self.manifest["counts"]["excluded"])
 
     def test_archived_repositories_are_excluded_and_nonarchived_are_integrated(self) -> None:
