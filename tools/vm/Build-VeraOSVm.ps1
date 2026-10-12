@@ -119,8 +119,16 @@ $dockerArgs = @(
 )
 
 if ($residentSourceStageResolved) {
+    # GNU autotools host packages must not be configured as root. This build
+    # volume is profile-isolated; ownership changes cannot affect the
+    # previously qualified 2024.02.4 CORE_BOOT/BROWSER caches.
+    & docker run --rm --user "0:0" --mount "type=volume,source=$BuildVolume,target=/work" --entrypoint /bin/chown $BuilderImage -R "1000:1000" "/work"
+    if ($LASTEXITCODE -ne 0) { throw "Could not prepare non-root resident build volume" }
+
     $dockerArgs = @(
         "run", "--rm",
+        "--user", "1000:1000",
+        "--env", "HOME=/home/vera-build",
         "--env", "VERAOS_REQUIRE_RESIDENT_CORE=1",
         "--env", "VERAOS_RESIDENT_STAGE=/resident",
         "--mount", "type=bind,source=$residentSourceStageResolved,target=/resident,readonly"
