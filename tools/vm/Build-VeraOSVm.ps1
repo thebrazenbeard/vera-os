@@ -66,10 +66,10 @@ fi
 actual="$(git -C /work/buildroot rev-parse HEAD)"
 test "$actual" = "$expected"
 if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
-  python_version="$(sed -n 's/^PYTHON3_VERSION = //p' /work/buildroot/package/python3/python3.mk | head -1)"
-  case "$python_version" in
-    3.12.*|3.13.*|3.14.*|3.15.*|3.16.*) ;;
-    *) echo "Resident source packaging requires Buildroot target Python >=3.12; pinned version $python_version" >&2; exit 12 ;;
+  python_major="$(sed -n 's/^PYTHON3_VERSION_MAJOR = //p' /work/buildroot/package/python3/python3.mk | head -1)"
+  case "$python_major" in
+    3.12|3.13|3.14|3.15|3.16) ;;
+    *) echo "Resident source packaging requires Buildroot Python >=3.12; version major $python_major" >&2; exit 12 ;;
   esac
 fi
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot "$VERAOS_DEFCONFIG"
