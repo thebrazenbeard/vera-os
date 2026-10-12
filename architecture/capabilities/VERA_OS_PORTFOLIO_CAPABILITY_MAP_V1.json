@@ -1504,11 +1504,11 @@
       "description": "Read-only industrial CompactLogix discovery and L5X summary research tool, not machine control.",
       "disposition": "ACTIVE_OR_AVAILABLE",
       "evidence_basis": "GITHUB_README_EXACT_MAIN_HEAD_20261012_NO_RUNTIME_QUALIFICATION",
-      "exact_head": "baeb8826ac3a06b5960a07f8a0bfbdf84b4c77b8",
+      "exact_head": "35c1efe1fb36748549f9aea9d0a5863ccc509aef",
       "family_id": "industrial-intelligence",
       "private": false,
       "purpose": "Industrial bench tool; not a boot service and no automatic PLC/network access.",
-      "repository": "thebrazenbeard/RSLinux5000000",
+      "repository": "thebrazenbeard/RSLinux",
       "semantic_signals": [
         "Read-only industrial CompactLogix discovery and L5X summary research tool, not machine control."
       ]
