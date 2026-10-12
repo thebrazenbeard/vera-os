@@ -91,13 +91,13 @@ def _verified_image_bundle(image: Path, virtual_path: str, expected: str, extrac
 
 
 def package(vault: Path, inventory: Path, output: Path, *, verify_all_inside: bool = True) -> dict:
-    vault = vault.resolve(strict=True)
-    inventory = inventory.resolve(strict=True)
     output = output.absolute()
     if output.suffix != ".ext4":
         raise VolumeError("Output must have .ext4 suffix")
     if output.exists() or output.is_symlink() or output.with_suffix(".ext4.receipt.json").exists():
         raise FileExistsError("Refuse to overwrite existing volume or receipt")
+    vault = vault.resolve(strict=True)
+    inventory = inventory.resolve(strict=True)
     if output == vault or vault in output.parents or output == inventory or inventory in output.parents:
         raise VolumeError("Output must be outside input paths")
     for command in ("mkfs.ext4", "debugfs"):
