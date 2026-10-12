@@ -179,20 +179,40 @@ def audit(
     raw_receipt = rootfs.read(receipt_path)
     receipt_state = "ABSENT"
     if raw_receipt is not None:
+        receipt_state = "INVALID"
         try:
             receipt = json.loads(raw_receipt)
-            if receipt.get("schema") == "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1" and \
-                    receipt.get("authority") is False:
-                receipt_state = "PRESENT_NOT_INDEPENDENTLY_VERIFIED"
-            else:
-                receipt_state = "INVALID"
+            records = receipt.get("components")
+            if (
+                isinstance(receipt, dict)
+                and receipt.get("schema") == "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1"
+                and receipt.get("authority") is False
+                and isinstance(records, list)
+                and len(records) == len(candidates)
+                and all(isinstance(row, dict) for row in records)
+            ):
+                by_receipt = {row.get("repository"): row for row in records}
+                if len(by_receipt) == len(candidates) and all(
+                    item["repository"] in by_receipt
+                    and by_receipt[item["repository"]].get("source_head") == item["bound_source_head"]
+                    and by_receipt[item["repository"]].get("marker_path") == item["expected_marker"]
+                    and isinstance(by_receipt[item["repository"]].get("marker_sha256"), str)
+                    and re.fullmatch(r"[0-9a-f]{64}", by_receipt[item["repository"]]["marker_sha256"])
+                    and rootfs.read(item["expected_marker"]) is not None
+                    and digest(rootfs.read(item["expected_marker"])) == by_receipt[item["repository"]]["marker_sha256"]
+                    for item in candidates
+                ):
+                    receipt_state = "MARKER_HASHES_VALID_NOT_INDEPENDENTLY_ATTESTED"
         except (ValueError, AttributeError, TypeError):
             receipt_state = "INVALID"
 
     catalog_match = all(item["exact_bytes_match_source"] for item in embedded.values())
     core_source_present = all(item["source_file_packaged"] for item in candidates)
     core_abi = all(item["image_python_compatible"] for item in candidates)
-    ready_for_guest_import_tests = os_present and catalog_match and core_source_present and core_abi and receipt_state != "ABSENT"
+    ready_for_guest_import_tests = (
+        os_present and catalog_match and core_source_present and core_abi
+        and receipt_state == "MARKER_HASHES_VALID_NOT_INDEPENDENTLY_ATTESTED"
+    )
     return {
         "schema": "VERA_OS_IMAGE_MATERIALIZATION_AUDIT_V1",
         "audit_type": "READ_ONLY_STATIC_ROOTFS_EXAMINATION",
