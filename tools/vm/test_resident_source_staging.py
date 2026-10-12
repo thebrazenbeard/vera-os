@@ -53,6 +53,7 @@ class ResidentStageTests(unittest.TestCase):
                 marker = repo/"portal/__init__.py"
             else:
                 marker = repo/f"src/{component}/__init__.py"
+            marker.parent.mkdir(parents=True, exist_ok=True)
             marker.write_bytes(b"committed marker\n")
             git(repo, "add", ".")
             git(repo, "commit", "-qm", "frozen source")
