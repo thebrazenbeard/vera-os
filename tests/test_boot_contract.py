@@ -160,8 +160,8 @@ class VeraOsBootContractTests(unittest.TestCase):
             self.implementation_plan,
             pid=1,
         )
-        self.assertEqual(86, state.portfolio_total)
-        self.assertEqual(81, state.portfolio_integrated)
+        self.assertEqual(90, state.portfolio_total)
+        self.assertEqual(85, state.portfolio_integrated)
         self.assertEqual(5, state.portfolio_excluded)
         self.assertTrue(state.portfolio_implementation_plan_validated)
         marker = boot_marker(state)
@@ -198,7 +198,7 @@ class VeraOsBootContractTests(unittest.TestCase):
             state = json.loads((run_root / "boot-state.json").read_text(encoding="utf-8"))
             self.assertEqual("VERA", state["base_identity"])
             self.assertTrue(state["portfolio_implementation_plan_validated"])
-            self.assertEqual(86, state["portfolio_total"])
+            self.assertEqual(90, state["portfolio_total"])
             lifecycle = json.loads(
                 (lifecycle_root / STATE_FILENAME).read_text(encoding="utf-8")
             )

@@ -49,9 +49,9 @@ class PortfolioImplementationTests(unittest.TestCase):
             self.composition,
         )
         rows = self.plan["repositories"]
-        self.assertEqual(86, len(rows))
-        self.assertEqual(86, len({row["repository"] for row in rows}))
-        self.assertEqual(81, self.plan["inventory"]["active_or_available"])
+        self.assertEqual(90, len(rows))
+        self.assertEqual(90, len({row["repository"] for row in rows}))
+        self.assertEqual(85, self.plan["inventory"]["active_or_available"])
         self.assertEqual(5, self.plan["inventory"]["archived"])
 
     def test_canonical_runtime_absorption_preserves_repository_primary_roles(self) -> None:

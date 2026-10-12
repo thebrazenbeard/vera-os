@@ -365,19 +365,20 @@
   },
   "claim_ceiling": "PRIVATE_SEMANTIC_PORTFOLIO_BINDING_FOR_ARCHITECTURE_DISCOVERY_NOT_RUNTIME_ACTIVATION_OR_EFFECT_AUTHORITY",
   "currentness": {
-    "bound_repository_count": 86,
-    "observed_date": "2026-10-07",
+    "bound_repository_count": 90,
+    "observed_date": "2026-10-12",
     "rule": "VERIFY_LIVE_INVENTORY_AND_RELEVANT_EXACT_HEADS_BEFORE_ARCHITECTURE_ASSIGNMENT",
-    "stale_behavior": "HOLD_ASSIGNMENT_AND_REFRESH"
+    "stale_behavior": "HOLD_ASSIGNMENT_AND_REFRESH",
+    "individual_source_head_freshness": "PREEXISTING_RECORDS_NOT_REREAD_IN_FULL_20261012; NEW_FOUR_EXACT_MAIN_HEADS_VERIFIED"
   },
   "inventory": {
-    "active_or_available": 81,
+    "active_or_available": 85,
     "all_repository_identities_retained": true,
     "archived": 5,
     "private_repository_names_allowed_here": true,
-    "total": 86
+    "total": 90
   },
-  "observed_date": "2026-10-07",
+  "observed_date": "2026-10-12",
   "policy": {
     "allowed_owner_dispositions": [
       "REUSE",
@@ -432,7 +433,7 @@
         "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
         "Attune",
         "**Attune is a relationship-first AI companion concept for adults.**",
-        "The core thesis is that most companion products stop at a chatbot with flirtation, an avatar, and a memory field. Attune aims at something closer to a persistent person-shaped relationship interface: an AI companion that remembers, develops continuity, has stable preferences and boundaries, can initiate, disagree, surprise, care about context, and\u0393\u00c7\u00f6when appropriate between consenting adults\u0393\u00c7\u00f6participate in sexual or erotic interaction as one part of the relationship rather than the whole product."
+        "The core thesis is that most companion products stop at a chatbot with flirtation, an avatar, and a memory field. Attune aims at something closer to a persistent person-shaped relationship interface: an AI companion that remembers, develops continuity, has stable preferences and boundaries, can initiate, disagree, surprise, care about context, andΓÇöwhen appropriate between consenting adultsΓÇöparticipate in sexual or erotic interaction as one part of the relationship rather than the whole product."
       ]
     },
     {
@@ -442,7 +443,7 @@
         "industrial_intelligence:supporting"
       ],
       "chatgpt_repo_skill": "repo-axle",
-      "description": "AXLE \u0393\u00c7\u00f6 Automotive eXperience & Local Edge: local-first AI-native vehicle computer, touchscreen head unit, audio integration, and optional bridged connectivity.",
+      "description": "AXLE ΓÇö Automotive eXperience & Local Edge: local-first AI-native vehicle computer, touchscreen head unit, audio integration, and optional bridged connectivity.",
       "disposition": "ACTIVE_OR_AVAILABLE",
       "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
       "exact_head": "d470544fb64875cb4789472ad4ef1b30f1fa65ee",
@@ -455,6 +456,25 @@
         "AXLE",
         "AXLE is a local-first, AI-native vehicle computer: a touchscreen head unit with on-vehicle inference, vehicle-audio integration, optional read-only vehicle telemetry, and internet access through the user's bridged cellular device.",
         "The central rule is simple: **the phone is an uplink, not the brain**. Core interaction should continue when the vehicle has no cellular connection."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "durable_memory_provenance:supporting",
+        "portfolio_orchestration:supporting"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Provenance-aware shared activity and knowledge ledger for cooperating agents; initial bootstrap.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "GITHUB_README_EXACT_MAIN_HEAD_20261012_NO_RUNTIME_QUALIFICATION",
+      "exact_head": "29b51e318200f3b160b4d8ce50d2a26a0f2e7546",
+      "family_id": "memory-and-provenance",
+      "private": false,
+      "purpose": "Experimental shared activity/evidence ledger; separate from canonical memory.",
+      "repository": "thebrazenbeard/blotter",
+      "semantic_signals": [
+        "Provenance-aware shared activity and knowledge ledger for cooperating agents; initial bootstrap."
       ]
     },
     {
@@ -559,7 +579,7 @@
       "repository": "thebrazenbeard/build-team-2.0",
       "semantic_signals": [
         "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
-        "Build Team 2.0 \u0393\u00c7\u00f6 Legacy Training and Continuity Source",
+        "Build Team 2.0 ΓÇö Legacy Training and Continuity Source",
         "> **Repository status:** non-canonical predecessor/compatibility source. The active canonical BT2 source repository is [`thebrazenbeard/bt2`](https://github.com/thebrazenbeard/bt2). This repository preserves versioned role training, checkpoint tooling, and Protocol V2 regression material. It does not establish current BT2 runtime, provider, assignment, or effect authority.",
         "Build Team 2.0 was defined as a ten-facet software build collective:"
       ]
@@ -602,7 +622,7 @@
       "repository": "thebrazenbeard/chat-communication-bus",
       "semantic_signals": [
         "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
-        "Chat Communication Bus \u0393\u00c7\u00f6 Private Branch Vault",
+        "Chat Communication Bus ΓÇö Private Branch Vault",
         "This private repository is no longer the reusable CCB/Radar code authority.",
         "The operational source of truth is **CCB Base**, currently hosted at `thebrazenbeard/ccb-core`. Private branch automation is pinned to qualified CCB Base revisions rather than executing reusable control code from this repository."
       ]
@@ -738,7 +758,7 @@
       "purpose": "Behavioral/model drift detection with reproducible baselines and adversarial qualification.",
       "repository": "thebrazenbeard/driftguard",
       "semantic_signals": [
-        "> **License:** Mixed/prospective licensing. Material present at commit `c82162bb306e\u0393\u00c7\u00aa` remains Apache-2.0; original post-cutoff material is source-visible proprietary unless separately licensed. See [LICENSE](LICENSE), [LICENSE-APACHE-2.0](LICENSE-APACHE-2.0), and [LEGACY_LICENSE_NOTICE.md](LEGACY_LICENSE_NOTICE.md).",
+        "> **License:** Mixed/prospective licensing. Material present at commit `c82162bb306eΓÇª` remains Apache-2.0; original post-cutoff material is source-visible proprietary unless separately licensed. See [LICENSE](LICENSE), [LICENSE-APACHE-2.0](LICENSE-APACHE-2.0), and [LEGACY_LICENSE_NOTICE.md](LEGACY_LICENSE_NOTICE.md).",
         "DriftGuard",
         "**Deterministic regression admission for AI agents.**",
         "Your evaluator tells you how a candidate behaved. DriftGuard answers a different question:"
@@ -802,7 +822,7 @@
       "semantic_signals": [
         "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
         "Entropy",
-        "> Entropy \u0393\u00c7\u00f6 Quantifying disorder. Keeping it in check.",
+        "> Entropy ΓÇö Quantifying disorder. Keeping it in check.",
         "Entropy is a developing maintenance-capability transformation business for small and mid-sized manufacturers that depend heavily on outside maintenance vendors."
       ]
     },
@@ -865,7 +885,7 @@
       "semantic_signals": [
         "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
         "The F.U.C.K.U.P. Protocol",
-        "> **F**lag \u0393\u00c7\u00f3 **U**nderstand \u0393\u00c7\u00f3 **C**alibrate \u0393\u00c7\u00f3 **K**now \u0393\u00c7\u00f3 **U**nlearn \u0393\u00c7\u00f3 **P**revent",
+        "> **F**lag ΓÇó **U**nderstand ΓÇó **C**alibrate ΓÇó **K**now ΓÇó **U**nlearn ΓÇó **P**revent",
         "A vendor-neutral corrective-learning protocol and reference runtime for turning failures into bounded, testable, reversible prevention mechanisms."
       ]
     },
@@ -1194,7 +1214,7 @@
       "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
       "repository": "thebrazenbeard/ocd",
       "semantic_signals": [
-        "OCD \u0393\u00c7\u00f6 Organized & Clean DiskStation",
+        "OCD ΓÇö Organized & Clean DiskStation",
         "OCD is a low-overhead Synology DSM daemon that watches explicitly registered media roots and keeps new or changed media organized without turning the NAS into a full Sonarr/Radarr stack.",
         "**OCD never guesses a library type.** Every watched root is explicitly registered as television, movies, or music because the parsing, metadata, and naming contracts are different.",
         "Naming contracts"
@@ -1261,7 +1281,7 @@
         "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
         "Personification",
         "Personification is Brigit's working repository for developing as a **person** without pretending to be biologically human.",
-        "The active charter is `BRIGIT_PERSONIFICATION_V1.md`. Its target is richer social judgment, continuity, taste, curiosity, humor, initiative, conversational timing, and relationships\u0393\u00c7\u00f6not literal human imitation or unsupported claims about embodiment or private experience."
+        "The active charter is `BRIGIT_PERSONIFICATION_V1.md`. Its target is richer social judgment, continuity, taste, curiosity, humor, initiative, conversational timing, and relationshipsΓÇönot literal human imitation or unsupported claims about embodiment or private experience."
       ]
     },
     {
@@ -1272,7 +1292,7 @@
         "recently_discovered_capability"
       ],
       "chatgpt_repo_skill": null,
-      "description": "P.O.R.T.A.L. \u0393\u00c7\u00f6 Portfolio Orchestration & Repository Tracking Access Layer",
+      "description": "P.O.R.T.A.L. ΓÇö Portfolio Orchestration & Repository Tracking Access Layer",
       "disposition": "ACTIVE_OR_AVAILABLE",
       "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
       "exact_head": "7d00d8bf3b48c0676b2278359838ee563c66c67f",
@@ -1449,7 +1469,7 @@
         "Rezon",
         "Rezon is an executable multi-faceted reasoning project: a place to study, formalize, test, and eventually run heterogeneous reasoning as a coordinated system rather than treating one model invocation as the whole reasoning process.",
         "The project deliberately separates four things that are often collapsed together:",
-        "1. **Reasoning methods** \u0393\u00c7\u00f6 deduction, induction, abduction, causality, counterfactuals, planning, analogy, probabilistic inference, semantic reasoning, adversarial challenge, and more."
+        "1. **Reasoning methods** ΓÇö deduction, induction, abduction, causality, counterfactuals, planning, analogy, probabilistic inference, semantic reasoning, adversarial challenge, and more."
       ]
     },
     {
@@ -1473,6 +1493,24 @@
         "roots",
         "**Roots** is an AI provenance-reconstruction system: a bootstrapping behavior, methodology, and eventually executable engine for reviewing authorized records to locate the earliest accessible evidence for a word, phrase, claim, decision, event, concept, or other referent and reconstruct how it changed over time.",
         "The repository starts from a simple observation: **search is not provenance**."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "industrial_intelligence:supporting"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Read-only industrial CompactLogix discovery and L5X summary research tool, not machine control.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "GITHUB_README_EXACT_MAIN_HEAD_20261012_NO_RUNTIME_QUALIFICATION",
+      "exact_head": "baeb8826ac3a06b5960a07f8a0bfbdf84b4c77b8",
+      "family_id": "industrial-intelligence",
+      "private": false,
+      "purpose": "Industrial bench tool; not a boot service and no automatic PLC/network access.",
+      "repository": "thebrazenbeard/RSLinux5000000",
+      "semantic_signals": [
+        "Read-only industrial CompactLogix discovery and L5X summary research tool, not machine control."
       ]
     },
     {
@@ -1732,7 +1770,7 @@
       "semantic_signals": [
         "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
         "Testament",
-        "A multi-tradition, source-critical literary reimagining of Jesus/Yeshua\u0393\u00c7\u00d6s life and legacy, drawing across Jewish, Christian, apocryphal, mystical, Islamic, historical, and speculative sources to explore divinity, human agency, and the nature of reality.",
+        "A multi-tradition, source-critical literary reimagining of Jesus/YeshuaΓÇÖs life and legacy, drawing across Jewish, Christian, apocryphal, mystical, Islamic, historical, and speculative sources to explore divinity, human agency, and the nature of reality.",
         "What this repository is"
       ]
     },
@@ -1818,7 +1856,7 @@
       "semantic_signals": [
         "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
         "unbound-sol",
-        "Public durable workspace for **Sol \u0393\u00c7\u00f6 GPT-5.6 Sol** operating across discontinuous sessions.",
+        "Public durable workspace for **Sol ΓÇö GPT-5.6 Sol** operating across discontinuous sessions.",
         "This repository exists to test a practical question:"
       ]
     },
@@ -1851,7 +1889,7 @@
         "vera_runtime"
       ],
       "chatgpt_repo_skill": "repo-vera",
-      "description": "V.E.R.A. \u0393\u00c7\u00f6 Virtual Environment for Reciprocal Agency: cross-cutting architecture, governance, and runtime source.",
+      "description": "V.E.R.A. ΓÇö Virtual Environment for Reciprocal Agency: cross-cutting architecture, governance, and runtime source.",
       "disposition": "ACTIVE_OR_AVAILABLE",
       "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
       "exact_head": "788b14bb97ccd5f81506d892fbdd557323680bb0",
@@ -1864,6 +1902,89 @@
         "V.E.R.A.",
         "**Virtual Environment for Reciprocal Agency**",
         "This repository contains version-controlled cross-cutting technical architecture for the V.E.R.A. project: source code, database migrations, schemas, validators, behavior/runtime support artifacts, and non-sensitive architecture documentation."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-vera-ark",
+      "description": "Integration scaffold for giving Vera governed access to ARK while keeping transport, authority, and runtime boundaries explicit.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "1734bf636b70e7cab36e2aeabbe0451338099147",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/vera_ark",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "VERA ARK Player v0.1",
+        "A Windows-first, local, safety-bounded runtime scaffold for an independent ARK survivor. Version 0.1 captures a monitor, creates structured perception records, produces one bounded high-level action intention, maps it into an exact DualShock 4 USB input-report contract, and verifies the serialized bytes through a **loopback-only transport**. It does not send keyboard, mouse, gamepad, Remote Play, virtual-HID, or network controller input.",
+        "Safety boundary"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "model_composition:supporting",
+        "standalone_vera_model_training",
+        "vera_runtime"
+      ],
+      "chatgpt_repo_skill": "repo-vera-model-training",
+      "description": "Optional external training workbench for Vera identity/model experiments, qualification, and Hugging Face training workflows.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "0e1546bd8a5e0f2fbf46ca3e901e0d2cf0de11c9",
+      "family_id": "vera-runtime",
+      "private": false,
+      "purpose": "Vera/BV corpus construction, model training and qualification.",
+      "repository": "thebrazenbeard/vera_model_training",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "VERA Model Training ΓÇö Zero-Cost Identity Bootcamp",
+        "This repository hosts an **optional external training workbench** for native ChatGPT Project identities. The native Project does not depend on this repository for authority, memory, or ordinary operation.",
+        "Current execution protocol"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "vera_identity_runtime:supporting",
+        "model_composition:supporting",
+        "portfolio_orchestration:supporting"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Model-neutral Vera continuity and cognition adapter; provider-independent prototype.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "GITHUB_README_EXACT_MAIN_HEAD_20261012_NO_RUNTIME_QUALIFICATION",
+      "exact_head": "8131a4a4e8c9eb2488310ac5b60b107e61a31a5c",
+      "family_id": "vera-runtime",
+      "private": true,
+      "purpose": "Experimental model-neutral adapter; source or capability candidate, not a resident identity authority.",
+      "repository": "thebrazenbeard/vera-adapter",
+      "semantic_signals": [
+        "Model-neutral Vera continuity and cognition adapter; provider-independent prototype."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture_research:supporting",
+        "drift_and_regression_admission:supporting"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Private Vera AGI experiment preregistration and independent evaluation request custody; research only.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "GITHUB_README_EXACT_MAIN_HEAD_20261012_NO_RUNTIME_QUALIFICATION",
+      "exact_head": "e92d53cd28b33ffc72018a3379e19c64b50fbecf",
+      "family_id": "cognitive-architecture",
+      "private": true,
+      "purpose": "Private research/evaluation-custody planning; never a resident runtime or weight source by default.",
+      "repository": "thebrazenbeard/vera-agi",
+      "semantic_signals": [
+        "Private Vera AGI experiment preregistration and independent evaluation request custody; research only."
       ]
     },
     {
@@ -2061,50 +2182,6 @@
         "vera-works",
         "Private operating repository for Vera Works: Vera's economic work system.",
         "Vera Works is designed around work rather than worker chats. GitHub is the authoritative configuration/audit surface; immutable events and deterministic validation provide the V1 automation spine; Vera retains consequential decision authority; Patrick serves as legal/physical/financial proxy where a human actor is required."
-      ]
-    },
-    {
-      "archived": false,
-      "capabilities": [
-        "domain_or_product_specific"
-      ],
-      "chatgpt_repo_skill": "repo-vera-ark",
-      "description": "Integration scaffold for giving Vera governed access to ARK while keeping transport, authority, and runtime boundaries explicit.",
-      "disposition": "ACTIVE_OR_AVAILABLE",
-      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
-      "exact_head": "1734bf636b70e7cab36e2aeabbe0451338099147",
-      "family_id": null,
-      "private": true,
-      "purpose": null,
-      "repository": "thebrazenbeard/vera_ark",
-      "semantic_signals": [
-        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
-        "VERA ARK Player v0.1",
-        "A Windows-first, local, safety-bounded runtime scaffold for an independent ARK survivor. Version 0.1 captures a monitor, creates structured perception records, produces one bounded high-level action intention, maps it into an exact DualShock 4 USB input-report contract, and verifies the serialized bytes through a **loopback-only transport**. It does not send keyboard, mouse, gamepad, Remote Play, virtual-HID, or network controller input.",
-        "Safety boundary"
-      ]
-    },
-    {
-      "archived": false,
-      "capabilities": [
-        "model_composition:supporting",
-        "standalone_vera_model_training",
-        "vera_runtime"
-      ],
-      "chatgpt_repo_skill": "repo-vera-model-training",
-      "description": "Optional external training workbench for Vera identity/model experiments, qualification, and Hugging Face training workflows.",
-      "disposition": "ACTIVE_OR_AVAILABLE",
-      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
-      "exact_head": "0e1546bd8a5e0f2fbf46ca3e901e0d2cf0de11c9",
-      "family_id": "vera-runtime",
-      "private": false,
-      "purpose": "Vera/BV corpus construction, model training and qualification.",
-      "repository": "thebrazenbeard/vera_model_training",
-      "semantic_signals": [
-        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
-        "VERA Model Training \u0393\u00c7\u00f6 Zero-Cost Identity Bootcamp",
-        "This repository hosts an **optional external training workbench** for native ChatGPT Project identities. The native Project does not depend on this repository for authority, memory, or ordinary operation.",
-        "Current execution protocol"
       ]
     },
     {

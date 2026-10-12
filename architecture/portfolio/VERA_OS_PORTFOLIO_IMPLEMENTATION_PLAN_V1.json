@@ -44,10 +44,10 @@
   },
   "claim_ceiling": "ALL_LIVE_PORTFOLIO_REPOSITORIES_CONSIDERED_FOR_IMPLEMENTATION_AT_SOURCE_PLANNING_LEVEL_ONLY_NOT_INSTALLATION_NOT_RUNTIME_ACTIVATION",
   "inventory": {
-    "active_or_available": 81,
+    "active_or_available": 85,
     "archived": 5,
-    "private": 19,
-    "total": 86
+    "private": 21,
+    "total": 90
   },
   "lanes": {
     "BOUNDED_SERVICE_OR_TOOL": "Use through a bounded service/tool adapter with separate authority.",
@@ -63,7 +63,7 @@
     "VERA_MONO_ABSORBED_REASONING": "Use Vera Mono's absorbed Rezon package while preserving Rezon source ownership/provenance.",
     "VERA_MONO_ABSORPTION": "Reuse mechanisms already absorbed into Vera Mono; do not depend on donor repo at runtime."
   },
-  "observed_at": "2026-10-07T18:49:55-04:00",
+  "observed_at": "2026-10-12",
   "policy": {
     "all_owned_repositories_considered_exactly_once": true,
     "canonical_runtime_repository": "thebrazenbeard/vera-mono",
@@ -72,7 +72,8 @@
     "operating_environment_repository": "thebrazenbeard/vera-os",
     "portfolio_membership_is_not_boot_activation": true,
     "protected_effect_authority_source": "PATRICK_EXPLICIT_EXACT_TARGET_EFFECT",
-    "source_presence_is_not_runtime_consumption": true
+    "source_presence_is_not_runtime_consumption": true,
+    "portfolio_catalog_is_not_image_installation": true
   },
   "repositories": [
     {
@@ -123,6 +124,23 @@
       "repository": "thebrazenbeard/axle",
       "runtime_authority_declared": false,
       "source_integration_mode": "CLIENT_OR_ADAPTER",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "durable_memory_provenance:supporting",
+        "portfolio_orchestration:supporting"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "29b51e318200f3b160b4d8ce50d2a26a0f2e7546",
+      "implementation_class": "INFRASTRUCTURE_PROVIDER",
+      "implementation_path": "BOUNDED_SERVICE_OR_TOOL",
+      "repository": "thebrazenbeard/blotter",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "INFRASTRUCTURE",
       "source_maturity": "SOURCE_PRESENT"
     },
     {
@@ -921,6 +939,22 @@
       "source_maturity": "SOURCE_PRESENT"
     },
     {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "industrial_intelligence:supporting"
+      ],
+      "decision": "MANAGE_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "baeb8826ac3a06b5960a07f8a0bfbdf84b4c77b8",
+      "implementation_class": "MANAGED_APPLICATION_OR_PROJECT",
+      "implementation_path": "PORTAL_MANAGED_PROJECT",
+      "repository": "thebrazenbeard/RSLinux5000000",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MANAGED_PROJECT",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
       "activation_policy": "NEVER",
       "archived": true,
       "capabilities": [
@@ -1226,6 +1260,75 @@
       "activation_policy": "ON_DEMAND",
       "archived": false,
       "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "decision": "ADAPT_ON_DEMAND",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "1734bf636b70e7cab36e2aeabbe0451338099147",
+      "implementation_class": "DEVICE_OR_CLIENT",
+      "implementation_path": "EXTERNAL_NODE_OR_CLIENT",
+      "repository": "thebrazenbeard/vera_ark",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "CLIENT_OR_ADAPTER",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": false,
+      "capabilities": [
+        "model_composition:supporting",
+        "standalone_vera_model_training",
+        "vera_runtime"
+      ],
+      "decision": "QUALIFY_ON_DEMAND_PROVIDER",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "0e1546bd8a5e0f2fbf46ca3e901e0d2cf0de11c9",
+      "implementation_class": "OPTIONAL_COGNITION",
+      "implementation_path": "COGNITION_PROVIDER_CONTRACT",
+      "repository": "thebrazenbeard/vera_model_training",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "MODEL_PIPELINE",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
+        "vera_identity_runtime:supporting",
+        "model_composition:supporting",
+        "portfolio_orchestration:supporting"
+      ],
+      "decision": "RESEARCH_OR_ADAPT",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "8131a4a4e8c9eb2488310ac5b60b107e61a31a5c",
+      "implementation_class": "COGNITIVE_RESEARCH_OR_SUBSYSTEM",
+      "implementation_path": "OPTIONAL_RESEARCH_ADAPTER",
+      "repository": "thebrazenbeard/vera-adapter",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "COGNITIVE_SUBSYSTEM",
+      "source_maturity": "SOURCE_PRESENT"
+    },
+    {
+      "activation_policy": "NEVER",
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture_research:supporting",
+        "drift_and_regression_admission:supporting"
+      ],
+      "decision": "RETAIN_PROVENANCE",
+      "direct_sibling_runtime_dependency": false,
+      "exact_head": "e92d53cd28b33ffc72018a3379e19c64b50fbecf",
+      "implementation_class": "LINEAGE_PROVENANCE",
+      "implementation_path": "PROVENANCE_RECORD_ONLY",
+      "repository": "thebrazenbeard/vera-agi",
+      "runtime_authority_declared": false,
+      "source_integration_mode": "PROVENANCE",
+      "source_maturity": "RESEARCH_DRAFT"
+    },
+    {
+      "activation_policy": "ON_DEMAND",
+      "archived": false,
+      "capabilities": [
         "mobile_client"
       ],
       "decision": "ADAPT_ON_DEMAND",
@@ -1372,40 +1475,6 @@
       "repository": "thebrazenbeard/vera-works",
       "runtime_authority_declared": false,
       "source_integration_mode": "MANAGED_PROJECT",
-      "source_maturity": "SOURCE_PRESENT"
-    },
-    {
-      "activation_policy": "ON_DEMAND",
-      "archived": false,
-      "capabilities": [
-        "domain_or_product_specific"
-      ],
-      "decision": "ADAPT_ON_DEMAND",
-      "direct_sibling_runtime_dependency": false,
-      "exact_head": "1734bf636b70e7cab36e2aeabbe0451338099147",
-      "implementation_class": "DEVICE_OR_CLIENT",
-      "implementation_path": "EXTERNAL_NODE_OR_CLIENT",
-      "repository": "thebrazenbeard/vera_ark",
-      "runtime_authority_declared": false,
-      "source_integration_mode": "CLIENT_OR_ADAPTER",
-      "source_maturity": "SOURCE_PRESENT"
-    },
-    {
-      "activation_policy": "NEVER",
-      "archived": false,
-      "capabilities": [
-        "model_composition:supporting",
-        "standalone_vera_model_training",
-        "vera_runtime"
-      ],
-      "decision": "QUALIFY_ON_DEMAND_PROVIDER",
-      "direct_sibling_runtime_dependency": false,
-      "exact_head": "0e1546bd8a5e0f2fbf46ca3e901e0d2cf0de11c9",
-      "implementation_class": "OPTIONAL_COGNITION",
-      "implementation_path": "COGNITION_PROVIDER_CONTRACT",
-      "repository": "thebrazenbeard/vera_model_training",
-      "runtime_authority_declared": false,
-      "source_integration_mode": "MODEL_PIPELINE",
       "source_maturity": "SOURCE_PRESENT"
     },
     {

@@ -26,8 +26,8 @@
   "counts": {
     "archived": 5,
     "excluded": 5,
-    "integrated": 81,
-    "total": 86
+    "integrated": 85,
+    "total": 90
   },
   "model_policy": {
     "artifact_root": "vera/models",
@@ -54,7 +54,7 @@
     "trained_model_role": "OPTIONAL_LOCAL_COGNITION_PROVIDER",
     "veraos_requires_trained_vera_model": false
   },
-  "observed_at": "2026-10-07T18:49:55-04:00",
+  "observed_at": "2026-10-12",
   "portfolio_policy": {
     "exclusion_requires": [
       "ARCHIVED",
@@ -66,7 +66,9 @@
     "integration_does_not_imply_effect_authority": true,
     "live_nonarchived_default": "INTEGRATED",
     "rule": "ALL_OWNED_REPOSITORIES_MUST_BE_REPRESENTED_EXACTLY_ONCE",
-    "unknown_role_default": "MANAGED_PROJECT"
+    "unknown_role_default": "MANAGED_PROJECT",
+    "inventory_refresh_as_of": "2026-10-12",
+    "inventory_status": "CENSUS_90_REPOSITORIES; prior entries retain their last individually observed source heads; catalog inclusion is not image code inclusion"
   },
   "privacy": {
     "distribution_intent": "PRIVATE_PERSONAL_OS_NOT_FOR_PUBLIC_RELEASE",
@@ -110,7 +112,7 @@
       "archived": false,
       "boot_policy": "ON_DEMAND",
       "default_branch": "main",
-      "description": "AXLE \u0393\u00c7\u00f6 Automotive eXperience & Local Edge: local-first AI-native vehicle computer, touchscreen head unit, audio integration, and optional bridged connectivity.",
+      "description": "AXLE ΓÇö Automotive eXperience & Local Edge: local-first AI-native vehicle computer, touchscreen head unit, audio integration, and optional bridged connectivity.",
       "disposition": "INTEGRATED",
       "exact_head": "d470544fb64875cb4789472ad4ef1b30f1fa65ee",
       "exclusion_reason": null,
@@ -118,6 +120,21 @@
       "name": "axle",
       "observed_updated_at": "2026-09-28T10:35:48Z",
       "repository": "thebrazenbeard/axle",
+      "runtime_authority": false,
+      "visibility": "public"
+    },
+    {
+      "archived": false,
+      "boot_policy": "ON_DEMAND",
+      "default_branch": "main",
+      "description": "Provenance-aware shared activity and knowledge ledger for cooperating agents; initial bootstrap.",
+      "disposition": "INTEGRATED",
+      "exact_head": "29b51e318200f3b160b4d8ce50d2a26a0f2e7546",
+      "exclusion_reason": null,
+      "integration_mode": "INFRASTRUCTURE",
+      "name": "blotter",
+      "observed_updated_at": "2026-10-12",
+      "repository": "thebrazenbeard/blotter",
       "runtime_authority": false,
       "visibility": "public"
     },
@@ -680,7 +697,7 @@
       "archived": false,
       "boot_policy": "CORE",
       "default_branch": "main",
-      "description": "P.O.R.T.A.L. \u0393\u00c7\u00f6 Portfolio Orchestration & Repository Tracking Access Layer",
+      "description": "P.O.R.T.A.L. ΓÇö Portfolio Orchestration & Repository Tracking Access Layer",
       "disposition": "INTEGRATED",
       "exact_head": "7d00d8bf3b48c0676b2278359838ee563c66c67f",
       "exclusion_reason": null,
@@ -808,6 +825,21 @@
       "name": "roots",
       "observed_updated_at": "2026-09-30T10:15:40Z",
       "repository": "thebrazenbeard/roots",
+      "runtime_authority": false,
+      "visibility": "public"
+    },
+    {
+      "archived": false,
+      "boot_policy": "ON_DEMAND",
+      "default_branch": "main",
+      "description": "Read-only industrial CompactLogix discovery and L5X summary research tool, not machine control.",
+      "disposition": "INTEGRATED",
+      "exact_head": "baeb8826ac3a06b5960a07f8a0bfbdf84b4c77b8",
+      "exclusion_reason": null,
+      "integration_mode": "MANAGED_PROJECT",
+      "name": "RSLinux5000000",
+      "observed_updated_at": "2026-10-12",
+      "repository": "thebrazenbeard/RSLinux5000000",
       "runtime_authority": false,
       "visibility": "public"
     },
@@ -1070,7 +1102,7 @@
       "archived": false,
       "boot_policy": "NEVER",
       "default_branch": "main",
-      "description": "V.E.R.A. \u0393\u00c7\u00f6 Virtual Environment for Reciprocal Agency: cross-cutting architecture, governance, and runtime source.",
+      "description": "V.E.R.A. ΓÇö Virtual Environment for Reciprocal Agency: cross-cutting architecture, governance, and runtime source.",
       "disposition": "INTEGRATED",
       "exact_head": "788b14bb97ccd5f81506d892fbdd557323680bb0",
       "exclusion_reason": null,
@@ -1080,6 +1112,66 @@
       "repository": "thebrazenbeard/vera",
       "runtime_authority": false,
       "visibility": "public"
+    },
+    {
+      "archived": false,
+      "boot_policy": "ON_DEMAND",
+      "default_branch": "main",
+      "description": "Integration scaffold for giving Vera governed access to ARK while keeping transport, authority, and runtime boundaries explicit.",
+      "disposition": "INTEGRATED",
+      "exact_head": "1734bf636b70e7cab36e2aeabbe0451338099147",
+      "exclusion_reason": null,
+      "integration_mode": "CLIENT_OR_ADAPTER",
+      "name": "vera_ark",
+      "observed_updated_at": "2026-09-28T00:14:09Z",
+      "repository": "thebrazenbeard/vera_ark",
+      "runtime_authority": false,
+      "visibility": "private"
+    },
+    {
+      "archived": false,
+      "boot_policy": "NEVER",
+      "default_branch": "main",
+      "description": "Optional external training workbench for Vera identity/model experiments, qualification, and Hugging Face training workflows.",
+      "disposition": "INTEGRATED",
+      "exact_head": "0e1546bd8a5e0f2fbf46ca3e901e0d2cf0de11c9",
+      "exclusion_reason": null,
+      "integration_mode": "MODEL_PIPELINE",
+      "name": "vera_model_training",
+      "observed_updated_at": "2026-10-03T22:33:44Z",
+      "repository": "thebrazenbeard/vera_model_training",
+      "runtime_authority": false,
+      "visibility": "public"
+    },
+    {
+      "archived": false,
+      "boot_policy": "ON_DEMAND",
+      "default_branch": "main",
+      "description": "Model-neutral Vera continuity and cognition adapter; provider-independent prototype.",
+      "disposition": "INTEGRATED",
+      "exact_head": "8131a4a4e8c9eb2488310ac5b60b107e61a31a5c",
+      "exclusion_reason": null,
+      "integration_mode": "COGNITIVE_SUBSYSTEM",
+      "name": "vera-adapter",
+      "observed_updated_at": "2026-10-08",
+      "repository": "thebrazenbeard/vera-adapter",
+      "runtime_authority": false,
+      "visibility": "private"
+    },
+    {
+      "archived": false,
+      "boot_policy": "NEVER",
+      "default_branch": "main",
+      "description": "Private Vera AGI experiment preregistration and independent evaluation request custody; research only.",
+      "disposition": "INTEGRATED",
+      "exact_head": "e92d53cd28b33ffc72018a3379e19c64b50fbecf",
+      "exclusion_reason": null,
+      "integration_mode": "PROVENANCE",
+      "name": "vera-agi",
+      "observed_updated_at": "2026-10-12",
+      "repository": "thebrazenbeard/vera-agi",
+      "runtime_authority": false,
+      "visibility": "private"
     },
     {
       "archived": false,
@@ -1215,36 +1307,6 @@
       "repository": "thebrazenbeard/vera-works",
       "runtime_authority": false,
       "visibility": "private"
-    },
-    {
-      "archived": false,
-      "boot_policy": "ON_DEMAND",
-      "default_branch": "main",
-      "description": "Integration scaffold for giving Vera governed access to ARK while keeping transport, authority, and runtime boundaries explicit.",
-      "disposition": "INTEGRATED",
-      "exact_head": "1734bf636b70e7cab36e2aeabbe0451338099147",
-      "exclusion_reason": null,
-      "integration_mode": "CLIENT_OR_ADAPTER",
-      "name": "vera_ark",
-      "observed_updated_at": "2026-09-28T00:14:09Z",
-      "repository": "thebrazenbeard/vera_ark",
-      "runtime_authority": false,
-      "visibility": "private"
-    },
-    {
-      "archived": false,
-      "boot_policy": "NEVER",
-      "default_branch": "main",
-      "description": "Optional external training workbench for Vera identity/model experiments, qualification, and Hugging Face training workflows.",
-      "disposition": "INTEGRATED",
-      "exact_head": "0e1546bd8a5e0f2fbf46ca3e901e0d2cf0de11c9",
-      "exclusion_reason": null,
-      "integration_mode": "MODEL_PIPELINE",
-      "name": "vera_model_training",
-      "observed_updated_at": "2026-10-03T22:33:44Z",
-      "repository": "thebrazenbeard/vera_model_training",
-      "runtime_authority": false,
-      "visibility": "public"
     },
     {
       "archived": false,

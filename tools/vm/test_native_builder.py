@@ -1,3 +1,4 @@
+import os
 import pathlib
 import subprocess
 import tempfile
@@ -5,6 +6,7 @@ import unittest
 
 SCRIPT = pathlib.Path(__file__).with_name("Build-VeraOSNative.sh")
 
+@unittest.skipIf(os.name == "nt", "Native Bash builder tests require a Linux host")
 class NativeBuilderGuards(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
