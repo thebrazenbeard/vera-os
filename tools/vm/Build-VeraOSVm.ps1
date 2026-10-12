@@ -4,7 +4,7 @@ param(
     [string]$BuilderImage = "veraos-buildroot-builder:2024.02.4",
     [string]$BuildVolume = "veraos-buildroot-work",
     [int]$Jobs = 4,
-    [ValidateSet("CORE_BOOT", "BROWSER")]
+    [ValidateSet("CORE_BOOT", "BROWSER", "RESIDENT_BROWSER")]
     [string]$Profile = "CORE_BOOT",
     [string]$ResidentSourceStage = ""
 )
@@ -21,6 +21,8 @@ if ($sourceStatus.Count -gt 0) {
     throw "VeraOS image build requires a clean source tree for exact-head provenance"
 }
 
+$buildrootVersion = "2024.02.4"
+$buildrootCommit = "e0a2687421a4f93e65aa00a30bcb0b4817f7a195"
 switch ($Profile) {
     "CORE_BOOT" {
         $defconfig = "veraos_x86_64_defconfig"
@@ -30,6 +32,18 @@ switch ($Profile) {
         $defconfig = "veraos_x86_64_browser_defconfig"
         $browserPackaged = $true
     }
+    "RESIDENT_BROWSER" {
+        $defconfig = "veraos_x86_64_resident_browser_defconfig"
+        $browserPackaged = $true
+        $buildrootVersion = "2025.02.18"
+        $buildrootCommit = "d030e36bbc9669230c015be971b14b6e062cfdde"
+        if (-not $ResidentSourceStage) {
+            throw "RESIDENT_BROWSER requires an explicit, separately verified resident source stage"
+        }
+    }
+}
+if ($ResidentSourceStage -and $Profile -ne "RESIDENT_BROWSER") {
+    throw "Resident source staging is allowed only for RESIDENT_BROWSER"
 }
 
 $residentSourceStageResolved = $null
@@ -59,9 +73,9 @@ if ($existingVolume -ne $BuildVolume) {
 
 $script = @'
 set -eu
-expected="e0a2687421a4f93e65aa00a30bcb0b4817f7a195"
+expected="$VERAOS_BUILDROOT_COMMIT"
 if [ ! -d /work/buildroot/.git ]; then
-  git clone --depth 1 --branch 2024.02.4 https://github.com/buildroot/buildroot.git /work/buildroot
+  git clone --depth 1 --branch "$VERAOS_BUILDROOT_VERSION" https://github.com/buildroot/buildroot.git /work/buildroot
 fi
 actual="$(git -C /work/buildroot rev-parse HEAD)"
 test "$actual" = "$expected"
@@ -94,6 +108,8 @@ $dockerArgs = @(
     "run", "--rm",
     "--env", "VERAOS_JOBS=$Jobs",
     "--env", "VERAOS_DEFCONFIG=$defconfig",
+    "--env", "VERAOS_BUILDROOT_VERSION=$buildrootVersion",
+    "--env", "VERAOS_BUILDROOT_COMMIT=$buildrootCommit",
     "--mount", "type=bind,source=$repo,target=/workspace,readonly",
     "--mount", "type=bind,source=$artifacts,target=/artifacts",
     "--mount", "type=volume,source=$BuildVolume,target=/work",
@@ -127,8 +143,8 @@ $result = [ordered]@{
     SourceHead = $sourceHead
     SourceTreeClean = $true
     ImageBuilder = "Buildroot"
-    BuildrootVersion = "2024.02.4"
-    BuildrootCommit = "e0a2687421a4f93e65aa00a30bcb0b4817f7a195"
+    BuildrootVersion = $buildrootVersion
+    BuildrootCommit = $buildrootCommit
     Kernel = $kernel
     KernelSha256 = ((Get-FileHash $kernel -Algorithm SHA256).Hash.ToLowerInvariant())
     Rootfs = $rootfs
@@ -136,7 +152,9 @@ $result = [ordered]@{
     BuildProfile = $Profile
     Defconfig = $defconfig
     BrowserPackaged = $browserPackaged
-    BrowserProfileDefconfig = "veraos_x86_64_browser_defconfig"
+    BrowserProfileDefconfig = if ($Profile -eq "RESIDENT_BROWSER") {
+        "veraos_x86_64_resident_browser_defconfig"
+    } else { "veraos_x86_64_browser_defconfig" }
     ResidentCoreSourceStaged = [bool]$residentSourceStageResolved
     ResidentCoreImportQualified = $false
     ResidentCoreStageReceiptSha256 = if ($residentSourceStageResolved) {
