@@ -158,13 +158,113 @@ def stage(
     }
 
 
+def verify_stage(staging_root: Path, source_root: Path = ROOT) -> dict[str, object]:
+    """Verify every allowlisted staged file against the exact pinned manifest.
+
+    This does not verify Python imports, installed native dependencies, a running
+    service, an independent reviewer, or protected effects.
+    """
+    staging_root = staging_root.resolve(strict=True)
+    source_root = source_root.resolve(strict=True)
+    receipt_file = staging_root / "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json"
+    receipt_raw = receipt_file.read_bytes()
+    receipt = json.loads(receipt_raw)
+    if not isinstance(receipt, dict) or receipt.get("schema") != "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1" or \
+       receipt.get("authority") is not False or \
+       receipt.get("scope") != "PINNED_COMMITTED_GIT_ARCHIVE_NOT_INSTALLED_OR_ACTIVATED":
+        raise StageError("Resident stage receipt schema, scope, or authority mismatch")
+    composition, plan = _load_bindings(source_root)
+    records = receipt.get("components")
+    if not isinstance(records, list) or len(records) != len(COMPONENTS):
+        raise StageError("Resident stage must list exactly four core components")
+    byrepo = {row.get("repository"): row for row in records if isinstance(row, dict)}
+    if len(byrepo) != len(COMPONENTS):
+        raise StageError("Duplicate or malformed resident component records")
+    expected_files: set[str] = set()
+    counts = {}
+    for component, (repo, _) in COMPONENTS.items():
+        if repo not in byrepo or repo not in composition or repo not in plan:
+            raise StageError(f"Unbound resident component: {repo}")
+        record = byrepo[repo]
+        if record.get("source_head") != composition[repo]["exact_head"] or \
+           record.get("source_head") != plan[repo]["exact_head"]:
+            raise StageError(f"Resident source head mismatch: {repo}")
+        marker_path = "/opt/veraos/components/" + component + "/" + (
+            "packages/vera_core/src/vera_core/__init__.py" if component == "vera_mono" else
+            "portal/__init__.py" if component == "portal" else
+            "src/pre_active/__init__.py" if component == "pre_active" else
+            "src/volition/__init__.py"
+        )
+        if record.get("marker_path") != marker_path:
+            raise StageError(f"Resident marker path mismatch: {repo}")
+        files = record.get("files")
+        if not isinstance(files, list) or not files or record.get("file_count") != len(files):
+            raise StageError(f"Missing staged file manifest: {repo}")
+        canonical = []
+        marker_hash = None
+        for row in files:
+            if not isinstance(row, dict) or set(row) != {"path", "sha256"}:
+                raise StageError("Malformed staged file entry")
+            relative = row["path"]
+            path = Path(relative)
+            if not isinstance(relative, str) or path.is_absolute() or ".." in path.parts or \
+               not relative.startswith("components/" + component + "/") or \
+               "\\" in relative or relative in expected_files:
+                raise StageError(f"Unsafe or duplicate staged file: {relative}")
+            expected_files.add(relative)
+            actual = staging_root / path
+            if actual.is_symlink() or not actual.is_file() or not actual.resolve().is_relative_to(staging_root):
+                raise StageError(f"Missing or linked staged source: {relative}")
+            observed = _digest(actual.read_bytes())
+            if observed != row["sha256"]:
+                raise StageError(f"Staged file was modified: {relative}")
+            canonical.append({"path": relative, "sha256": observed})
+            if "/opt/veraos/" + relative == marker_path:
+                marker_hash = observed
+        if record.get("marker_sha256") != marker_hash or marker_hash is None:
+            raise StageError(f"Component marker digest mismatch: {repo}")
+        packed_hash = _digest(json.dumps(sorted(canonical, key=lambda x: x["path"]),
+                               sort_keys=True, separators=(",", ":")).encode())
+        if packed_hash != record.get("file_manifest_sha256"):
+            raise StageError(f"Component manifest digest mismatch: {repo}")
+        counts[repo] = len(files)
+    observed_files = {
+        path.relative_to(staging_root).as_posix()
+        for path in (staging_root / "components").rglob("*")
+        if path.is_file() or path.is_symlink()
+    }
+    if expected_files != observed_files:
+        raise StageError("Staged component file inventory mismatch")
+    return {
+        "schema": "VERA_OS_RESIDENT_STAGE_VERIFICATION_V1",
+        "status": "PINNED_SOURCE_FILES_VERIFIED_NOT_INSTALLED",
+        "component_count": len(records),
+        "file_counts": counts,
+        "receipt_sha256": _digest(receipt_raw),
+        "guest_import_qualified": False,
+        "activated": False,
+        "protected_effect_authority": False,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkouts", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--checkouts", type=Path)
+    group.add_argument("--verify-stage", type=Path)
+    parser.add_argument("--output", type=Path)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
     args = parser.parse_args()
-    print(json.dumps(stage(args.checkouts,args.output,args.repo_root),indent=2))
+    if args.verify_stage:
+        result = verify_stage(args.verify_stage, args.repo_root)
+    else:
+        if args.output is None:
+            parser.error("--output is required with --checkouts")
+        result = stage(args.checkouts,args.output,args.repo_root)
+        verified = verify_stage(args.output, args.repo_root)
+        if verified["status"] != "PINNED_SOURCE_FILES_VERIFIED_NOT_INSTALLED":
+            raise StageError("Stage readback did not verify")
+    print(json.dumps(result,indent=2))
 
 
 if __name__ == "__main__":
