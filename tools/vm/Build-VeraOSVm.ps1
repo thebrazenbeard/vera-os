@@ -6,7 +6,8 @@ param(
     [int]$Jobs = 4,
     [ValidateSet("CORE_BOOT", "BROWSER", "RESIDENT_BROWSER")]
     [string]$Profile = "CORE_BOOT",
-    [string]$ResidentSourceStage = ""
+    [string]$ResidentSourceStage = "",
+    [string]$DesktopAssetStage = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -57,6 +58,22 @@ if ($ResidentSourceStage) {
     if ($residentSourceStageResolved.StartsWith($repo + [IO.Path]::DirectorySeparatorChar,
          [StringComparison]::OrdinalIgnoreCase)) {
         throw "Resident source stage must be external to the VeraOS checkout"
+    }
+}
+$desktopAssetStageResolved = $null
+if ($DesktopAssetStage) {
+    if ($Profile -eq "CORE_BOOT") {
+        throw "Desktop asset stage is only valid for BROWSER or RESIDENT_BROWSER"
+    }
+    $desktopAssetStageResolved = [System.IO.Path]::GetFullPath($DesktopAssetStage)
+    $brandingReceipt = Join-Path $desktopAssetStageResolved "branding-receipt.json"
+    if (-not (Test-Path -PathType Container $desktopAssetStageResolved) -or
+        -not (Test-Path -PathType Leaf $brandingReceipt)) {
+        throw "Desktop asset stage is missing or lacks a receipt"
+    }
+    if ($desktopAssetStageResolved.StartsWith($repo + [IO.Path]::DirectorySeparatorChar,
+            [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Private desktop asset stage must remain outside Git checkout"
     }
 }
 New-Item -ItemType Directory -Force $artifacts | Out-Null
@@ -134,6 +151,15 @@ if ($residentSourceStageResolved) {
         "--mount", "type=bind,source=$residentSourceStageResolved,target=/resident,readonly"
     ) + $dockerArgs[2..($dockerArgs.Count - 1)]
 }
+if ($desktopAssetStageResolved) {
+    # Add an explicitly read-only host-private stage; no images are committed.
+    # Buildroot's post-build hook verifies all staged SHA-256 values before use.
+    $dockerArgs = @(
+        "run", "--rm",
+        "--env", "VERAOS_DESKTOP_STAGE=/branding",
+        "--mount", "type=bind,source=$desktopAssetStageResolved,target=/branding,readonly"
+    ) + $dockerArgs[2..($dockerArgs.Count - 1)]
+}
 & docker @dockerArgs
 if ($LASTEXITCODE -ne 0) {
     throw "VeraOS Buildroot image build failed"
@@ -165,6 +191,11 @@ $result = [ordered]@{
     } else { "veraos_x86_64_browser_defconfig" }
     ResidentCoreSourceStaged = [bool]$residentSourceStageResolved
     ResidentCoreImportQualified = $false
+    DesktopAssetStagePackaged = [bool]$desktopAssetStageResolved
+    DesktopAssetsRenderedQualified = $false
+    DesktopAssetReceiptSha256 = if ($desktopAssetStageResolved) {
+        ((Get-FileHash (Join-Path $desktopAssetStageResolved "branding-receipt.json") -Algorithm SHA256).Hash.ToLowerInvariant())
+    } else { $null }
     ResidentCoreStageReceiptSha256 = if ($residentSourceStageResolved) {
         ((Get-FileHash (Join-Path $residentSourceStageResolved "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json") -Algorithm SHA256).Hash.ToLowerInvariant())
     } else { $null }
