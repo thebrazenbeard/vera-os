@@ -45,4 +45,26 @@ if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
   # Explicitly no auto-start or protected-effect admission here.
 fi
 
+
+# Optional private local visuals. Do not turn wallpaper into a boot dependency.
+# These files are staged outside Git and remain in a locally held VeraOS image.
+if [ -n "${VERAOS_DESKTOP_STAGE:-}" ]; then
+  branding_stage="$VERAOS_DESKTOP_STAGE"
+  python3 "$repo_root/tools/ui/Stage-VeraOSBranding.py" \
+    --verify-stage "$branding_stage" >/dev/null
+  install -d "$target_dir/usr/share/veraos/branding"
+  for name in wallpaper-1920x1080.jpg launcher-256.png launcher-128.png \
+              launcher-64.png launcher-32.png; do
+    install -m 0644 "$branding_stage/$name" \
+      "$target_dir/usr/share/veraos/branding/$name"
+  done
+  if [ -f "$branding_stage/avatar-512.png" ]; then
+    install -m 0644 "$branding_stage/avatar-512.png" \
+      "$target_dir/usr/share/veraos/branding/avatar-512.png"
+  fi
+  install -m 0644 "$branding_stage/branding-receipt.json" \
+    "$target_dir/etc/veraos/architecture/VERA_OS_LOCAL_BRANDING_BUILD_RECEIPT_V1.json"
+  # Copied raster assets are not proof of graphical UI or P.O.R.T.A.L. render.
+fi
+
 chmod 0755 "$target_dir/sbin/vera-init"
