@@ -4,9 +4,11 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
@@ -47,6 +49,11 @@ class ImageMaterializationAuditTests(unittest.TestCase):
             self.add(virtual, (ROOT / source_files[key]).read_bytes())
 
     def add_python(self, version):
+        self.simulated_python_version = tuple(map(int, version.split(".")))
+        if os.name == "nt":
+            # Windows without developer-mode privilege cannot create symlinks.
+            # The Linux fixture still exercises the actual link reader.
+            return
         marker = self.rootfs / self.requirements["python_runtime_marker"].lstrip("/")
         marker.parent.mkdir(parents=True, exist_ok=True)
         marker.symlink_to("python" + version)
@@ -80,7 +87,11 @@ class ImageMaterializationAuditTests(unittest.TestCase):
         return receipt
 
     def check(self):
-        return AUDIT.audit(AUDIT.DirectoryRootfs(self.rootfs), ROOT)
+        reader = AUDIT.DirectoryRootfs(self.rootfs)
+        if os.name == "nt" and hasattr(self, "simulated_python_version"):
+            with mock.patch.object(AUDIT, "python_version", return_value=self.simulated_python_version):
+                return AUDIT.audit(reader, ROOT)
+        return AUDIT.audit(reader, ROOT)
 
     def test_catalog_covers_ninety_not_all_installed(self):
         self.assertEqual(len(self.composition["repositories"]), 90)
@@ -181,7 +192,12 @@ class ImageMaterializationAuditTests(unittest.TestCase):
         target.unlink()
         foreign = self.root / "outside"
         foreign.write_bytes(original)
-        target.symlink_to(foreign)
+        try:
+            target.symlink_to(foreign)
+        except OSError as exc:
+            if getattr(exc, "winerror", None) == 1314:
+                self.skipTest("Windows user lacks symlink creation privilege")
+            raise
         result = self.check()
         self.assertFalse(result["core_components"][0]["source_file_packaged"])
 
