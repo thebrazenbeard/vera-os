@@ -63,8 +63,9 @@ class LocalOfflinePortfolioTests(unittest.TestCase):
         p = offline.lookup_repo(self.root, "thebrazenbeard/project-12")
         self.assertEqual(p["repository"], "thebrazenbeard/project-12")
         self.assertTrue(Path(p["bundle_path"]).is_file())
-        with Path(p["bundle_path"]).open("ab") as writer:
-            writer.write(b"ALTERED")
+        with Path(p["bundle_path"]).open("r+b") as writer:
+            writer.seek(0)
+            writer.write(b"X")
         with self.assertRaisesRegex(offline.OfflinePortfolioError, "hash differs"):
             offline.lookup_repo(self.root, "thebrazenbeard/project-12")
 
