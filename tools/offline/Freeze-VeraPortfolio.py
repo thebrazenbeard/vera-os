@@ -193,7 +193,7 @@ def run(inventory: Path, output: Path, limit: int | None = None, verify_only: bo
         "protected_effect_authority": False,
     }
     report = output / "portfolio-snapshot-summary.json"
-    if not verify_only and not report.exists():
+    if not verify_only and not missing and not report.exists():
         with report.open("x", encoding="utf-8") as file:
             json.dump(result, file, indent=2, sort_keys=True)
             file.write("\n")
