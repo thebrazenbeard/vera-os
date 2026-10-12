@@ -54,9 +54,9 @@ class ResidentStageTests(unittest.TestCase):
             else:
                 marker = repo/f"src/{component}/__init__.py"
             marker.write_bytes(b"committed marker\n")
-            (repo / ".private-untracked").write_text("NOT FOR STAGE")
             git(repo, "add", ".")
             git(repo, "commit", "-qm", "frozen source")
+            (repo / ".private-untracked").write_text("NOT FOR STAGE")
             self.pinned[repository] = git(repo, "rev-parse", "HEAD")
         composition = {
             "repositories": [
