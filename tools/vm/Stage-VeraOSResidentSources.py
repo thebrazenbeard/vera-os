@@ -140,7 +140,7 @@ def stage(
         }
         encoded = json.dumps(receipt, sort_keys=True, indent=2) + "\n"
         # Stage has only source allowlisted files. No .git, tests, credentials or model weights.
-        (tmp_path/"VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json").write_text(encoded, encoding="utf-8")
+        (tmp_path/"VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json").write_bytes(encoded.encode("utf-8"))
         tmp_path.rename(destination)
     return {
         "schema": "VERA_OS_RESIDENT_SOURCE_STAGING_RESULT_V1",
