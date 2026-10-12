@@ -5,7 +5,8 @@ param(
     [string]$BuildVolume = "veraos-buildroot-work",
     [int]$Jobs = 4,
     [ValidateSet("CORE_BOOT", "BROWSER")]
-    [string]$Profile = "CORE_BOOT"
+    [string]$Profile = "CORE_BOOT",
+    [string]$ResidentSourceStage = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -31,6 +32,19 @@ switch ($Profile) {
     }
 }
 
+$residentSourceStageResolved = $null
+if ($ResidentSourceStage) {
+    $residentSourceStageResolved = [System.IO.Path]::GetFullPath($ResidentSourceStage)
+    $receipt = Join-Path $residentSourceStageResolved "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json"
+    $sources = Join-Path $residentSourceStageResolved "components"
+    if (-not (Test-Path -PathType Container $sources) -or -not (Test-Path -PathType Leaf $receipt)) {
+        throw "Resident source stage or its pinned receipt is missing"
+    }
+    if ($residentSourceStageResolved.StartsWith($repo + [IO.Path]::DirectorySeparatorChar,
+         [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Resident source stage must be external to the VeraOS checkout"
+    }
+}
 New-Item -ItemType Directory -Force $artifacts | Out-Null
 
 & docker build -t $BuilderImage -f $builderDockerfile $repo
@@ -51,6 +65,13 @@ if [ ! -d /work/buildroot/.git ]; then
 fi
 actual="$(git -C /work/buildroot rev-parse HEAD)"
 test "$actual" = "$expected"
+if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
+  python_version="$(sed -n 's/^PYTHON3_VERSION = //p' /work/buildroot/package/python3/python3.mk | head -1)"
+  case "$python_version" in
+    3.12.*|3.13.*|3.14.*|3.15.*|3.16.*) ;;
+    *) echo "Resident source packaging requires Buildroot target Python >=3.12; pinned version $python_version" >&2; exit 12 ;;
+  esac
+fi
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot "$VERAOS_DEFCONFIG"
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot olddefconfig
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot BR2_JLEVEL="$VERAOS_JOBS" -j"$VERAOS_JOBS"
@@ -81,6 +102,14 @@ $dockerArgs = @(
     "/artifacts/veraos-buildroot-build.sh"
 )
 
+if ($residentSourceStageResolved) {
+    $dockerArgs = @(
+        "run", "--rm",
+        "--env", "VERAOS_REQUIRE_RESIDENT_CORE=1",
+        "--env", "VERAOS_RESIDENT_STAGE=/resident",
+        "--mount", "type=bind,source=$residentSourceStageResolved,target=/resident,readonly"
+    ) + $dockerArgs[2..($dockerArgs.Count - 1)]
+}
 & docker @dockerArgs
 if ($LASTEXITCODE -ne 0) {
     throw "VeraOS Buildroot image build failed"
@@ -108,6 +137,11 @@ $result = [ordered]@{
     Defconfig = $defconfig
     BrowserPackaged = $browserPackaged
     BrowserProfileDefconfig = "veraos_x86_64_browser_defconfig"
+    ResidentCoreSourceStaged = [bool]$residentSourceStageResolved
+    ResidentCoreImportQualified = $false
+    ResidentCoreStageReceiptSha256 = if ($residentSourceStageResolved) {
+        ((Get-FileHash (Join-Path $residentSourceStageResolved "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json") -Algorithm SHA256).Hash.ToLowerInvariant())
+    } else { $null }
     ProtectedEffectAuthority = $false
 }
 $resultJson = $result | ConvertTo-Json -Depth 4
