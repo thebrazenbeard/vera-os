@@ -1,0 +1,67 @@
+{
+  "schema": "VERA_OS_OFFLINE_PORTFOLIO_QUALIFICATION_EVIDENCE_V1",
+  "observation_date": "2026-10-12",
+  "evidence_type": "RUNTIME_OBSERVATION_INTERNAL_NOT_INDEPENDENT_REVIEW",
+  "host": "Lappy Windows and Ubuntu 26.04 WSL2",
+  "source_branch": "work/offline-portfolio-bundles-20261012",
+  "capture_tool_source_head": "bcb9dc4fb94a3d882cae8f2fa3d17f6891f168b8",
+  "volume_packaging_source_head": "aae64c3f92133503fabc846476b723a36323ab5c",
+  "scope": "ALL_OWNED_GITHUB_GIT_SOURCE_BUNDLES_LOCAL_TO_LAPPY",
+  "snapshot": {
+    "path_windows": "D:\\VeraOS\\vm\\offline-portfolio-vault-20261012",
+    "census_repo_count": 90,
+    "verified_repo_count": 90,
+    "private_repo_count": 21,
+    "archived_repo_count": 5,
+    "bundle_payload_total_bytes": 601795187,
+    "summary_sha256": "3fdf404a13101b68c875c73fc71376f2f69d1cace4cb11a2a16e88fd1abcc607",
+    "readback": "ALL_REPOSITORIES_BYTES_VERIFIED_SOURCE_ONLY",
+    "freshness_type": "PER_REPOSITORY_CAPTURE_NOT_AN_ATOMIC_CROSS_REPO_SNAPSHOT",
+    "private_content_published": false
+  },
+  "volume": {
+    "path_windows": "D:\\VeraOS\\vm\\offline-portfolio-images-20261012\\VeraOS-Offline-Portfolio-20261012.ext4",
+    "format": "ext4 standalone filesystem file, not partitioned/bootable disk",
+    "label": "VERAOFFLINE",
+    "bytes": 939524096,
+    "sha256": "599079729f16362eee25af98c5d42952539e061c8e49c35ed5be12c6597d3e78",
+    "receipt_sha256": "3390067dcc95b0b9a5dc716fe0acf72f3ba346ac425314aa77af7a2da0374e1e",
+    "bundles_read_back_from_ext4": 90,
+    "private_bundles_present": 21,
+    "archived_bundles_present": 5,
+    "mount_mode": "Linux WSL2 ext4 loop mount read-only, noload",
+    "read_only_mount_succeeded": true,
+    "temporary_mount_cleaned_up": true,
+    "offline_restores": [
+      {
+        "repository": "thebrazenbeard/vera-mono",
+        "expected_head": "dd6fd951f2a935373d6d9e3a5958e77920626ba5",
+        "head_verified": true
+      },
+      {
+        "repository": "thebrazenbeard/brigit",
+        "expected_head": "4b2485a9fb5c17c3d49a5bc8167f96aafbd06f30",
+        "head_verified": true,
+        "privacy": "PRIVATE_LOCAL_TEST"
+      }
+    ],
+    "kernel_and_native_veraos_guest_mount_tested": false,
+    "bootable_os_image": false,
+    "native_disk_partition_modified": false,
+    "automatic_activation": false
+  },
+  "claims": {
+    "offline_github_git_source_available": true,
+    "offline_source_clone_from_ext4_available": true,
+    "all_projects_executable_offline": false,
+    "external_python_js_go_rust_dependencies_cached": false,
+    "trained_vera_model_weights_qualified": false,
+    "portal_route_consumption_qualified": false,
+    "vera_mono_resident_runtime_qualified": false,
+    "graphical_veraos_interface_qualified": false,
+    "independent_review": false,
+    "protected_effect_authority": false
+  },
+  "source_data_disclosure": "Records are in private vera-os repository only; actual bundle and ext4 bytes remain on Lappy and must not be uploaded/distributed.",
+  "next_gate": "Attach ext4 data filesystem to separately qualified VeraOS guest, verify guest mounts/read-only access, then qualify on-demand project restoration and execution dependencies."
+}

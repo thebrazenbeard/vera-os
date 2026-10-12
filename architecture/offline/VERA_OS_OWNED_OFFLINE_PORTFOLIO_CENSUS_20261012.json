@@ -1,0 +1,920 @@
+{
+  "schema": "VERA_OS_OWNED_OFFLINE_PORTFOLIO_CENSUS_V1",
+  "observed_date": "2026-10-12",
+  "owner": "thebrazenbeard",
+  "scope": "ALL_GITHUB_OWNED_REPOSITORY_SOURCE_SNAPSHOT_NOT_RUNTIME_INSTALLATION",
+  "repo_count": 90,
+  "private_count": 21,
+  "archived_count": 5,
+  "policy": {
+    "all_repos_mirrored_locally": true,
+    "private_contents_remain_local": true,
+    "mirror_has_no_runtime_authority": true,
+    "archived_still_captured": true,
+    "offline_build_requires_dependency_cache": true,
+    "trained_model_weights_are_separate_artifacts": true,
+    "no_online_fallback_when_offline": true
+  },
+  "repositories": [
+    {
+      "repo": "thebrazenbeard/abil",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "c842c9058d8a4d1e4caf4bf7cdfad7e3c678ce6b",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/Attune",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "46461057e4d9ea25ec91a051fc17020e1113329a",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/axle",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "EXTERNAL_NODE_OR_CLIENT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "d470544fb64875cb4789472ad4ef1b30f1fa65ee",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/blotter",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "BOUNDED_SERVICE_OR_TOOL",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "29b51e318200f3b160b4d8ce50d2a26a0f2e7546",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/brigit",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "9f24b88fe5154e073a6f79a6c71e8f484c9fec79",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/brigit-unbound",
+      "default_branch": "main",
+      "private": true,
+      "archived": true,
+      "role": "PROVENANCE_RECORD_ONLY",
+      "activation": "NEVER",
+      "previous_plan_head": "f1350ef794acd0e8a657bb38d21e66f4775501a0",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/bt2",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "8d9b07d165350c341538be56cdfc919b729fe96b",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/bugops",
+      "default_branch": "main",
+      "private": false,
+      "archived": true,
+      "role": "PROVENANCE_RECORD_ONLY",
+      "activation": "NEVER",
+      "previous_plan_head": "1d35bcbd16da24c7635a004845de1390de850b4e",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/build-team-2.0",
+      "default_branch": "main",
+      "private": false,
+      "archived": true,
+      "role": "PROVENANCE_RECORD_ONLY",
+      "activation": "NEVER",
+      "previous_plan_head": "950112a697550b689049da807f2d8176a507c38f",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/ccb-core",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "0b542a78ebf5827a518e0731a63f17a7ac8a2727",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/chat-communication-bus",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "e0bcb5eb18630693de55a1af2066411c7af079bb",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/conations",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "51948aac796936f0e7c437722e6f52c883e544e9",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/conditioning",
+      "default_branch": "main",
+      "private": true,
+      "archived": true,
+      "role": "PROVENANCE_RECORD_ONLY",
+      "activation": "NEVER",
+      "previous_plan_head": "1b969cde2e1905dc87f4f3c2dda95a040c180781",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/cricket",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "c2342648c72aa9faefd9c5441c654ad8239afe33",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/deepmemorystorage",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "BOUNDED_SERVICE_OR_TOOL",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "3199b05a24411ed1b3a3561fe90866adf9c74d14",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/discovery",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "620c09b2a1c96256cc7523877f3e986ad75f8f0a",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/driftguard",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_ON_DEMAND_SPECIALIST",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "52fa829c629fa0f3e729204912db9f9f783f322a",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/ears",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "c313c41b2ae53488623d193ef664f1f14504189c",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/empathy",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "76ebb492827a79b20b3be76fe9f9f48ab860ef1d",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/entropyinc",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "6d68c36bb7ab3adecc5c34902b310a7ef1f7c0d9",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/executor",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "2b9b4e9456c6481b1d5fe9be0a142d01ce804d8f",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/firesafe",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "d0685b5184ea39eed3a6114f8cbaffc671f2c3f0",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/fuckup",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "a87dea38a58c4cff75bc7d123d87f63a5e110895",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/god-brain",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "495c2b42932153cba0926744d04a69bc34557f81",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/hc-brain",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "80a55949b0bb7549b7f678fba8ecedce854e3c0e",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/hephaestus",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_ON_DEMAND_SPECIALIST",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "030494fa2cc4c875013a9a4842abe60588c9c709",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/ingest",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERA_MONO_ABSORPTION",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "27764c9fb97c84d178a3f66e0da2d669df645ed6",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/intranel",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "677a1612e8a956760a40b942650b01cf0b22dd33",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/lgcm",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "0043c60419de9ef0b52363b62aed8c0a52ef63f5",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/lou-pole",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "9ea4eaefe5229ca90d7ae6099dbf30d9e13b64b2",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/masamune",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_ON_DEMAND_SPECIALIST",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "25653790d59080cda0b6d6e57b8a4cd64d1ee2b5",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/mediaphile",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "5540d7e2f0b07c0e91a1158c9c00f63be9d9587a",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/mediaphile-client",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "cc8f0b8008ae43abc97f3f7528e37bea8955693c",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/mediaphile-server",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "417cc7f0bc7c7b30e087a87298423b86394ef96f",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/meso-crct",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "060d0feeb9dc9eb23801082bd8f1c4a7cb06184d",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/mosaic",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "COGNITION_PROVIDER_CONTRACT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "3a442e94b4f5b8fa365e2206c40405df6961e18d",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/noema",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "697d1fac6f9fea158994888a861e651ac8fac282",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/ocd",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "EXTERNAL_NODE_OR_CLIENT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "30c49f0a5ebe99d217e66e985893b3b109dc2e2f",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/on-theo",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "2fdc9614fa4f45eb038772d736b146809e10a7f1",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/orgasm",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "8ca06c91a0dd8f2ca33cc221d815027aa8b084b5",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/personification",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "31610e915047af46aa3242190a57baedaed7fbfb",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/portal",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "CORE",
+      "previous_plan_head": "7d00d8bf3b48c0676b2278359838ee563c66c67f",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/pre-active",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "CORE",
+      "previous_plan_head": "1f23a809d7274df506e03e2d9052525538c3bcf6",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/project-achilles",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_ON_DEMAND_SPECIALIST",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "99bc4e8cf7bd60d022fb25222d701a8cf42f80c0",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/project-lantern",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_ON_DEMAND_SPECIALIST",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "79b730ed4d1d3d7486902a725ced39854e0ffb47",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/project-runner",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "04702abbf51aa2920b7d054275619253ea6fa748",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/RepairTracker",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "EXTERNAL_NODE_OR_CLIENT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "cd7c6f27d27a03130d6e793d69634005a130dc3a",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/retro-gamer",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "4c463a97263587e40b8caedb5e7c37b988886dba",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/rezon",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERA_MONO_ABSORBED_REASONING",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "ec401810990337bf07a5d6473782ba13eba1bb3f",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/roots",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_ON_DEMAND_SPECIALIST",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "1bc3af6aec0bebe383f60f56ad3070e83f0f40b5",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/RSLinux",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "baeb8826ac3a06b5960a07f8a0bfbdf84b4c77b8",
+      "previous_name": "thebrazenbeard/RSLinux5000000"
+    },
+    {
+      "repo": "thebrazenbeard/self",
+      "default_branch": "main",
+      "private": true,
+      "archived": true,
+      "role": "PROVENANCE_RECORD_ONLY",
+      "activation": "NEVER",
+      "previous_plan_head": "f97e5696938586211c24367e9462b896fa7b7932",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/selfimage",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "ebcea11beea64bfcee386893464f573cdbeada17",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/semanticatlas",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "895677a64af5d29b580306ca52ecc0e0607a9ccc",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/semiotics",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "37117a2097f7f2aa35968fc9db24eacf7240826e",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/sexuality",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "0c5dc52e984cbdaa87fc9fe75fd03c212f477c87",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/skeletonkey",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "EXTERNAL_NODE_OR_CLIENT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "102d365b2b22c0c4c6fefa269a075e3ae5164148",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/spk-packager",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "BOUNDED_SERVICE_OR_TOOL",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "01d1b637f262f8e1890e59362b236e677ab48b85",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/spm",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "d9ea72798ac892ac75f858177b6ed0c5a6b4c37c",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/sql-connectome",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "BOUNDED_SERVICE_OR_TOOL",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "b609fcec50fe5a135ca1d8139f5563f5631582b2",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/tattler",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "BOUNDED_SERVICE_OR_TOOL",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "d091584cf1bb514dcf1ba786ed16f705fabf807d",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/temporal",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "BOUNDED_SERVICE_OR_TOOL",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "0fc7071a6b01e609fb2cdc76a32c73276ab27094",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/testament",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "20517788763e76863a35e02ba3cc9051d0a227bb",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/thebrazenbeard",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "83ea2e083ccbf83ad5215ca53a9d5a00d16bb0d0",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/transcendence",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "69dacb467e94fb73ce106cd5176c39800c64e195",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/trek-data-core",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "58f25f8c45e8379df0ef7c7b5db546e037d1c050",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/unbound-sol",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PROVENANCE_RECORD_ONLY",
+      "activation": "NEVER",
+      "previous_plan_head": "d4284dd1f044e506bb85554856c00497d6790d44",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/unvtrslr",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "33edef682181e1bea6b36c5afc588d261f0c1289",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PROVENANCE_RECORD_ONLY",
+      "activation": "NEVER",
+      "previous_plan_head": "788b14bb97ccd5f81506d892fbdd557323680bb0",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera_ark",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "EXTERNAL_NODE_OR_CLIENT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "1734bf636b70e7cab36e2aeabbe0451338099147",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera_model_training",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "COGNITION_PROVIDER_CONTRACT",
+      "activation": "NEVER",
+      "previous_plan_head": "0e1546bd8a5e0f2fbf46ca3e901e0d2cf0de11c9",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-adapter",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "OPTIONAL_RESEARCH_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "8131a4a4e8c9eb2488310ac5b60b107e61a31a5c",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-agi",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "PROVENANCE_RECORD_ONLY",
+      "activation": "NEVER",
+      "previous_plan_head": "e92d53cd28b33ffc72018a3379e19c64b50fbecf",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-apk",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "EXTERNAL_NODE_OR_CLIENT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "ec2f69a3946eb63c47d39e6c729aa70ec5c29542",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-control-plane",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "b86143e50ba41d05eab19d5a300662afeda60d6e",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-habitat",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "EXTERNAL_NODE_OR_CLIENT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "82cf6a625e417ced00205f66be1e76dc396ab617",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-mesh",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "98b74ff77981a5478e20a748bbb94565ad9140c8",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-mono",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PACKAGE_SELF_CONTAINED_RUNTIME",
+      "activation": "CORE",
+      "previous_plan_head": "e5af8cb740267bb5674864571e915842bf5e6677",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-os",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "ROOTFS_NATIVE_OS",
+      "activation": "HOST",
+      "previous_plan_head": "be4a45a2b8b7a8e329f772820df0a757766b3073",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-R9A0",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PROVENANCE_RECORD_ONLY",
+      "activation": "NEVER",
+      "previous_plan_head": "287a85cb5f2f6f553cfbb336cb2e03aa7b1c8d01",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-synology",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "EXTERNAL_NODE_OR_CLIENT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "d13cdefbf817aeba60c673fa4a517575c311da2c",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/vera-works",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "569c88cc20123c264fa6e3ce6e989be06f65c1d7",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/volition",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "CORE",
+      "previous_plan_head": "dbc628d376515a0a523b1eecdf62129cca5d6b08",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/voss",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_ON_DEMAND_SPECIALIST",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "36a623d3a158e5aef521d42e378bafacd67d3de5",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/wip",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "VERAOS_SERVICE_ADAPTER",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "3b93b64c09f5ed704b21a9db28cb918df181947e",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/workbridge",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "BOUNDED_SERVICE_OR_TOOL",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "e88e14ea25f25abd723bb50909b3e25e67f889fd",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/workbridgecommander",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "BOUNDED_SERVICE_OR_TOOL",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "c2b95be79ca011a539c20bfee60fcbc46cfea177",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/WorkBridgeMCP",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "BOUNDED_SERVICE_OR_TOOL",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "f091f6be6e85f489e3e7839e10612204b89a4a9e",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/world-zero",
+      "default_branch": "main",
+      "private": false,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "07c5b998d081cbe61091ac3ae5592f8ac33b4bbf",
+      "previous_name": null
+    },
+    {
+      "repo": "thebrazenbeard/wreckforge",
+      "default_branch": "main",
+      "private": true,
+      "archived": false,
+      "role": "PORTAL_MANAGED_PROJECT",
+      "activation": "ON_DEMAND",
+      "previous_plan_head": "dc8a889d68d1fb8d064aadff1cf8c2b8d97d6ace",
+      "previous_name": null
+    }
+  ]
+}

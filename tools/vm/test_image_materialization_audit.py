@@ -203,7 +203,7 @@ class ImageMaterializationAuditTests(unittest.TestCase):
 
     def test_new_repos_classified_not_autoboot(self):
         byrepo = {row["repository"]: row for row in self.composition["repositories"]}
-        for name in ("vera-adapter", "blotter", "RSLinux5000000", "vera-agi"):
+        for name in ("vera-adapter", "blotter", "RSLinux", "vera-agi"):
             row = byrepo["thebrazenbeard/" + name]
             self.assertFalse(row["runtime_authority"])
             self.assertNotEqual(row["boot_policy"], "CORE")
