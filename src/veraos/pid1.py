@@ -170,11 +170,41 @@ def launch_resident(command: list[str]) -> subprocess.Popen:
     return subprocess.Popen(command, env=env, close_fds=True)
 
 
+def prepare_loopback() -> bool:
+    # Internal-only HTTP interface; do not admit a guest network NIC or
+    # outbound provider merely because loopback became available.
+    try:
+        result = subprocess.run(
+            ["/sbin/ip", "link", "set", "lo", "up"],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return result.returncode == 0
+    except OSError:
+        return False
+
+
+def browser_command() -> list[str]:
+    return ["/usr/bin/cog", "--platform=drm", "http://127.0.0.1:18765/"]
+
+
+def launch_browser(command: list[str]) -> subprocess.Popen:
+    env = os.environ.copy()
+    env["XDG_RUNTIME_DIR"] = "/run/veraos"
+    return subprocess.Popen(command, env=env, close_fds=True)
+
+
 def run_supervisor(
     *,
     run_root: Path = DEFAULT_RUN_ROOT,
     sleep: Callable[[float], None] = time.sleep,
     resident_supervisor: ResidentSupervisor | None = None,
+    browser_supervisor: ResidentSupervisor | None = None,
+    drm_available: Callable[[], bool] = (
+        lambda: Path("/dev/dri/card0").exists() and Path("/usr/bin/cog").is_file()
+    ),
+    local_ui_network_available: bool = True,
 ) -> None:
     stop = {"requested": False}
     _install_signal_handlers(stop)
@@ -183,15 +213,33 @@ def run_supervisor(
         launch=launch_resident,
         health=lambda: read_health(run_root),
     )
+    browser = browser_supervisor or ResidentSupervisor(
+        browser_command(),
+        launch=launch_browser,
+    )
     try:
         while not stop["requested"]:
             _reap_children()
-            resident_state = resident.tick(time.monotonic())
+            now = time.monotonic()
+            resident_state = resident.tick(now)
+            if not local_ui_network_available:
+                browser_state = "BLOCKED_NO_LOOPBACK"
+            elif not drm_available():
+                browser_state = "BLOCKED_NO_DRM"
+            elif resident_state != "COMPOSED_NO_COGNITION":
+                browser_state = "WAITING_FOR_RESIDENT"
+            else:
+                observed = browser.tick(now)
+                browser_state = (
+                    "COG_PROCESS_ALIVE_RENDER_UNQUALIFIED"
+                    if observed == "RUNNING_UNVERIFIED" else observed
+                )
             heartbeat = {
                 "schema": "VERAOS_PID1_HEARTBEAT_V1",
                 "pid": os.getpid(),
                 "observed_at_unix": time.time(),
                 "resident_state": resident_state,
+                "browser_state": browser_state,
             }
             (run_root / "heartbeat.json").write_text(
                 json.dumps(heartbeat, sort_keys=True) + "\n",
@@ -199,6 +247,7 @@ def run_supervisor(
             )
             sleep(1.0)
     finally:
+        browser.close()
         resident.close()
 
 
@@ -220,8 +269,10 @@ def main(argv: list[str] | None = None) -> int:
     if os.getpid() != 1 and not args.allow_non_pid1:
         raise SystemExit("vera-init must run as PID 1")
 
+    loopback_ready = True
     if os.getpid() == 1:
         mount_kernel_filesystems()
+        loopback_ready = prepare_loopback()
 
     args.run_root.mkdir(parents=True, exist_ok=True)
     contract = _load_json(args.boot_contract)
@@ -245,7 +296,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.allow_non_pid1:
         return 0
-    run_supervisor(run_root=args.run_root)
+    run_supervisor(
+        run_root=args.run_root,
+        local_ui_network_available=loopback_ready,
+    )
     return 0
 
 
