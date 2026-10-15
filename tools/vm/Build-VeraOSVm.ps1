@@ -88,6 +88,11 @@ if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
 fi
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot "$VERAOS_DEFCONFIG"
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot olddefconfig
+if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
+  python3 /workspace/tools/vm/Verify-VeraOSResolvedConfig.py \
+    --config /work/output/.config \
+    --contract /workspace/architecture/os/VERA_OS_RESIDENT_BUILDROOT_CANDIDATE_V1.json
+fi
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot BR2_JLEVEL="$VERAOS_JOBS" -j"$VERAOS_JOBS"
 test -f /work/output/images/bzImage
 test -f /work/output/images/rootfs.ext2
