@@ -87,7 +87,7 @@ class VmContractTests(unittest.TestCase):
         self.assertIn('[System.IO.File]::WriteAllText(', build)
         self.assertNotIn('"-lc", $script', build)
         self.assertIn('BR2_JLEVEL="$VERAOS_JOBS"', build)
-        self.assertIn('[ValidateSet("CORE_BOOT", "BROWSER")]', build)
+        self.assertIn('[ValidateSet("CORE_BOOT", "BROWSER", "RESIDENT_BROWSER")]', build)
         self.assertIn('VERAOS_DEFCONFIG=$defconfig', build)
         self.assertIn('SourceHead = $sourceHead', build)
         self.assertIn('SourceTreeClean = $true', build)
