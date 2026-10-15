@@ -92,9 +92,15 @@ $probeArgs = @("run","--rm","--user","1000:1000",
     "--mount","type=volume,source=$BuildVolume,target=/work,readonly",
     "--entrypoint","/usr/bin/git",$BuilderImage,
     "-C","/work/buildroot","rev-parse","HEAD")
-$verifiedBuildrootHead = (& docker @probeArgs | Select-Object -First 1).Trim()
-if ($LASTEXITCODE -ne 0 -or
-    $verifiedBuildrootHead -ne "d030e36bbc9669230c015be971b14b6e062cfdde") {
+# Do not pipe native Docker output into Select-Object -First 1: closing
+# the pipe early yields $LASTEXITCODE=-1 even when Git prints the right SHA.
+$buildrootOutput = @(& docker @probeArgs)
+$buildrootExit = $LASTEXITCODE
+if ($buildrootExit -ne 0 -or $buildrootOutput.Count -ne 1) {
+    throw "Read-only Buildroot head probe failed"
+}
+$verifiedBuildrootHead = ([string]$buildrootOutput[0]).Trim()
+if ($verifiedBuildrootHead -ne "d030e36bbc9669230c015be971b14b6e062cfdde") {
     throw "Buildroot exact-source pin not satisfied"
 }
 $receipt = [ordered]@{
