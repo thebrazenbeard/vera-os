@@ -22,18 +22,25 @@ if (-not (Test-Path $kernel)) { throw "Missing VeraOS kernel: $kernel" }
 if (-not (Test-Path $rootfs)) { throw "Missing VeraOS rootfs: $rootfs" }
 if (-not (Test-Path $buildReceiptPath)) { throw "Missing VeraOS build receipt: $buildReceiptPath" }
 
-$currentHead = (& git -C $repo rev-parse HEAD | Select-Object -First 1)
-$sourceStatus = @(& git -C $repo status --porcelain=v1)
-if ($sourceStatus.Count -gt 0) {
-    throw "VeraOS qualification requires a clean source tree for exact-head provenance"
+# Exact built source is earlier than the qualification-tooling commit.
+# Refuse a guest boot on any branch that has changed Buildroot or runtime code.
+$validator = Join-Path $repo "tools\vm\Verify-VeraOSBuildSource.py"
+$imageSource = "a2a91017876df7ca1677ad4afefd7b45dd80165f"
+$bound = & python $validator --repo-root $repo --image-source-head $imageSource
+if ($LASTEXITCODE -ne 0) {
+    throw "VeraOS image source is not an exact unchanged ancestor"
 }
+$binding = ($bound | Out-String | ConvertFrom-Json)
+$currentHead = $binding.qualification_tool_head
 
 $buildReceipt = Get-Content $buildReceiptPath -Raw | ConvertFrom-Json
 if ($buildReceipt.Schema -ne "VERA_OS_BUILDROOT_BUILD_RESULT_V1") {
     throw "Unexpected VeraOS build receipt schema"
 }
-if ($buildReceipt.SourceHead -ne $currentHead) {
-    throw "VeraOS build receipt source head does not match current source head"
+if ($buildReceipt.SourceHead -ne $imageSource -or
+    $buildReceipt.QualificationToolHead -ne $currentHead -or
+    -not $buildReceipt.ImageBuildSourceUnchanged) {
+    throw "VeraOS image build source and current qualification-tooling head are not cross-bound"
 }
 
 $buildProfile = [string]$buildReceipt.BuildProfile
@@ -45,6 +52,15 @@ if ($buildProfile -eq "CORE_BOOT") {
 } elseif ($buildProfile -eq "BROWSER") {
     if ($buildReceipt.Defconfig -ne "veraos_x86_64_browser_defconfig" -or -not $browserPackaged) {
         throw "BROWSER build receipt is internally inconsistent"
+    }
+} elseif ($buildProfile -eq "RESIDENT_BROWSER") {
+    if ($buildReceipt.Defconfig -ne "veraos_x86_64_resident_browser_defconfig" -or
+        $buildReceipt.BuildrootVersion -ne "2025.02.18" -or
+        $buildReceipt.BuildrootCommit -ne "d030e36bbc9669230c015be971b14b6e062cfdde" -or
+        -not $browserPackaged -or
+        $buildReceipt.ResidentCoreSourceStaged -ne $true -or
+        $buildReceipt.ResidentCoreImportQualified -ne $false) {
+        throw "RESIDENT_BROWSER build receipt is inconsistent or overclaims runtime"
     }
 } else {
     throw "Unknown VeraOS build profile: $buildProfile"
@@ -184,8 +200,10 @@ $receipt = [ordered]@{
     observed_at = (Get-Date).ToString("o")
     product_base = "VERA"
     linux_role = "KERNEL_DRIVER_HARDWARE_SUBSTRATE"
-    image_builder = "BUILDROOT_2024_02_4"
-    source_head = $currentHead
+    image_builder = ("BUILDROOT_" + ([string]$buildReceipt.BuildrootVersion).Replace(".", "_"))
+    source_head = $imageSource
+    qualification_tool_head = $currentHead
+    image_build_source_unchanged = $true
     source_tree_clean = $true
     build_receipt_sha256 = $buildReceiptSha256
     kernel_sha256 = $kernelSha256
@@ -213,11 +231,16 @@ $receipt = [ordered]@{
     qualification_disk = "DISPOSABLE_QCOW2_OVERLAY"
     build_profile = $buildProfile
     browser_packaged = $browserPackaged
-    browser_profile_defconfig = "veraos_x86_64_browser_defconfig"
+    browser_profile_defconfig = [string]$buildReceipt.BrowserProfileDefconfig
+    resident_core_source_staged = $buildProfile -eq "RESIDENT_BROWSER"
+    resident_core_import_qualified = $false
+    resident_runtime_qualified = $false
+    trained_model_route_qualified = $false
+    offline_portfolio_guest_mount_qualified = $false
     browser_runtime_qualified = $false
     ambient_protected_effect_authority = $false
     host_partition_table_modified = $false
-    claim_ceiling = "VM_BOOT_RESTART_LIFECYCLE_PERSISTENCE_GUEST_COMPOSITION_AND_PORTFOLIO_IMPLEMENTATION_PLAN_VALIDATION_ONLY_NOT_CANONICAL_MEMORY_NOT_SUPABASE_REPLACEMENT_NOT_BROWSER_RUNTIME_NOT_BARE_METAL_NOT_PROTECTED_EFFECT"
+    claim_ceiling = "VM_BOOT_RESTART_LIFECYCLE_PERSISTENCE_GUEST_COMPOSITION_AND_PORTFOLIO_PLAN_ONLY_NOT_RESIDENT_IMPORT_NOT_COG_RENDER_NOT_LOCAL_MODEL_NOT_OFFLINE_PORTFOLIO_MOUNT_NOT_BARE_METAL_NOT_PROTECTED_EFFECT"
 }
 
 $receiptPath = Join-Path $artifacts "veraos-vm-qualification.json"
