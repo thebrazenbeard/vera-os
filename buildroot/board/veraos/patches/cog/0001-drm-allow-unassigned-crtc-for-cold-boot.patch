@@ -1,0 +1,22 @@
+From: VeraOS build qualification <veraos@local.invalid>
+Subject: [PATCH] drm: allow compatible CRTC when encoder is unassigned at boot
+
+Virtual DRM devices may have a connected connector and valid modes while the
+encoder has no current CRTC assignment (crtc_id == 0).  Keep the possible_crtcs
+mask check and allow its first compatible CRTC for initial mode setting.
+Do not treat a different active CRTC binding as compatible.
+
+--- a/platform/drm/cog-platform-drm.c
++++ b/platform/drm/cog-platform-drm.c
+@@ -357,7 +357,10 @@ find_crtc_for_encoder(const drmModeRes *resources, const drmModeEncoder *encoder)
+     for (int i = 0; i < resources->count_crtcs; i++) {
+         const uint32_t crtc_mask = 1 << i;
+         const uint32_t crtc_id = resources->crtcs[i];
+-        if (encoder->possible_crtcs & crtc_mask && encoder->crtc_id == crtc_id) {
++        /* A cold-boot encoder may not yet have a CRTC assigned. */
++        if ((encoder->possible_crtcs & crtc_mask)
++                && (encoder->crtc_id == crtc_id
++                    || encoder->crtc_id == 0)) {
+             return crtc_id;
+         }
+     }
