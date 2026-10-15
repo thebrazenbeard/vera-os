@@ -13,6 +13,8 @@ import threading
 import time
 from typing import Callable
 
+from .desktop import open_loopback_server
+
 
 DEFAULT_COMPONENTS = Path("/opt/veraos/components")
 DEFAULT_RUN_ROOT = Path("/run/veraos")
@@ -172,10 +174,20 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     status, store = compose_components(args.components_root, args.state_root)
     stop = threading.Event()
+    server = None
+    http_thread = None
     try:
+        server = open_loopback_server(lambda: status)
+        http_thread = threading.Thread(target=server.serve_forever, daemon=True)
+        http_thread.start()
         print("VERAOS_RESIDENT_COMPONENTS_COMPOSED_V1", flush=True)
         serve_status(args.run_root, status, stop)
     finally:
+        if server is not None:
+            server.shutdown()
+            server.server_close()
+        if http_thread is not None:
+            http_thread.join(timeout=3.0)
         store.close()
     return 0
 
