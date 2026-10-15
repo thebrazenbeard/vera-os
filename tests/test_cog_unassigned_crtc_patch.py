@@ -18,9 +18,12 @@ def test_buildroot_profile_selects_source_bound_cog_patch_directory():
 
 
 def test_cog_patch_handles_unassigned_crtc_only_when_possible_mask_allows():
-    patches = list(PATCH_DIR.glob("*.patch"))
-    assert len(patches) == 1
-    patch = patches[0].read_text(encoding="utf-8")
+    patches = {p.name: p for p in PATCH_DIR.glob("*.patch")}
+    assert set(patches) == {
+        "0001-drm-allow-unassigned-crtc-for-cold-boot.patch",
+        "0002-drm-shm-frame-row-bounds.patch",
+    }
+    patch = patches["0001-drm-allow-unassigned-crtc-for-cold-boot.patch"].read_text(encoding="utf-8")
     assert "platform/drm/cog-platform-drm.c" in patch
     assert "encoder->crtc_id == 0" in patch
     assert "encoder->possible_crtcs & crtc_mask" in patch
