@@ -26,7 +26,7 @@ backing or working DRM rendering.
 +    if (width <= 0 || height <= 0 || width > G_MAXINT32 / 4 ||
 +        stride < width * 4 || (uint32_t) width > bo_width ||
 +        (uint32_t) height > bo_height) {
-+        g_warning("drop invalid SHM frame: impossible size or stride");
++        g_warning("drop invalid SHM frame: shm=%dx%d stride=%d format=%u gbm=%ux%u", width, height, stride, wl_shm_buffer_get_format(shm_buffer), bo_width, bo_height);
 +        return;
 +    }
  
