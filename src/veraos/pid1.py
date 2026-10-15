@@ -10,6 +10,9 @@ import subprocess
 import time
 from typing import Any, Callable
 
+import sys
+
+from .resident import ResidentSupervisor, read_health
 from .boot_contract import validate_boot_contract
 from .composition import validate_manifest
 from .portfolio_awareness import validate_capability_map
@@ -146,25 +149,57 @@ def _reap_children() -> None:
             return
 
 
+def resident_child_command(
+    *, run_root: Path = DEFAULT_RUN_ROOT,
+    state_root: Path = Path("/var/lib/veraos/resident"),
+    components_root: Path = Path("/opt/veraos/components"),
+) -> list[str]:
+    return [
+        sys.executable, "-m", "veraos.resident",
+        "--components-root", str(components_root),
+        "--run-root", str(run_root),
+        "--state-root", str(state_root),
+    ]
+
+
+def launch_resident(command: list[str]) -> subprocess.Popen:
+    # The PID1 entry script adjusts sys.path in-process, which subprocesses
+    # do not inherit. Pass the exact staged VeraOS root explicitly.
+    env = os.environ.copy()
+    env["PYTHONPATH"] = "/opt/veraos/src"
+    return subprocess.Popen(command, env=env, close_fds=True)
+
+
 def run_supervisor(
     *,
     run_root: Path = DEFAULT_RUN_ROOT,
     sleep: Callable[[float], None] = time.sleep,
+    resident_supervisor: ResidentSupervisor | None = None,
 ) -> None:
     stop = {"requested": False}
     _install_signal_handlers(stop)
-    while not stop["requested"]:
-        _reap_children()
-        heartbeat = {
-            "schema": "VERAOS_PID1_HEARTBEAT_V1",
-            "pid": os.getpid(),
-            "observed_at_unix": time.time(),
-        }
-        (run_root / "heartbeat.json").write_text(
-            json.dumps(heartbeat, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
-        sleep(1.0)
+    resident = resident_supervisor or ResidentSupervisor(
+        resident_child_command(run_root=run_root),
+        launch=launch_resident,
+        health=lambda: read_health(run_root),
+    )
+    try:
+        while not stop["requested"]:
+            _reap_children()
+            resident_state = resident.tick(time.monotonic())
+            heartbeat = {
+                "schema": "VERAOS_PID1_HEARTBEAT_V1",
+                "pid": os.getpid(),
+                "observed_at_unix": time.time(),
+                "resident_state": resident_state,
+            }
+            (run_root / "heartbeat.json").write_text(
+                json.dumps(heartbeat, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            sleep(1.0)
+    finally:
+        resident.close()
 
 
 def main(argv: list[str] | None = None) -> int:

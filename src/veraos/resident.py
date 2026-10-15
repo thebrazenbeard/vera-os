@@ -1,0 +1,184 @@
+"""VeraOS local-only resident component host, not a cognition/effect grant."""
+from __future__ import annotations
+
+import argparse
+import importlib
+import json
+import os
+from pathlib import Path
+import socket
+import subprocess
+import sys
+import threading
+import time
+from typing import Callable
+
+
+DEFAULT_COMPONENTS = Path("/opt/veraos/components")
+DEFAULT_RUN_ROOT = Path("/run/veraos")
+DEFAULT_STATE_ROOT = Path("/var/lib/veraos/resident")
+COMPONENT_NAMES = ("vera_core", "portal", "pre_active", "volition")
+
+
+def component_paths(base: Path) -> list[str]:
+    roots = sorted((base / "vera_mono" / "packages").glob("*/src"))
+    return [str(p) for p in roots if p.is_dir()] + [
+        str(base / "portal"),
+        str(base / "pre_active" / "src"),
+        str(base / "volition" / "src"),
+    ]
+
+
+def compose_components(base: Path, state_root: Path) -> tuple[dict, object]:
+    """Import exact staged packages; open PreActive's actual durable Store.
+
+    Importing the core does not instantiate a QualifiedVeraRuntime or
+    authorize any cognition/effects. Report that distinction explicitly.
+    """
+    if not (base / "vera_mono/packages/vera_core/src/vera_core/__init__.py").is_file():
+        raise FileNotFoundError("No staged vera_core package")
+    sys.path[:0] = component_paths(base)
+    core, portal, pre_active, volition = (
+        importlib.import_module(name) for name in COMPONENT_NAMES
+    )
+    if not hasattr(core, "QualifiedVeraRuntime"):
+        raise RuntimeError("Actual Vera runtime API missing")
+    if not hasattr(portal, "resolve_portal_route"):
+        raise RuntimeError("P.O.R.T.A.L. route API missing")
+    state_root.mkdir(parents=True, exist_ok=True)
+    store = pre_active.Store(state_root / "pre-active.sqlite3")
+    engine = volition.VolitionEngine()
+    assert engine is not None
+    status = {
+        "schema": "VERAOS_RESIDENT_STATUS_V1",
+        "status": "COMPOSED_NO_COGNITION",
+        "pid": os.getpid(),
+        "components": list(COMPONENT_NAMES),
+        "pre_active_store_open": True,
+        "volition_engine_initialized": True,
+        "portal_route_api_present": True,
+        "canonical_runtime_qualified": False,
+        "cognition_route_qualified": False,
+        "protected_effect_authority": False,
+    }
+    return status, store
+
+
+def serve_status(
+    run_root: Path,
+    status: dict,
+    stop: threading.Event,
+    ready: threading.Event | None = None,
+) -> None:
+    """Read-only status on a UNIX socket; no TCP/listening remote effects."""
+    run_root.mkdir(parents=True, exist_ok=True)
+    path = run_root / "resident.sock"
+    if path.exists():
+        # An existing live owner must never be displaced.
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as probe:
+            probe.settimeout(0.15)
+            try:
+                probe.connect(str(path))
+            except (ConnectionRefusedError, FileNotFoundError, OSError):
+                path.unlink(missing_ok=True)
+            else:
+                raise RuntimeError("Resident socket is already owned by a live process")
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as server:
+        server.bind(str(path))
+        if os.name != "nt":
+            os.chmod(path, 0o600)
+        server.listen(3)
+        server.settimeout(0.25)
+        if ready is not None:
+            ready.set()
+        try:
+            while not stop.is_set():
+                try:
+                    client, _ = server.accept()
+                except socket.timeout:
+                    continue
+                with client:
+                    client.settimeout(1.0)
+                    request = client.recv(80)
+                    if request.strip() == b"status":
+                        data = json.dumps(status, sort_keys=True).encode("utf-8") + b"\n"
+                    else:
+                        data = b'{"status":"UNSUPPORTED_READ_ONLY_REQUEST"}\n'
+                    client.sendall(data)
+        finally:
+            path.unlink(missing_ok=True)
+
+
+def read_health(run_root: Path = DEFAULT_RUN_ROOT) -> dict | None:
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+            client.settimeout(0.25)
+            client.connect(str(run_root / "resident.sock"))
+            client.sendall(b"status\n")
+            result = json.loads(client.recv(4096))
+        if result.get("schema") == "VERAOS_RESIDENT_STATUS_V1":
+            return result
+    except (OSError, ValueError, TypeError):
+        pass
+    return None
+
+
+class ResidentSupervisor:
+    """Single child, no duplicate launch and bounded rapid restart loop."""
+
+    def __init__(
+        self,
+        command: list[str],
+        *,
+        launch: Callable = subprocess.Popen,
+        health: Callable[[], dict | None] | None = None,
+    ) -> None:
+        self.command = command
+        self.launch = launch
+        self.health = health
+        self.child = None
+        self.launch_times: list[float] = []
+
+    def tick(self, now: float) -> str:
+        if self.child is not None and self.child.poll() is None:
+            info = self.health() if self.health else None
+            if (info and info.get("schema", "VERAOS_RESIDENT_STATUS_V1") == "VERAOS_RESIDENT_STATUS_V1"
+                    and info.get("pid") == self.child.pid and info.get("status")):
+                return str(info["status"])
+            return "RUNNING_UNVERIFIED"
+        self.child = None
+        self.launch_times = [t for t in self.launch_times if now - t < 60.0]
+        if len(self.launch_times) >= 3:
+            return "BLOCKED_RESTART_LIMIT"
+        self.child = self.launch(self.command)
+        self.launch_times.append(now)
+        return "STARTING"
+
+    def close(self) -> None:
+        if self.child is not None and self.child.poll() is None:
+            self.child.terminate()
+            try:
+                self.child.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                self.child.kill()
+                self.child.wait(timeout=3)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--components-root", type=Path, default=DEFAULT_COMPONENTS)
+    parser.add_argument("--run-root", type=Path, default=DEFAULT_RUN_ROOT)
+    parser.add_argument("--state-root", type=Path, default=DEFAULT_STATE_ROOT)
+    args = parser.parse_args(argv)
+    status, store = compose_components(args.components_root, args.state_root)
+    stop = threading.Event()
+    try:
+        print("VERAOS_RESIDENT_COMPONENTS_COMPOSED_V1", flush=True)
+        serve_status(args.run_root, status, stop)
+    finally:
+        store.close()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
