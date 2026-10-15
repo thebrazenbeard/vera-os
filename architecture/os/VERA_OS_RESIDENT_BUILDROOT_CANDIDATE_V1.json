@@ -40,6 +40,10 @@
         "reason": "portal PyYAML>=6,<7"
       }
     ],
+    "python_stdlib_flags": [
+      "BR2_PACKAGE_PYTHON3_SQLITE",
+      "BR2_PACKAGE_PYTHON3_SSL"
+    ],
     "browser_flags": [
       "BR2_PACKAGE_MESA3D",
       "BR2_PACKAGE_WPEWEBKIT",

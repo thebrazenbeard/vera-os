@@ -42,6 +42,17 @@ def probe(source: Path, repo: Path = ROOT):
         package_sources[stem]=target.group(1)
     for flag in contract["requires"]["browser_flags"]:
         if f"{flag}=y" not in defconfig.splitlines(): missing.append(flag)
+    # Python's optional stdlib extensions have their own Buildroot switches.
+    # The presence of SQLite/OpenSSL libraries alone does not enable imports.
+    flags=contract["requires"].get("python_stdlib_flags", [])
+    if flags:
+        python_config=(source/"package/python3/Config.in").read_text()
+        lines=[line.strip() for line in defconfig.splitlines()]
+        for flag in flags:
+            if not re.search(r"^config\s+"+re.escape(flag)+r"\s*$", python_config, re.M):
+                raise ValueError("Pinned Buildroot Python module symbol missing: "+flag)
+            if lines.count(flag+"=y") != 1 or "# "+flag+" is not set" in lines:
+                raise ValueError("Resident Python module flag missing or ambiguous: "+flag)
     if missing: raise ValueError("Resident defconfig missing required flags: "+",".join(missing))
     return {
       "schema":"VERA_OS_RESIDENT_UPSTREAM_SOURCE_PROBE_V1",
