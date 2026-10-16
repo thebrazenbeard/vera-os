@@ -54,3 +54,10 @@ and normal resident chat UI integration are still required before
 production local cognition can be considered installed/qualified.
 Never install on Windows, mutate its EFI/partition map, merge PRs, or
 grant runtime protected effects on the strength of this package alone.
+
+After a real guest-to-relay inventory PASS, the first genuine inference attempt
+failed before model dispatch because the optional diagnostic PID1 bypassed
+normal resident directory initialization. It now explicitly creates the
+private diagnostic PID1 state root before opening Pre-Active SQLite and
+rejects symlink redirection. The original failed serial log is preserved;
+this is a source repair pending rebuilt guest proof.

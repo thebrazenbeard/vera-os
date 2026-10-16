@@ -41,6 +41,18 @@ def require_no_guest_nic(sysfs: Path = Path("/sys/class/net")) -> None:
             raise RuntimeError("unexpected active sit0 tunnel NIC")
 
 
+def prepare_probe_state_root(root: Path = STATE) -> Path:
+    """Create bounded local development state; refuse redirected state roots."""
+    if root.is_symlink():
+        raise RuntimeError("probe state root must not be a symlink")
+    root.mkdir(mode=0o700,parents=True,exist_ok=True)
+    if not root.is_dir() or root.is_symlink():
+        raise RuntimeError("probe state root is not a private directory")
+    if os.name != "nt":
+        root.chmod(0o700)
+    return root
+
+
 def probe() -> None:
     mount_kernel_filesystems()
     if not prepare_loopback():
@@ -74,6 +86,7 @@ def probe() -> None:
         pre_active=importlib.import_module("pre_active")
         from .native_cognition import admit_local_text_route,execute_text_request
 
+        prepare_probe_state_root(STATE)
         store=pre_active.Store(STATE/"qwen4b-development-probe.sqlite3")
         # TEST-ONLY record, not an authentic independent model admission.
         descriptor={
