@@ -1,6 +1,7 @@
 """Loopback-only VeraOS dashboard, with truthful unqualified capability states."""
 from __future__ import annotations
 
+from html import escape
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from typing import Callable
@@ -30,18 +31,18 @@ button:disabled{cursor:not-allowed;opacity:.55}ul{padding-left:19px}
 <body>
 <header><h1>VERA OS</h1><small>Private resident environment · Local-only console</small></header>
 <main>
-<div class="notice">Live system telemetry; availability is not authorization.</div>
+<div class="notice">Local status snapshot at page load; availability is not authorization.</div>
 <section>
 <h2>Resident runtime</h2>
-<p id="status" class="state" role="status">Checking local resident host…</p>
+<p id="status" class="state" role="status">__VERAOS_STATUS__</p>
 <p class="muted">COMPOSED_NO_COGNITION means the component host is active but no cognition route has been admitted.</p>
 </section>
 <div class="grid">
-<section><h2>Resident components</h2><ul id="components"><li>Loading…</li></ul></section>
+<section><h2>Resident components</h2><ul id="components">__VERAOS_COMPONENTS__</ul></section>
 <section><h2>Capabilities</h2>
-<p>Canonical Vera runtime: <span id="canonical" class="state">UNVERIFIED</span></p>
-<p>Local cognition: <span id="cognition" class="state">UNVERIFIED</span></p>
-<p>Protected effects: <span id="effects" class="state">DENIED</span></p>
+<p>Canonical Vera runtime: <span id="canonical" class="state">__VERAOS_CANONICAL__</span></p>
+<p>Local cognition: <span id="cognition" class="state">__VERAOS_COGNITION__</span></p>
+<p>Protected effects: <span id="effects" class="state">__VERAOS_EFFECTS__</span></p>
 </section>
 </div>
 <section>
@@ -52,27 +53,47 @@ button:disabled{cursor:not-allowed;opacity:.55}ul{padding-left:19px}
 <p class="muted">VeraOS will not simulate a model response or silently select a paid provider.</p>
 </section>
 </main>
-<script>
-async function refresh(){
-try{
- const response=await fetch('/api/status',{cache:'no-store'});
- if(!response.ok)throw new Error('HTTP '+response.status);
- const s=await response.json();
- document.getElementById('status').textContent=s.status||'UNVERIFIED';
- document.getElementById('components').replaceChildren(
-  ...(s.components||[]).map(name=>{const li=document.createElement('li');li.textContent=name;return li})
- );
- document.getElementById('canonical').textContent=s.canonical_runtime_qualified?'QUALIFIED':'UNQUALIFIED';
- document.getElementById('cognition').textContent=s.cognition_route_qualified?'AVAILABLE':'NO ROUTE';
- document.getElementById('effects').textContent=s.protected_effect_authority?'AUTHORIZED':'DENIED';
-}catch(error){document.getElementById('status').textContent='LOCAL SERVICE UNAVAILABLE';}
-}
-refresh();setInterval(refresh,3000);
-</script>
 </body>
 </html>
 """
 
+
+
+
+def render_dashboard(status: dict) -> str:
+    """First paint is a truthful read-only server snapshot, no JavaScript needed."""
+    value = escape(str(status.get("status", "UNAVAILABLE"))[:128], quote=True)
+    components = status.get("components", [])
+    if not isinstance(components, (list, tuple)):
+        components = []
+    items = "".join(
+        "<li>" + escape(str(label)[:128], quote=True) + "</li>"
+        for label in components[:16]
+    )
+    if not items:
+        items = "<li>No components reported</li>"
+    fields = {
+        "__VERAOS_STATUS__": value,
+        "__VERAOS_COMPONENTS__": items,
+        "__VERAOS_CANONICAL__": (
+            "QUALIFIED" if status.get("canonical_runtime_qualified") is True
+            else "UNQUALIFIED"
+        ),
+        "__VERAOS_COGNITION__": (
+            "AVAILABLE" if status.get("cognition_route_qualified") is True
+            else "NO ROUTE"
+        ),
+        "__VERAOS_EFFECTS__": (
+            "AUTHORIZED" if status.get("protected_effect_authority") is True
+            else "DENIED"
+        ),
+    }
+    page = DASHBOARD
+    for placeholder, replacement in fields.items():
+        if page.count(placeholder) != 1:
+            raise ValueError("Invalid dashboard placeholder: " + placeholder)
+        page = page.replace(placeholder, replacement)
+    return page
 
 def make_handler(status_provider: Callable[[], dict]):
     class Handler(BaseHTTPRequestHandler):
@@ -84,7 +105,7 @@ def make_handler(status_provider: Callable[[], dict]):
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header(
                 "Content-Security-Policy",
-                "default-src 'none'; connect-src 'self'; script-src 'unsafe-inline'; "
+                "default-src 'none'; connect-src 'self'; script-src 'none'; "
                 "style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'",
             )
             self.end_headers()
@@ -92,7 +113,7 @@ def make_handler(status_provider: Callable[[], dict]):
 
         def do_GET(self):
             if self.path == "/":
-                self.send_bytes(200, DASHBOARD.encode("utf-8"), "text/html; charset=utf-8")
+                self.send_bytes(200, render_dashboard(status_provider()).encode("utf-8"), "text/html; charset=utf-8")
             elif self.path == "/api/status":
                 data = json.dumps(status_provider(), sort_keys=True).encode("utf-8")
                 self.send_bytes(200, data, "application/json")
