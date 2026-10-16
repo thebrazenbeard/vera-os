@@ -16,4 +16,11 @@ python -B experiments/cricket_dual_model/benchmark.py --cases experiments/cricke
 ```
 This run is model-assisted Cricket, **not** proof of a distinct Cricket Micro. Compare a primary-model critic with a different, genuinely distinct model using the **same** cases and reviewer interface. Passing `--core-digest` rejects an identical reviewer artifact digest; different digest alone does not establish training independence.
 
+Additional CPU-only training and simulated node-lease classification (both research-only):
+```powershell
+python -B experiments/cricket_dual_model/train_cpu_probe.py --output-dir ./fresh-toy-training-output
+python -B -m unittest discover -s experiments/cricket_dual_model -p "test_*.py" -v
+```
+See `TRAINING_AND_NODE_PILOT_20261016.md` and `docs/07-node-resident-agency-and-model-locality.md` for measured false-challenge rates and lease boundary semantics. This toy CPU classifier is **not** Cricket Micro, not independently reviewed, and not accepted for live routing. The `node_contract.py` implementation is pure advisory validation without signature verification or effect execution.
+
 Results contain only synthetic case IDs, labels, finding IDs, per-case status, timing and model digest. They intentionally exclude raw model completions. The harness fails when any case is unresolved and separately reports errors; a zero-result or malformed model reply is never treated as a clean PASS. No protected effects or tools are executed in the fixture.
