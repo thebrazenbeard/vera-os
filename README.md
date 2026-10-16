@@ -33,6 +33,21 @@ Primary goals:
 - [`docs/04-security-and-authority-model.md`](docs/04-security-and-authority-model.md) — OS-level governance direction
 - [`docs/05-open-questions.md`](docs/05-open-questions.md) — unresolved architecture questions
 
+## Federated cognition research candidate
+
+The first executable research kernel for **one Vera / multiple independent
+node-local cognitive participants** lives in `src/veraos/federation.py` on its
+development branch. It preserves local observations and hypotheses across
+restarts, explicitly stages evidence, and requires a separately authorized,
+revision-bound transition before adopting shared orientation.
+
+The source-bound contract and important limitations are in
+[`docs/13-federated-cognition-v1.md`](docs/13-federated-cognition-v1.md).
+Use `PYTHONPATH=src python -m unittest discover -s tests -v` to run
+the local behavioral tests. It is not an installed service, functioning
+multi-node network, distributed consensus algorithm, or cognition-capable
+neural agent.
+
 ## Status
 
 This repository is in **architecture discovery**. Documents record the current working model and should not be read as proof that any component has been implemented, installed, deployed, or validated.
