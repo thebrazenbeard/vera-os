@@ -32,8 +32,8 @@ isolated developer interface, not an arbitrary network proxy.
 ## Explicit opt-in qualification
 A separate rootfs diagnostic init /sbin/vera-virtio-probe must be named
 on the QEMU kernel command line to enable the guest probe. Normal
-/sbin/vera-init is unchanged. Probe checks /sys/class/net contains lo
-only, opens the exact VirtIO port, exposes the temporary guest loopback
+/sbin/vera-init is unchanged. Probe rejects any usable guest NIC while allowing the kernel-created sit0
+placeholder only when administratively DOWN, opens the exact VirtIO port, exposes the temporary guest loopback
 model facade, calls existing native_cognition P.O.R.T.A.L. and Pre-Active
 APIs against the actual pinned staged components, persists a result in
 probe-pre-active.sqlite3 and confirms idempotent replay.

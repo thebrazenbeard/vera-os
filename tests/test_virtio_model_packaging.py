@@ -30,5 +30,5 @@ def test_descriptor_remains_development_only():
     assert "TEST-ONLY record" in source
     assert "VERAOS_DEV_MODEL" in source
     assert "VERAOS_DEV_ACTUAL_MODEL_PREACTIVE_COMPLETED" in source
-    assert 'interfaces!=["lo"]' in source
+    assert "require_no_guest_nic()" in source
     assert "model_route_qualified" not in source

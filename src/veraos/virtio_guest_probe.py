@@ -22,13 +22,30 @@ STATE=Path("/var/lib/veraos/resident")
 BASE_URL="http://127.0.0.1:18766/v1"
 
 
+def require_no_guest_nic(sysfs: Path = Path("/sys/class/net")) -> None:
+    """Only lo and the DOWN kernel sit0 placeholder are allowed.
+
+    Linux may instantiate sit0 without any actual virtual NIC; reject
+    ethernet/tap/veth/wlan devices and a sit0 marked administratively UP.
+    QEMU also independently supplies -nic none and Docker --network none.
+    """
+    names=sorted(p.name for p in sysfs.glob("*"))
+    if "lo" not in names or any(name not in ("lo","sit0") for name in names):
+        raise RuntimeError("unexpected guest network NIC: "+repr(names))
+    if "sit0" in names:
+        try:
+            flags=int((sysfs/"sit0"/"flags").read_text().strip(),16)
+        except (OSError,ValueError) as exc:
+            raise RuntimeError("cannot verify inactive sit0 NIC") from exc
+        if flags & 0x1:  # IFF_UP
+            raise RuntimeError("unexpected active sit0 tunnel NIC")
+
+
 def probe() -> None:
     mount_kernel_filesystems()
     if not prepare_loopback():
         raise RuntimeError("guest local interface unavailable")
-    interfaces=sorted(p.name for p in Path("/sys/class/net").glob("*"))
-    if interfaces!=["lo"]:
-        raise RuntimeError("unexpected guest network NIC: "+repr(interfaces))
+    require_no_guest_nic()
     print("VERAOS_DEV_MODEL_GUEST_NO_NIC",flush=True)
     deadline=time.monotonic()+25
     while True:
