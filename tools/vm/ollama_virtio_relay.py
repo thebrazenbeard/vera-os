@@ -2,8 +2,8 @@
 """Source-bound QEMU VirtIO text relay; no host tools or arbitrary destinations.
 
 Runs outside guest in a narrow Docker sidecar sharing QEMU's network namespace.
-QEMU exposes a TCP chardev bound to 127.0.0.1 ONLY in that namespace; this
-sidecar translates two framed requests to an exact Ollama digest on Lappy.
+QEMU exposes a chardev Unix-domain socket in a private Docker volume; this
+sidecar connects over that file while only it can reach Windows Ollama.
 Guest has -nic none. Sidecar never listens or executes arbitrary operations.
 """
 from __future__ import annotations
@@ -117,18 +117,24 @@ class PinnedOllama:
         return {"id":ident,"ok":True,"text":answer}
 
 
-def run_relay(host: str, port: int, model: PinnedOllama) -> None:
-    if host!="127.0.0.1" or not 1<=port<=65535:
-        raise ValueError("Only QEMU container-local chardev is supported")
+SOCKET_PATH="/modelbridge/virtio-model.sock"
+
+
+def run_relay(path: str, model: PinnedOllama) -> None:
+    if path!=SOCKET_PATH:
+        raise ValueError("Only the private QEMU Unix chardev volume is allowed")
     model.verify()
     deadline=time.monotonic()+30
     while True:
+        stream=socket.socket(socket.AF_UNIX,socket.SOCK_STREAM)
         try:
-            stream=socket.create_connection((host,port),timeout=3)
+            stream.settimeout(3)
+            stream.connect(path)
             break
         except (ConnectionRefusedError,TimeoutError,OSError):
+            stream.close()
             if time.monotonic()>deadline:
-                raise RuntimeError("QEMU chardev not accepting serial relay")
+                raise RuntimeError("Private QEMU Unix chardev not accepting relay")
             time.sleep(0.5)
     print("VERAOS_RELAY_CONNECTED_PINNED_MODEL",flush=True)
     with stream:
@@ -156,11 +162,10 @@ def run_relay(host: str, port: int, model: PinnedOllama) -> None:
 
 def main() -> None:
     parser=argparse.ArgumentParser()
-    parser.add_argument("--host",default="127.0.0.1")
-    parser.add_argument("--port",type=int,default=17980)
+    parser.add_argument("--socket-path",default=SOCKET_PATH)
     parser.add_argument("--ollama",default="http://host.docker.internal:11434")
     args=parser.parse_args()
-    run_relay(args.host,args.port,PinnedOllama(args.ollama,MODEL,MODEL_DIGEST,MODEL_BYTES))
+    run_relay(args.socket_path,PinnedOllama(args.ollama,MODEL,MODEL_DIGEST,MODEL_BYTES))
 
 
 if __name__=="__main__":

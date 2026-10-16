@@ -99,3 +99,13 @@ def test_malformed_frames_or_mismatched_schema_refused():
             b=r.PinnedOllama(url,PIN_NAME,PIN_DIGEST,PIN_SIZE)
             with pytest.raises((ValueError,RuntimeError,TypeError)):
                 b.handle(parsed)
+
+
+def test_chardev_uses_private_unix_socket_only():
+    r=get_module()
+    with fake_ollama() as (url,calls):
+        model=r.PinnedOllama(url,PIN_NAME,PIN_DIGEST,PIN_SIZE)
+        for path in ("127.0.0.1:17980","/tmp/other.sock","/modelbridge/../host.sock"):
+            with pytest.raises(ValueError,match="private"):
+                r.run_relay(path,model)
+        assert r.SOCKET_PATH=="/modelbridge/virtio-model.sock"

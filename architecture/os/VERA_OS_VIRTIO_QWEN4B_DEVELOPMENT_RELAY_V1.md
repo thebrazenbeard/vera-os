@@ -12,13 +12,15 @@ admitted production cognition or VerifiedVeraRuntime identity.
 ## Restricted development transport
 QEMU VirtIO serial device name org.veraos.model.v1, guest dev entry
 resolved from /sys/class/virtio-ports by exact name. QEMU container uses
-Docker bridge networking with NO guest NIC (-nic none) and no published
-ports. Its chardev listens only on container-local 127.0.0.1:17980;
-one explicitly started Docker relay sidecar shares the QEMU container
-network namespace and connects solely to the Windows Ollama endpoint
-host.docker.internal:11434. No arbitrary destination/URL from the guest
-is forwarded. No shell/host effects, remote storage or credentials.
-The sidecar must be explicitly started; no persistent daemon installed.
+network NONE with NO guest NIC (-nic none) and no published ports. The
+chardev uses the fixed Unix socket /modelbridge/virtio-model.sock in a
+private Docker named volume shared ONLY by the QEMU and relay containers.
+An explicitly launched relay container uses Docker Desktop host networking
+to connect only to Windows Ollama via host.docker.internal:11434, while
+its VirtIO side is Unix-socket-only. Neither guest nor QEMU container
+has a network route. No arbitrary destination/URL from the guest is
+forwarded. No shell/host effects, remote storage or credentials.
+The relay must be explicitly started; no persistent daemon installed.
 
 Protocol is line-delimited bounded JSON on VirtIO serial. Operations
 are only models and chat, with exact model and digest/size verification,
