@@ -172,6 +172,8 @@ class NodeJournal:
                            sha256(data.encode("utf8")).hexdigest())
         event.verify()
         with closing(_connect(self.path)) as conn, conn:
+            # Serialize the idempotency read and insert across concurrent writers.
+            conn.execute("BEGIN IMMEDIATE")
             current = conn.execute("SELECT digest FROM events WHERE event_id=?",
                                    (event_id,)).fetchone()
             if current:
@@ -261,6 +263,8 @@ class SharedOrientation:
         if event.identity != self.orientation().identity:
             raise FederationError("Event claims another shared identity")
         with closing(_connect(self.path)) as conn, conn:
+            # Receiver duplicate admission must be atomic under parallel delivery.
+            conn.execute("BEGIN IMMEDIATE")
             existing = conn.execute("SELECT digest FROM candidates WHERE node_id=? AND event_id=?",
                                     (event.node_id,event.event_id)).fetchone()
             if existing is not None:
