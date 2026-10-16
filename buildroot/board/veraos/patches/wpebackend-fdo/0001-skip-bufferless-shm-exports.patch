@@ -1,0 +1,42 @@
+From: VeraOS image qualification <veraos@local.invalid>
+Subject: [PATCH] fdo: ignore bufferless surface commits before SHM export
+
+A Wayland surface commit without an attached wl_buffer must not forward
+the previous surface.shmBuffer pointer (or dmabuf) after bufferResource
+has been cleared by the prior commit. That stale pointer produced
+nonphysical SHM width/height/stride in Cog's export callback and a
+source-buffer fault. Preserve normal exports when bufferResource exists.
+
+Upstream WPEBackend-FDO 1.14.3 patch candidate, not a claim that
+runtime refresh is qualified.
+
+--- a/src/ws-egl.cpp
++++ b/src/ws-egl.cpp
+@@ -83,8 +83,12 @@
+         return;
+ 
+     struct wl_resource* bufferResource = surface.bufferResource;
+     surface.bufferResource = nullptr;
++
++    // A commit without a new wl_buffer must not re-export stale SHM data.
++    if (!bufferResource)
++        return;
+ 
+     if (surface.dmabufBuffer)
+         surface.apiClient->exportLinuxDmabuf(surface.dmabufBuffer);
+     else if (surface.shmBuffer)
+--- a/src/ws-shm.cpp
++++ b/src/ws-shm.cpp
+@@ -46,8 +46,12 @@
+ 
+     struct wl_resource* bufferResource = surface.bufferResource;
+     surface.bufferResource = nullptr;
+ 
++    // A commit without a new wl_buffer must not re-export stale SHM data.
++    if (!bufferResource)
++        return;
++
+     if (surface.shmBuffer)
+         surface.apiClient->exportShmBuffer(bufferResource, surface.shmBuffer);
+     else
+         surface.apiClient->exportBufferResource(bufferResource);
