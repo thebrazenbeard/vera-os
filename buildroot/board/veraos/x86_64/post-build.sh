@@ -46,3 +46,5 @@ if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
 fi
 
 chmod 0755 "$target_dir/sbin/vera-init"
+# Explicit QEMU-only diagnostic init; NEVER used by default boot.
+chmod 0755 "$target_dir/sbin/vera-virtio-probe"

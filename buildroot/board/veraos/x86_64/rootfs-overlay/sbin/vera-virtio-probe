@@ -1,0 +1,5 @@
+#!/usr/bin/python3
+import sys
+sys.path.insert(0, "/opt/veraos/src")
+from veraos.virtio_guest_probe import main
+main()
