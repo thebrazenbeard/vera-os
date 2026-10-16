@@ -22,6 +22,7 @@ def test_cog_patch_handles_unassigned_crtc_only_when_possible_mask_allows():
     assert set(patches) == {
         "0001-drm-allow-unassigned-crtc-for-cold-boot.patch",
         "0002-drm-shm-frame-row-bounds.patch",
+        "0003-drm-do-not-clobber-wl-shm-userdata.patch",
     }
     patch = patches["0001-drm-allow-unassigned-crtc-for-cold-boot.patch"].read_text(encoding="utf-8")
     assert "platform/drm/cog-platform-drm.c" in patch
