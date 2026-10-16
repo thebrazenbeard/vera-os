@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 import importlib
 import json
 import os
@@ -31,6 +32,18 @@ def component_paths(base: Path) -> list[str]:
     ]
 
 
+
+@dataclass
+class ResidentHandles:
+    """Hold the actual Vera Mono composition for the lifetime of this process."""
+
+    pre_active_store: object
+    canonical_runtime: object
+
+    def close(self) -> None:
+        self.pre_active_store.close()
+
+
 def compose_components(base: Path, state_root: Path) -> tuple[dict, object]:
     """Import exact staged packages; open PreActive's actual durable Store.
 
@@ -48,6 +61,12 @@ def compose_components(base: Path, state_root: Path) -> tuple[dict, object]:
     if not hasattr(portal, "resolve_portal_route"):
         raise RuntimeError("P.O.R.T.A.L. route API missing")
     state_root.mkdir(parents=True, exist_ok=True)
+    # Open the source-bound Vera Mono composition root first. Its native effect
+    # fence and trust registry stay fail-closed without injected authorities.
+    state = core.VeraStateDirectory(
+        state_root / "vera-state", project_id="veraos", identity_id="VERA",
+    )
+    canonical_runtime = core.QualifiedVeraRuntime.from_state_directory(state)
     store = pre_active.Store(state_root / "pre-active.sqlite3")
     engine = volition.VolitionEngine()
     assert engine is not None
@@ -59,11 +78,12 @@ def compose_components(base: Path, state_root: Path) -> tuple[dict, object]:
         "pre_active_store_open": True,
         "volition_engine_initialized": True,
         "portal_route_api_present": True,
+        "canonical_runtime_open": True,
         "canonical_runtime_qualified": False,
         "cognition_route_qualified": False,
         "protected_effect_authority": False,
     }
-    return status, store
+    return status, ResidentHandles(store, canonical_runtime)
 
 
 def serve_status(
