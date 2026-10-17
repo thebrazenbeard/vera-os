@@ -11,7 +11,8 @@ import urllib.request
 
 import pytest
 
-from test_native_admitted_cognition import staged, model_service, descriptor, STAGE
+from test_native_admitted_cognition import staged, STAGE
+from source_only_offline_fixture import make_offline_fixture
 
 
 def call(base, path, *, payload=None, origin=True, content_type="application/json"):
@@ -112,42 +113,31 @@ def test_actual_resident_main_http_request_persistence_and_fails_closed(monkeypa
     args = ["--components-root", str(STAGE),
             "--state-root", str(tmp_path / "persistent"),
             "--run-root", str(tmp_path / "run")]
-    with model_service(response="fixture-console-response") as (base_url, calls):
-        template = {"provider": descriptor(base_url),
-                    "base_url": base_url, "model": "resident-probe"}
-        verifier = lambda *args: "SYNTHETIC_SOURCE_FIXTURE_ONLY"
-        assert resident.main(args, conversation_template=template,
-                             host_admission_verifier=verifier) == 0
-        assert len(calls) == 1
-        assert "tools" not in calls[0]
-        # The first instance is fully shut down, then recreated from disk.
-        assert resident.main(args, conversation_template=template,
-                             host_admission_verifier=verifier) == 0
-        assert len(calls) == 1
-        assert seen[1]["run_id"] == seen[0]["run_id"]
-        from veraos.resident import compose_components
-        status, handles = compose_components(STAGE, tmp_path / "persistent")
-        try:
-            assert handles.pre_active_store.get_run(seen[0]["run_id"])["status"] == "COMPLETED"
-            assert handles.pre_active_store.get_run(seen[0]["run_id"])["final_text"] == "fixture-console-response"
-            assert status["cognition_route_qualified"] is False
-            assert status["protected_effect_authority"] is False
-        finally:
-            handles.close()
+    fixture,calls=make_offline_fixture("fixture-console-response")
+    assert resident.main(args, source_fixture_execute=fixture) == 0
+    assert len(calls) == 1
+    assert calls[0][1] == []  # empty tool list, NO network ModelAdapter
+    assert resident.main(args, source_fixture_execute=fixture) == 0
+    assert len(calls) == 1
+    assert seen[1]["run_id"] == seen[0]["run_id"]
+    from veraos.resident import compose_components
+    status, handles = compose_components(STAGE, tmp_path / "persistent")
+    try:
+        assert handles.pre_active_store.get_run(seen[0]["run_id"])["status"] == "COMPLETED"
+        assert handles.pre_active_store.get_run(seen[0]["run_id"])["final_text"] == "fixture-console-response"
+        assert status["cognition_route_qualified"] is False
+        assert status["protected_effect_authority"] is False
+    finally:
+        handles.close()
 
 
-def test_main_rejects_unverified_conversation_template(monkeypatch, tmp_path):
-    staged()
+def test_main_rejects_legacy_provider_parameters_without_state_mutation(tmp_path):
     from veraos import resident
     args = ["--components-root", str(STAGE),
             "--state-root", str(tmp_path / "persistent"),
             "--run-root", str(tmp_path / "run")]
-    with model_service() as (base_url, calls):
-        template = {"provider": descriptor(base_url),
-                    "base_url": base_url, "model": "resident-probe"}
-        with pytest.raises(RuntimeError, match="verifier absent"):
-            resident.main(args, conversation_template=template)
-        with pytest.raises(ValueError, match="invalid resident conversation template"):
-            resident.main(args, conversation_template={**template, "effects": True},
-                          host_admission_verifier=lambda *_: "SYNTHETIC_SOURCE_FIXTURE_ONLY")
-        assert calls == []
+    with pytest.raises(TypeError):
+        resident.main(args, conversation_template={"provider": {"qualification": "PASS"}})
+    with pytest.raises(TypeError):
+        resident.main(args, host_admission_verifier=lambda *args: "SYNTHETIC_SOURCE_FIXTURE_ONLY")
+    assert not (tmp_path / "persistent").exists()
