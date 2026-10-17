@@ -120,6 +120,7 @@ def compose_components(base: Path, state_root: Path) -> tuple[dict, object]:
         "canonical_runtime_open": True,
         "canonical_runtime_qualified": False,
         "cognition_route_qualified": False,
+        "conversation_fixture_available": False,
         "protected_effect_authority": False,
     }
     return status, ResidentHandles(store, canonical_runtime)
@@ -230,6 +231,7 @@ def main(
     *,
     cognition_request: dict | None = None,
     host_admission_verifier: Callable[[dict, str, str], str] | None = None,
+    conversation_template: dict | None = None,
 ) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--components-root", type=Path, default=DEFAULT_COMPONENTS)
@@ -246,7 +248,51 @@ def main(
                 cognition_request,
                 host_admission_verifier=host_admission_verifier,
             )
-        server = open_loopback_server(lambda: status)
+        if conversation_template is not None:
+            # This is a source-only, in-process fixture injection; normal CLI
+            # cannot configure it. No model path is admitted from HTTP input.
+            if type(conversation_template) is not dict or set(conversation_template) != {
+                "provider", "base_url", "model",
+            }:
+                raise ValueError("invalid resident conversation template")
+            if host_admission_verifier is None:
+                raise RuntimeError("resident host admission verifier absent: HELD")
+            fixture_lock = threading.Lock()
+            status["conversation_fixture_available"] = True
+
+            def handle_text(task: str, request_id: str) -> dict:
+                # Serialize all Pre-Active/SQLite writes from HTTP worker
+                # threads; stable IDs are durable and replay-safe once terminal.
+                with fixture_lock:
+                    # ThreadingHTTPServer processes each POST in a worker.
+                    # SQLite's main-thread Store connection is NOT transferable.
+                    # Reopen the same persistent Pre-Active DB in this worker,
+                    # then close its connection in that same worker.
+                    pre_active = importlib.import_module("pre_active")
+                    worker_store = pre_active.Store(
+                        args.state_root / "pre-active.sqlite3",
+                    )
+                    try:
+                        worker_handles = ResidentHandles(
+                            worker_store, store.canonical_runtime,
+                        )
+                        return worker_handles.execute_cognition_fixture(
+                            {
+                                **conversation_template,
+                                "task": task,
+                                "request_id": request_id,
+                                "now": time.time(),
+                            },
+                            host_admission_verifier=host_admission_verifier,
+                        )
+                    finally:
+                        worker_store.close()
+
+            server = open_loopback_server(
+                lambda: status, conversation_handler=handle_text,
+            )
+        else:
+            server = open_loopback_server(lambda: status)
         http_thread = threading.Thread(target=server.serve_forever, daemon=True)
         http_thread.start()
         print("VERAOS_RESIDENT_COMPONENTS_COMPOSED_V1", flush=True)
