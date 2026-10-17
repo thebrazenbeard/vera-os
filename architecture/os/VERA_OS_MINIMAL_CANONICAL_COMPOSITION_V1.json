@@ -1,0 +1,144 @@
+{
+  "schema": "VERA_OS_MINIMAL_CANONICAL_COMPOSITION_V1",
+  "scope": "REVIEWED_SOURCE_ARCHITECTURE_ONLY_NOT_BUILD_OR_GUEST",
+  "source_subjects": {
+    "vera_os_reviewed_pre_change_head": "578f435a3ab8ae23e8b735b4cc792dfa292a88d3",
+    "mono_draft_head": "89ba1d18da78e7e38f015cf8d8ef4f528aae9df8",
+    "portal_desktop_A1_head": "a5776acc8fa78a169660ef453c8c376c9f8f79f6",
+    "portal_resident_source_head": "36fa04da4e5eb383fecf463c72a43b94ca47d7e5",
+    "pre_active_source_head": "1f23a809d7274df506e03e2d9052525538c3bcf6",
+    "volition_source_head": "dbc628d376515a0a523b1eecdf62129cca5d6b08",
+    "portfolio_371_head": "951e7af1a97694faaf6bc18d51b35f70982e31fc",
+    "portfolio_372_head": "ef17ee929d807f5da033a3d5391d553b65c464e8"
+  },
+  "identity": {
+    "linux": {
+      "project_id": "veraos",
+      "identity_id": "VERA",
+      "canonical_state": "/var/lib/veraos/resident/vera-state"
+    },
+    "windows": {
+      "project_id": "VERA_MONO",
+      "identity_id": "VERA_PROJECT_IDENTITY_V1",
+      "canonical_state": "<desktop_runtime_root>/state/vera"
+    },
+    "shared_physical_writer": false,
+    "shared_state_root": false,
+    "locator_authenticates_user": false
+  },
+  "selected_source_components": [
+    {
+      "repository": "thebrazenbeard/vera-mono",
+      "component": "vera_mono",
+      "file_count": 316,
+      "internal_package_ids": [
+        "vera_core",
+        "vera_ingest",
+        "vera_identity",
+        "vera_runtime",
+        "rezon",
+        "portfolio_runtime",
+        "vera_coordination",
+        "vera_memory",
+        "vera_assurance",
+        "vera_pc_connection",
+        "vera_control",
+        "vera_recovery"
+      ]
+    },
+    {
+      "repository": "thebrazenbeard/portal",
+      "component": "portal",
+      "file_count": 89,
+      "role": "advisory_route_and_host_adapter"
+    },
+    {
+      "repository": "thebrazenbeard/pre-active",
+      "component": "pre_active",
+      "file_count": 18,
+      "role": "durable_source_event_run_store_NOT_CANONICAL_MEMORY"
+    },
+    {
+      "repository": "thebrazenbeard/volition",
+      "component": "volition",
+      "file_count": 8,
+      "role": "non_effectful_initiative_proposals"
+    }
+  ],
+  "source_receipt_sha256": "6f0031c1fcbaed41e4e3f6947e90a92ed5656ac3e09329de7d8e0b0f8417eca5",
+  "normal_init": {
+    "entrypoint": "/sbin/vera-init",
+    "python_package": "veraos.pid1",
+    "resident_module": "veraos.resident",
+    "browser_command": [
+      "/usr/bin/cog",
+      "--platform=drm",
+      "http://127.0.0.1:18765/"
+    ],
+    "resident_health_status": "COMPOSED_NO_COGNITION",
+    "no_provider_canonical_status": "PENDING_NO_ADMITTED_PROVIDER",
+    "guest_graphics_verified": false
+  },
+  "filesystem": {
+    "source": "/opt/veraos/components",
+    "host_code": "/opt/veraos/src/veraos",
+    "boot_manifests": "/etc/veraos/architecture",
+    "canonical_state": "/var/lib/veraos/resident/vera-state",
+    "operational_preactive": "/var/lib/veraos/resident/pre-active.sqlite3",
+    "boot_lifecycle": "/var/lib/veraos/lifecycle",
+    "run_ephemeral": "/run/veraos",
+    "gui_origin": "http://127.0.0.1:18765/"
+  },
+  "buildroot": {
+    "source_version": "2025.02.18",
+    "peeled_source_commit": "d030e36bbc9669230c015be971b14b6e062cfdde",
+    "selected_defconfig": "buildroot/configs/veraos_x86_64_resident_browser_defconfig",
+    "target_python": "3.12.14",
+    "source_historical_boot_contract_buildroot": "2024.02.4",
+    "required_stdlib": [
+      "sqlite3",
+      "ssl"
+    ],
+    "required_site_packages": [
+      "jsonschema",
+      "cryptography",
+      "yaml"
+    ],
+    "required_gui": [
+      "WPEWebKit",
+      "Cog DRM",
+      "Mesa",
+      "DejaVu Sans"
+    ],
+    "resolved_kconfig": false,
+    "build_executed": false,
+    "image_accepted": false,
+    "target_imports_executed": false
+  },
+  "excluded_as_mandatory_guest_runtime": [
+    "thebrazenbeard/rezon",
+    "thebrazenbeard/mosaic",
+    "thebrazenbeard/fuckup",
+    "thebrazenbeard/vera-model",
+    "thebrazenbeard/vera_model_training",
+    "thebrazenbeard/v-e-r-a",
+    "thebrazenbeard/vision",
+    "thebrazenbeard/physica",
+    "thebrazenbeard/human-shield",
+    "thebrazenbeard/redworm",
+    "thebrazenbeard/vera-ark",
+    "thebrazenbeard/vera-habitat",
+    "thebrazenbeard/ears"
+  ],
+  "rule": "External donor/sibling repositories are not dynamic runtime dependencies; reusable Rezon source is already internal to Mono. PORTAL/PreActive/Volition are separately selected exact-package host seam inputs, not automatic extra memory or authority owners.",
+  "qualification": {
+    "source": "PINNED_431_FILE_STAGE_VERIFIED",
+    "resolved_buildroot_kconfig": "UNEXECUTED",
+    "compiled_elf_and_target_imports": "UNEXECUTED",
+    "built_rootfs_and_image": "NOT_BUILT",
+    "real_ext2_image_receipt": "UNEXECUTED",
+    "pid1_cog_graphical_two_boot": "NOT_GUEST_QUALIFIED",
+    "provider_model": "HOLD",
+    "protected_effects": "DENIED"
+  }
+}

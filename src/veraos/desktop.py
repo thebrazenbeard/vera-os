@@ -80,16 +80,32 @@ function updateControls(){
 async function sendMessage(){
  if(!conversationAvailable||sending)return;
  const input=document.getElementById('message');
- const task=input.value.trim();
- if(!task||task.length>2048)return;
- sending=true;updateControls();
+ const task=input.value;
  const result=document.getElementById('conversation-result');
+ // Mono #77 accepts the ORIGINAL literal or explicitly rejects it.
+ // Never turn invalid whitespace into a different canonical task.
+ if(!task||task!==task.trim()||task.length>2048){
+  result.textContent='INVALID_LITERAL_TEXT — original user input not submitted';
+  return;
+ }
+ let pending=null;
+ try{pending=JSON.parse(localStorage.getItem(PENDING_KEY)||'null')}
+ catch(error){
+  result.textContent='OUTCOME_UNKNOWN_NO_REDISPATCH — unreadable pending message';
+  return;
+ }
+ // A claimed/unknown original may ONLY be retried under the identical
+ // conversation, request ID and literal. It cannot be displaced by a new send.
+ if(pending!==null && (!pending || pending.conversation_id!==conversationId
+   || pending.task!==task || typeof pending.request_id!=='string'
+   || !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,95}$/.test(pending.request_id))){
+  result.textContent='OUTCOME_UNKNOWN_NO_REDISPATCH — reconcile prior message first';
+  return;
+ }
+ sending=true;updateControls();
  result.textContent='PENDING — awaiting local response';
  requestSequence++;
- let pending=null;
- try{pending=JSON.parse(localStorage.getItem(PENDING_KEY)||'null')}catch(error){}
- const requestId=(pending&&pending.conversation_id===conversationId&&pending.task===task)
-  ?pending.request_id:'ui-'+randomHex();
+ const requestId=pending?pending.request_id:'ui-'+randomHex();
  localStorage.setItem(PENDING_KEY,JSON.stringify({
   conversation_id:conversationId,request_id:requestId,task:task
  }));
@@ -108,11 +124,17 @@ async function sendMessage(){
       result.textContent='HELD — unverified completion not displayed';
     }
   }else{
+    if(payload.status==='BLOCKED' && typeof payload.task_id==='string'
+       && payload.task_id.startsWith('ui-')){
+      // A completed, source-bound local HTTP response means intake was
+      // durably recorded; retire ONLY the UI retry selector, not Mono state.
+      localStorage.removeItem(PENDING_KEY);
+    }
     result.textContent=payload.status==='BLOCKED'
       ?'HELD — canonical task recorded; no model authorized'
       :(payload.status||'PENDING');
   }
- }catch(error){result.textContent='LOCAL SERVICE UNAVAILABLE'}
+ }catch(error){result.textContent='OUTCOME_UNKNOWN_NO_REDISPATCH — retain original message'}
  finally{sending=false;updateControls()}
 }
 document.getElementById('send').addEventListener('click',sendMessage);
