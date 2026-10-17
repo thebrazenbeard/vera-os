@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import importlib
 import json
+import os
 from pathlib import Path
 import sys
 import threading
@@ -13,7 +14,8 @@ import pytest
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"src"))
-STAGE=Path(r"D:\VeraOS\vm\resident-core-source-stage-20261012\components")
+STAGE=Path(os.environ.get("VERAOS_CANONICAL_STAGE",
+    r"D:\VeraOS\vm\resident-core-source-stage-20261012\components"))
 
 
 def staged():

@@ -82,6 +82,7 @@ def compose_components(base: Path, state_root: Path) -> tuple[dict, object]:
         "canonical_runtime_qualified": False,
         "cognition_route_qualified": False,
         "conversation_fixture_available": False,
+        "conversation_intake_available": True,
         "protected_effect_authority": False,
     }
     return status, ResidentHandles(store, canonical_runtime)
@@ -202,73 +203,104 @@ def main(
     server = None
     http_thread = None
     try:
+        # The normal resident ALWAYS owns task intake. No admitted provider
+        # means a durable HELD task, never a model dispatch or a fake answer.
+        from vera_core.local_conversation import (
+            ConversationError, open_message, recover_message,
+            reserve_source_trial, seal_source_observation,
+        )
+        from vera_core.portal_task_handoff import export_portal_route_request
+        from portal.vera_task_handoff import assess_vera_task_route
+        from portal import PortalRouteAdvertisement
+
+        fixture_lock = threading.Lock()
         if source_fixture_execute is not None:
-            # Python-injected OFFLINE test executor only. Not a CLI/env/HTTP
-            # option; no provider descriptor, URL, or network-capable model
-            # adapter is constructed by this production resident module.
-            # The external test source owns its deterministic fixture.
-            fixture_lock = threading.Lock()
             status["conversation_fixture_available"] = True
 
-            def handle_text(task: str, request_id: str) -> dict:
-                with fixture_lock:
-                    pre_active = importlib.import_module("pre_active")
-                    worker_store = pre_active.Store(args.state_root / "pre-active.sqlite3")
-                    try:
-                        result = source_fixture_execute(task, request_id, worker_store)
-                        if type(result) is dict and result.get("status") == "COMPLETED":
-                            # Validate the original task and durable model event
-                            # before exposing this fixture result to the UI.
-                            run_id, event_id, answer_text = (
-                                result.get("run_id"),
-                                result.get("event_id"),
-                                result.get("final_text"),
-                            )
-                            if any(type(x) is not str or not x for x in (run_id, event_id, answer_text)):
-                                return {"status": "OUTCOME_UNKNOWN"}
-                            row = worker_store.connection.execute(
-                                """
-                                SELECT r.task, r.status, r.final_text,
-                                       r.capabilities_json, r.source_event_id,
-                                       e.kind, e.payload_json, e.dedup_key
-                                FROM runs AS r JOIN events AS e ON e.id=r.source_event_id
-                                WHERE r.id=? AND e.id=?
-                                """, (run_id, event_id),
-                            ).fetchone()
-                            route_rows = worker_store.connection.execute(
-                                """
-                                SELECT payload_json FROM journal
-                                WHERE subject_id=? AND event_type='VERAOS_COGNITION_ROUTE_SELECTED'
-                                ORDER BY seq DESC
-                                """, (event_id,),
-                            ).fetchall()
-                            try:
-                                event_data = json.loads(row["payload_json"]) if row else None
-                                caps = json.loads(row["capabilities_json"]) if row else None
-                                routes = [json.loads(r["payload_json"]) for r in route_rows]
-                            except (ValueError, TypeError):
-                                return {"status": "OUTCOME_UNKNOWN"}
-                            if (
-                                row is None or row["task"] != task
-                                or row["status"] != "COMPLETED"
-                                or row["final_text"] != answer_text
-                                or row["source_event_id"] != event_id
-                                or row["kind"] != "task.requested"
-                                or row["dedup_key"] != f"veraos-text:{request_id}"
-                                or event_data != {"task": task, "capabilities": []}
-                                or caps != [] or len(routes) != 1
-                                or routes[0].get("provider_id") != result.get("provider_id")
-                                or routes[0].get("route_id") != result.get("route_id")
-                                or routes[0].get("effect_class") != "COGNITION_ONLY"
-                            ):
-                                return {"status": "OUTCOME_UNKNOWN"}
-                        return result
-                    finally:
-                        worker_store.close()
+        def handle_text(task: str, request_id: str,
+                        conversation_id: str = "veraos-local-console") -> dict:
+            # The client locator identifies a conversation, NOT a user,
+            # permission, model, trusted origin, or authenticated principal.
+            with fixture_lock:
+                pre_active = importlib.import_module("pre_active")
+                worker_store = pre_active.Store(args.state_root / "pre-active.sqlite3")
+                try:
+                    intake = open_message(
+                        store.canonical_runtime.tasks,
+                        conversation_id, request_id, task,
+                    )
+                    if source_fixture_execute is None:
+                        return {"status": "BLOCKED", "task_id": intake["task_id"]}
 
-            server = open_loopback_server(lambda: status, conversation_handler=handle_text)
-        else:
-            server = open_loopback_server(lambda: status)
+                    current = recover_message(
+                        store.canonical_runtime.tasks, worker_store, intake,
+                    )
+                    if current["status"] == "SOURCE_COMPLETED_UNSEALED_NO_REDISPATCH":
+                        current = seal_source_observation(
+                            store.canonical_runtime.tasks, worker_store, intake,
+                        )
+                    if current["status"] == "SOURCE_OBSERVATION_REVALIDATED":
+                        # Only an explicitly injected test fixture may return
+                        # a synthetic result; no production admitted model.
+                        return {
+                            "status": "COMPLETED",
+                            "run_id": current["source"]["run_id"],
+                            "final_text": current["source"]["text"],
+                            "task_id": intake["task_id"], "synthetic": True,
+                        }
+                    if current["status"] != "PENDING_NO_ADMITTED_PROVIDER":
+                        return {"status": "BLOCKED", "task_id": intake["task_id"]}
+
+                    # A test-only advertisement cannot authenticate a host.
+                    # PORTAL supplies advisory routing; Mono task owns its CAS.
+                    advisory = PortalRouteAdvertisement(
+                        adapter_id="pre-active-offline-fixture",
+                        route_id="offline-fixture", node_id="veraos",
+                        target_kind="MODEL", target_id="offline-deterministic",
+                        capabilities=("text",),
+                        effect_capabilities=("NO_PROTECTED_EFFECT",),
+                        authorized_effects=("NO_PROTECTED_EFFECT",),
+                        available=True, attached=True, current=True,
+                    )
+                    request = export_portal_route_request(
+                        store.canonical_runtime.tasks, intake["task_id"],
+                        node_id="veraos", target_kind="MODEL",
+                        target_id="offline-deterministic",
+                        required_capabilities=("text",),
+                    )
+                    assessment = assess_vera_task_route(request, (advisory,))
+                    reserve_source_trial(
+                        store.canonical_runtime.tasks, intake, assessment,
+                        target_id="offline-deterministic",
+                        route_id="offline-fixture",
+                    )
+                    # Source-only deterministic injected callback. The reservation
+                    # is durable BEFORE invocation. Any crash/no outcome never
+                    # causes a second invocation on subsequent HTTP retries.
+                    result = source_fixture_execute(task, request_id, worker_store)
+                    if type(result) is not dict or result.get("status") != "COMPLETED":
+                        return {"status": "BLOCKED", "task_id": intake["task_id"]}
+                    checked = seal_source_observation(
+                        store.canonical_runtime.tasks, worker_store, intake,
+                    )
+                    if checked["status"] != "SOURCE_OBSERVATION_REVALIDATED":
+                        return {"status": "BLOCKED", "task_id": intake["task_id"]}
+                    if (result.get("run_id") != checked["source"]["run_id"]
+                            or result.get("event_id") != checked["source"]["event_id"]
+                            or result.get("final_text") != checked["source"]["text"]
+                            or result.get("route_id") != "offline-fixture"
+                            or result.get("provider_id") != "offline-fixture"):
+                        raise ConversationError("injected callback disagrees with persisted source")
+                    return {
+                        "status": "COMPLETED",
+                        "run_id": checked["source"]["run_id"],
+                        "final_text": checked["source"]["text"],
+                        "task_id": intake["task_id"], "synthetic": True,
+                    }
+                finally:
+                    worker_store.close()
+
+        server = open_loopback_server(lambda: status, conversation_handler=handle_text)
         http_thread = threading.Thread(target=server.serve_forever, daemon=True)
         http_thread.start()
         print("VERAOS_RESIDENT_COMPONENTS_COMPOSED_V1", flush=True)

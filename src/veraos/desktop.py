@@ -59,6 +59,17 @@ button:disabled{cursor:not-allowed;opacity:.55}ul{padding-left:19px}
 let conversationAvailable=false;
 let sending=false;
 let requestSequence=0;
+let syntheticFixture=false;
+const randomHex=()=>Array.from(crypto.getRandomValues(new Uint8Array(16)),
+ x=>x.toString(16).padStart(2,'0')).join('');
+const CONVERSATION_KEY='veraos-local-conversation-v1';
+const PENDING_KEY='veraos-local-pending-message-v1';
+let conversationId=localStorage.getItem(CONVERSATION_KEY);
+if(!conversationId || !/^console-[0-9a-f]{32}$/.test(conversationId)){
+ conversationId='console-'+randomHex();
+ localStorage.setItem(CONVERSATION_KEY,conversationId);
+}
+
 function updateControls(){
  const enabled=conversationAvailable&&!sending;
  document.getElementById('message').disabled=!enabled;
@@ -73,18 +84,31 @@ async function sendMessage(){
  const result=document.getElementById('conversation-result');
  result.textContent='PENDING — awaiting local response';
  requestSequence++;
- const requestId='ui-'+Date.now().toString(36)+'-'+requestSequence.toString(36);
+ let pending=null;
+ try{pending=JSON.parse(localStorage.getItem(PENDING_KEY)||'null')}catch(error){}
+ const requestId=(pending&&pending.conversation_id===conversationId&&pending.task===task)
+  ?pending.request_id:'ui-'+randomHex();
+ localStorage.setItem(PENDING_KEY,JSON.stringify({
+  conversation_id:conversationId,request_id:requestId,task:task
+ }));
  try{
   const response=await fetch('/api/conversation',{
    method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({task:task,request_id:requestId})
+   body:JSON.stringify({task:task,request_id:requestId,conversation_id:conversationId})
   });
   const payload=await response.json();
   if(!response.ok){result.textContent=payload.status||'HELD_OR_UNAVAILABLE';return}
   if(payload.status==='COMPLETED' && typeof payload.final_text==='string'){
-    result.textContent=payload.final_text;
+    if(syntheticFixture&&payload.synthetic===true){
+      localStorage.removeItem(PENDING_KEY);
+      result.textContent='SYNTHETIC DEVELOPMENT FIXTURE — NOT AN ADMITTED MODEL\\n'+payload.final_text;
+    }else{
+      result.textContent='HELD — unverified completion not displayed';
+    }
   }else{
-    result.textContent=payload.status||'PENDING';
+    result.textContent=payload.status==='BLOCKED'
+      ?'HELD — canonical task recorded; no model authorized'
+      :(payload.status||'PENDING');
   }
  }catch(error){result.textContent='LOCAL SERVICE UNAVAILABLE'}
  finally{sending=false;updateControls()}
@@ -105,10 +129,11 @@ try{
  document.getElementById('canonical').textContent=s.canonical_runtime_qualified?'QUALIFIED':'UNQUALIFIED';
  document.getElementById('cognition').textContent=s.cognition_route_qualified?'AVAILABLE':'NO ROUTE';
  document.getElementById('effects').textContent=s.protected_effect_authority?'AUTHORIZED':'DENIED';
- conversationAvailable=s.conversation_fixture_available===true;
+ syntheticFixture=s.conversation_fixture_available===true;
+ conversationAvailable=s.conversation_intake_available===true || syntheticFixture;
  document.getElementById('message-label').textContent=conversationAvailable
   ? 'SOURCE FIXTURE ONLY — not an authenticated resident model'
-  : 'No local cognition route is connected.';
+  : 'Messages are recorded as tasks; model execution remains HELD.';
  updateControls();
 }catch(error){
  document.getElementById('status').textContent='LOCAL SERVICE UNAVAILABLE';
@@ -201,16 +226,22 @@ def make_handler(
                 self.send_json(400, {"status": "INVALID_JSON"})
                 return
             if (type(request) is not dict
-                or set(request) != {"task", "request_id"}
+                or set(request) not in ({"task", "request_id"}, {"task", "request_id", "conversation_id"})
                 or type(request["task"]) is not str
                 or not request["task"].strip()
                 or len(request["task"]) > 2048
                 or type(request["request_id"]) is not str
-                or _REQUEST_ID.fullmatch(request["request_id"]) is None):
+                or _REQUEST_ID.fullmatch(request["request_id"]) is None
+                or ("conversation_id" in request and
+                    (type(request["conversation_id"]) is not str
+                     or _REQUEST_ID.fullmatch(request["conversation_id"]) is None))):
                 self.send_json(400, {"status": "INVALID_REQUEST"})
                 return
             try:
                 answer = conversation_handler(
+                    request["task"].strip(), request["request_id"],
+                    request["conversation_id"],
+                ) if "conversation_id" in request else conversation_handler(
                     request["task"].strip(), request["request_id"],
                 )
             except (ValueError, RuntimeError):
@@ -243,6 +274,8 @@ def make_handler(
                     "status": answer["status"],
                     "request_id": request["request_id"],
                     "run_id": answer.get("run_id"),
+                    "task_id": answer.get("task_id"),
+                    "synthetic": answer.get("synthetic") is True,
                     "final_text": answer.get("final_text") if answer["status"] == "COMPLETED" else None,
                 },
             )

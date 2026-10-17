@@ -46,7 +46,8 @@ def test_disabled_console_is_still_usable_and_never_dispatches():
         code, html, head = call(base, "/")
         assert code == 200 and b'id="message"' in html
         assert b'id="send"' in html and b'sendMessage()' in html
-        assert b"textContent=payload.final_text" in html
+        assert b"conversation_intake_available" in html
+        assert b"SYNTHETIC DEVELOPMENT FIXTURE" in html
         assert b'disabled' in html
         assert b"Content-Security-Policy" not in html
         assert "Content-Security-Policy" in head
