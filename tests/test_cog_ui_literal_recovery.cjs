@@ -5,12 +5,15 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
+const {createHash, webcrypto} = require('node:crypto');
+const digest = obj => createHash('sha256').update(JSON.stringify(obj)).digest('hex');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'veraos', 'desktop.py'), 'utf8');
 const match = html.match(/<script>\s*([\s\S]*?)\s*<\/script>/);
 assert.ok(match, 'dashboard script must be parseable');
 
-function boot({task, pending = null, failPost = false, postResult = null} = {}) {
+function boot({task, pending = null, failPost = false, postResult = null,
+                postMutator = null, historyMutator = null, failHistory = false} = {}) {
   const conversation = 'console-' + 'a'.repeat(32);
   const backing = new Map([['veraos-local-conversation-v1', conversation]]);
   if (pending !== null) backing.set('veraos-local-pending-message-v1', JSON.stringify(pending));
@@ -29,10 +32,11 @@ function boot({task, pending = null, failPost = false, postResult = null} = {}) 
     };
   }
   const requests = [];
+  let historyRows = [];
   const ctx = vm.createContext({
     localStorage: storage,
-    crypto: {getRandomValues: bytes => (bytes.fill(23), bytes)},
-    Uint8Array,
+    crypto: {getRandomValues: bytes => (bytes.fill(23), bytes), subtle: webcrypto.subtle},
+    Uint8Array, TextEncoder,
     JSON, Array, encodeURIComponent,
     setInterval() {},
     document: {
@@ -51,12 +55,35 @@ function boot({task, pending = null, failPost = false, postResult = null} = {}) 
           protected_effect_authority: false,
         }),
       };
-      if (url.startsWith('/api/conversation/history')) return {
-        ok: true, json: async () => ({schema: 'VERAOS_CANONICAL_CONVERSATION_HISTORY_V1', messages: []}),
-      };
+      if (url.startsWith('/api/conversation/history')) {
+        const data = {schema: 'VERAOS_CANONICAL_CONVERSATION_HISTORY_V1',
+          conversation_id: conversation, messages: historyRows,
+          truncated: false, memory_admitted: false, model_admitted: false};
+        return {ok: !failHistory, json: async () => (
+          historyMutator ? historyMutator(data) : data)};
+      }
       if (url === '/api/conversation') {
         if (failPost) throw new Error('simulated missing response');
-        return {ok: true, json: async () => (postResult ?? {status: 'BLOCKED', task_id: 'ui-bound-task'})};
+        const msg = JSON.parse(options.body);
+        const taskId = 'ui-' + digest({conversation_id: msg.conversation_id,
+          message_id: msg.request_id, schema: 'VERAOS_LOCAL_MESSAGE_KEY_V1'});
+        const sourceDigest = digest({conversation_id: msg.conversation_id,
+          message_id: msg.request_id, schema: 'VERAOS_LOCAL_UI_INTAKE_SOURCE_V1',
+          text: msg.task});
+        const opened = 'a'.repeat(64);
+        const canonical = {schema: 'VERAOS_CANONICAL_NO_PROVIDER_ACK_V1',
+          conversation_id: msg.conversation_id, message_id: msg.request_id,
+          text: msg.task, task_id: taskId, source_digest: sourceDigest,
+          opened_head: opened, task_journal_head: opened,
+          canonical_status: 'PENDING_NO_ADMITTED_PROVIDER', origin_authenticated: false};
+        historyRows = [{conversation_id: msg.conversation_id,
+          message_id: msg.request_id, text: msg.task, task_id: taskId,
+          source_digest: sourceDigest, task_journal_head: opened,
+          status: 'PENDING_NO_ADMITTED_PROVIDER', source_kind: 'UNTRUSTED_USER_INPUT',
+          accepted_as_task_result: false, memory_admitted: false}];
+        const normal = {status: 'BLOCKED', task_id: taskId, canonical_intake: canonical};
+        return {ok: true, json: async () => (postResult ?? (
+          postMutator ? postMutator(normal) : normal))};
       }
       throw new Error('unexpected fetch ' + url);
     },
@@ -132,5 +159,56 @@ test('invalid cached pending JSON blocks before dispatch', async () => {
 test('unattributable BLOCKED response does not erase pending original', async () => {
   const app = boot({task: 'Unproven', postResult: {status: 'BLOCKED'}});
   assert.equal((await app.send()).length, 1);
+  assert.ok(app.backing.has('veraos-local-pending-message-v1'));
+});
+
+
+test('forged BLOCKED/ui identifier cannot retire the pending original', async () => {
+  const app = boot({task:'Forged', postResult:{status:'BLOCKED',task_id:'ui-fabricated-no-source-proof'}});
+  assert.equal((await app.send()).length,1);
+  assert.ok(app.backing.has('veraos-local-pending-message-v1'));
+  assert.match(app.elems['conversation-result'].textContent,/UNKNOWN|unverified/i);
+});
+
+test('POST wrong conversation/message/literal/source/head cannot clear', async () => {
+  const mutants = [
+    p=>({...p, canonical_intake:{...p.canonical_intake,conversation_id:'console-other'}}),
+    p=>({...p, canonical_intake:{...p.canonical_intake,message_id:'ui-other'}}),
+    p=>({...p, canonical_intake:{...p.canonical_intake,text:'Other literal'}}),
+    p=>({...p, canonical_intake:{...p.canonical_intake,source_digest:'e'.repeat(64)}}),
+    p=>({...p, canonical_intake:{...p.canonical_intake,opened_head:'f'.repeat(64)}}),
+    p=>({...p, task_id:'ui-'+'f'.repeat(64)}),
+  ];
+  for(const postMutator of mutants){
+    const app=boot({task:'Exact source',postMutator});
+    assert.equal((await app.send()).length,1);
+    assert.ok(app.backing.has('veraos-local-pending-message-v1'));
+  }
+});
+
+test('stale, missing or contradictory read-only Mono history keeps original ID', async () => {
+  const hostile = [
+    d=>({...d,messages:[]}),
+    d=>({...d,messages:[{...d.messages[0],task_journal_head:'f'.repeat(64)}]}),
+    d=>({...d,messages:[{...d.messages[0],text:'substitution'}]}),
+    d=>({...d,messages:[{...d.messages[0],status:'SOURCE_COMPLETED_UNSEALED_NO_REDISPATCH'}]}),
+    d=>({...d,messages:[...d.messages,d.messages[0]]}),
+    d=>({...d,truncated:true}),
+  ];
+  for(const historyMutator of hostile){
+    const app=boot({task:'Original',historyMutator});
+    assert.equal((await app.send()).length,1);
+    assert.ok(app.backing.has('veraos-local-pending-message-v1'));
+  }
+  const missing = boot({task:'History down',failHistory:true});
+  assert.equal((await missing.send()).length,1);
+  assert.ok(missing.backing.has('veraos-local-pending-message-v1'));
+});
+
+test('unqualified synthetic fixture result cannot retire canonical pending ID', async () => {
+  const app=boot({task:'Only a fixture',postResult:{
+    status:'COMPLETED',synthetic:true,final_text:'simulated'}});
+  vm.runInContext('syntheticFixture=true;',app.ctx);
+  assert.equal((await app.send()).length,1);
   assert.ok(app.backing.has('veraos-local-pending-message-v1'));
 });

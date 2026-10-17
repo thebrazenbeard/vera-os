@@ -245,7 +245,35 @@ def main(
                         conversation_id, request_id, task,
                     )
                     if source_fixture_execute is None:
-                        return {"status": "BLOCKED", "task_id": intake["task_id"]}
+                        # An unqualified HTTP status is not a task receipt.
+                        # Only an unchanged Mono TASK_OPENED and read-only
+                        # PENDING_NO_ADMITTED_PROVIDER readback may acknowledge
+                        # an original UI message without any provider action.
+                        current = verify_source_readback(
+                            recover_message,
+                            store.canonical_runtime.tasks, worker_store, intake,
+                        )
+                        head = store.canonical_runtime.tasks.read(
+                            intake["task_id"]
+                        ).journal_head_digest
+                        if (current["status"] != "PENDING_NO_ADMITTED_PROVIDER"
+                                or head != intake["opened_head"]):
+                            return {"status": "BLOCKED", "task_id": intake["task_id"]}
+                        return {
+                            "status": "BLOCKED", "task_id": intake["task_id"],
+                            "canonical_intake": {
+                                "schema": "VERAOS_CANONICAL_NO_PROVIDER_ACK_V1",
+                                "conversation_id": conversation_id,
+                                "message_id": request_id,
+                                "text": task,
+                                "task_id": intake["task_id"],
+                                "source_digest": intake["source_digest"],
+                                "opened_head": intake["opened_head"],
+                                "task_journal_head": head,
+                                "canonical_status": current["status"],
+                                "origin_authenticated": False,
+                            },
+                        }
 
                     current = verify_source_readback(
                         recover_message,

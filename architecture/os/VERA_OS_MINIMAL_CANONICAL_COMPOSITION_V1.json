@@ -140,5 +140,16 @@
     "pid1_cog_graphical_two_boot": "NOT_GUEST_QUALIFIED",
     "provider_model": "HOLD",
     "protected_effects": "DENIED"
+  },
+  "current_resident_required_source_components": [
+    "vera_mono",
+    "portal",
+    "pre_active",
+    "volition"
+  ],
+  "minimal_no_provider_boot_without_preactive_and_volition": {
+    "status": "NOT_IMPLEMENTED_NOT_QUALIFIED",
+    "distinction": "All four are current source-stage and runtime imports; a future Mono-only offline boot is a design candidate, not an observed working composition",
+    "admission_requires": "Remove imports, new cold-state/pid1/GUI tests, real Kconfig/import/guest readback"
   }
 }

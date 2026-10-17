@@ -77,6 +77,62 @@ function updateControls(){
  document.getElementById('message').disabled=!enabled;
  document.getElementById('send').disabled=!enabled;
 }
+// HTTP status alone does not bind a task to the persisted Mono opener.
+// Require independently recomputed source/task IDs, exact opener head, and
+// a separate fresh read-only canonical history record before retiring UI
+// retry evidence. This is local-source consistency, NOT user authentication.
+async function sha256Hex(text){
+ if(!crypto.subtle||typeof crypto.subtle.digest!=='function')throw new Error('hash unavailable');
+ const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));
+ return Array.from(new Uint8Array(bytes),x=>x.toString(16).padStart(2,'0')).join('');
+}
+async function noProviderAckMatches(payload,original){
+ const a=payload&&payload.canonical_intake;
+ if(!a||typeof a!=='object'||payload.status!=='BLOCKED'
+    ||a.schema!=='VERAOS_CANONICAL_NO_PROVIDER_ACK_V1'
+    ||a.canonical_status!=='PENDING_NO_ADMITTED_PROVIDER'
+    ||a.origin_authenticated!==false
+    ||a.conversation_id!==original.conversation_id
+    ||a.message_id!==original.request_id||a.text!==original.task
+    ||a.task_id!==payload.task_id
+    ||!/^ui-[0-9a-f]{64}$/.test(a.task_id)
+    ||!(/^[0-9a-f]{64}$/.test(a.source_digest))
+    ||!(/^[0-9a-f]{64}$/.test(a.opened_head))
+    ||a.task_journal_head!==a.opened_head)return false;
+ try{
+  const key='ui-'+await sha256Hex(JSON.stringify({
+    conversation_id:original.conversation_id,message_id:original.request_id,
+    schema:'VERAOS_LOCAL_MESSAGE_KEY_V1'
+  }));
+  const source=await sha256Hex(JSON.stringify({
+    conversation_id:original.conversation_id,message_id:original.request_id,
+    schema:'VERAOS_LOCAL_UI_INTAKE_SOURCE_V1',text:original.task
+  }));
+  if(a.task_id!==key||a.source_digest!==source)return false;
+  const history=await fetch('/api/conversation/history?conversation_id='+
+    encodeURIComponent(original.conversation_id),{cache:'no-store'});
+  if(!history.ok)return false;
+  const data=await history.json();
+  if(data.schema!=='VERAOS_CANONICAL_CONVERSATION_HISTORY_V1'
+    ||data.conversation_id!==original.conversation_id
+    ||!Array.isArray(data.messages)||data.truncated===true
+    ||data.memory_admitted!==false||data.model_admitted!==false)return false;
+  const found=data.messages.filter(m=>
+    m.conversation_id===original.conversation_id
+    &&m.message_id===original.request_id &&m.text===original.task
+    &&m.task_id===key &&m.source_digest===source);
+  if(found.length!==1)return false;
+  const m=found[0];
+  if(m.task_journal_head!==a.opened_head
+    ||m.status!=='PENDING_NO_ADMITTED_PROVIDER'
+    ||m.source_kind!=='UNTRUSTED_USER_INPUT'
+    ||m.accepted_as_task_result!==false
+    ||m.memory_admitted!==false)return false;
+  const still=JSON.parse(localStorage.getItem(PENDING_KEY)||'null');
+  return !!still&&still.conversation_id===original.conversation_id
+     &&still.request_id===original.request_id&&still.task===original.task;
+ }catch(error){return false}
+}
 async function sendMessage(){
  if(!conversationAvailable||sending)return;
  const input=document.getElementById('message');
@@ -118,20 +174,22 @@ async function sendMessage(){
   if(!response.ok){result.textContent=payload.status||'HELD_OR_UNAVAILABLE';return}
   if(payload.status==='COMPLETED' && typeof payload.final_text==='string'){
     if(syntheticFixture&&payload.synthetic===true){
-      localStorage.removeItem(PENDING_KEY);
+      // Fixture text is not canonical result provenance; retain UI source.
       result.textContent='SYNTHETIC DEVELOPMENT FIXTURE — NOT AN ADMITTED MODEL\\n'+payload.final_text;
     }else{
       result.textContent='HELD — unverified completion not displayed';
     }
   }else{
-    if(payload.status==='BLOCKED' && typeof payload.task_id==='string'
-       && payload.task_id.startsWith('ui-')){
-      // A completed, source-bound local HTTP response means intake was
-      // durably recorded; retire ONLY the UI retry selector, not Mono state.
-      localStorage.removeItem(PENDING_KEY);
+    let acknowledged=false;
+    if(payload.status==='BLOCKED'){
+      acknowledged=await noProviderAckMatches(payload,{
+        conversation_id:conversationId,request_id:requestId,task:task
+      });
+      if(acknowledged)localStorage.removeItem(PENDING_KEY);
     }
     result.textContent=payload.status==='BLOCKED'
-      ?'HELD — canonical task recorded; no model authorized'
+      ?(acknowledged?'HELD — canonical task recorded; no model authorized'
+         :'OUTCOME_UNKNOWN_NO_REDISPATCH — unverified task acknowledgement')
       :(payload.status||'PENDING');
   }
  }catch(error){result.textContent='OUTCOME_UNKNOWN_NO_REDISPATCH — retain original message'}
@@ -344,6 +402,10 @@ def make_handler(
                     "request_id": request["request_id"],
                     "run_id": answer.get("run_id"),
                     "task_id": answer.get("task_id"),
+                    "canonical_intake": (
+                        answer.get("canonical_intake")
+                        if answer["status"] == "BLOCKED" else None
+                    ),
                     "synthetic": answer.get("synthetic") is True,
                     "accepted_as_task_result": False,
                     "model_authenticated": False,

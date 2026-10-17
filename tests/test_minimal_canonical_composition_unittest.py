@@ -86,6 +86,14 @@ class MinimalCompositionContract(unittest.TestCase):
         self.assertFalse(newer["image_accepted"])
         self.assertFalse(newer["target_imports_executed"])
 
+    def test_staged_sources_are_not_proof_of_minimal_boot_requirements(self):
+        graph = self.graph
+        self.assertEqual(graph["current_resident_required_source_components"],
+                         ["vera_mono", "portal", "pre_active", "volition"])
+        candidate = graph["minimal_no_provider_boot_without_preactive_and_volition"]
+        self.assertEqual(candidate["status"], "NOT_IMPLEMENTED_NOT_QUALIFIED")
+        self.assertFalse(graph["buildroot"]["build_executed"])
+
     def test_no_false_build_guest_provider_or_effect_claim(self):
         q = self.graph["qualification"]
         self.assertEqual(q["resolved_buildroot_kconfig"], "UNEXECUTED")

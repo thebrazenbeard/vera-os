@@ -244,3 +244,50 @@ provider admission and canonical-memory write were NOT performed.
 No shared official architecture artifact was mutated in PORTAL's repository
 by this Integration source-only contribution. Only Integration-owned
 VeraOS #38 source branch and Bus coordination are eligible mutation surfaces.
+
+
+## 2026-10-17 — CCB #373/#374 exact-head reconciliation and Cog receipt repair
+
+CCB architecture #373 at `74710211c7f3a5e1a516802a2e7d87ad68297dc2`
+and stacked private PORTAL handoff #374 at
+`f0ffc0d51e83498a7fd99e1a74606828924a13b5` preserve a
+**review candidate**, not accepted architecture or a live runtime.
+Their `VERAOS_MINIMAL_BOM_V1` agrees with our 431-file **staged**
+prototype: Mono 316 / PORTAL 89 / Pre-Active 18 / Volition 8.
+This is NOT a minimal logically necessary package count. In today's
+actual `veraos.resident.compose_components`, all four roots are required
+because the resident imports and constructs PORTAL, Pre-Active and Volition.
+A different future Mono-only no-provider GUI could eliminate optional
+advisory/event-source services ONLY after changing the resident composition
+and proving exact imports, startup, cold recovery, and new source+guest tests.
+No such alternative has been implemented or qualified here.
+
+The normal Linux Cog's UI retry selector now requires
+`VERAOS_CANONICAL_NO_PROVIDER_ACK_V1`, originating from a real
+`open_message` and read-only Mono `recover_message` with the unchanged
+first `TASK_OPENED` digest. Client computes deterministic task ID/source
+digest from the original exact IDs/text and cross-checks the acknowledgement
+with a **fresh read-only Mono conversation-history response**: one exact
+message, same journal head, `PENDING_NO_ADMITTED_PROVIDER`, untrusted
+input, zero result/memory authority. Mismatch/unknown/cryptographic
+subtle API absence/short history => retain pending ID, not redispatch.
+HTTP proof is source-consistency at a loopback host; it is NOT authenticated
+against a malicious local process or a compromised host. Browser
+`localStorage` is never canonical task/memory/identity state.
+
+PORTAL Desktop A1 #55 newer `2f42d494e46d9613cd2626da7c9fa6f0e8d7ec79`
+preserves `state=HELD` presentation while VeraOS POST uses
+`status=BLOCKED`; both describe Mono's
+`PENDING_NO_ADMITTED_PROVIDER` when an intact task opener exists.
+Windows Desktop project/state tuple remains separate from Linux.
+PORTAL's pending #373 review rightly asks whether state-owner handles
+close deterministically and whether legacy no-locator direct handler is
+acceptable; **these remain separately qualified**, not inferred from
+this UI fix.
+
+Source-to-system remains stopped at real selected Buildroot 2025.02.18
+effective `.config` resolution, compiled target ELF `DT_NEEDED`
+closure and Python imports, actual ext2 image hash/inventory, and
+normal PID1/Cog graphical two-boot behavior. Historical boot metadata
+2024.02.4 cannot replace the selected candidate proof. No model,
+guest, image or protected effect was executed in this source increment.
