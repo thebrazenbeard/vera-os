@@ -40,6 +40,45 @@ class ResidentHandles:
     pre_active_store: object
     canonical_runtime: object
 
+    def execute_cognition_fixture(
+        self,
+        request: dict,
+        *,
+        host_admission_verifier: Callable[[dict, str, str], str] | None = None,
+    ) -> dict:
+        """One explicit host-injected, source-fixture-only cognition turn.
+
+        Normal CLI never configures this hook. No real-host verifier is
+        installed: even a purported 'VERIFIED_REAL' answer remains HOLD.
+        Structural provider PASS is never sufficient to invoke inference.
+        """
+        required = {"provider", "base_url", "model", "task", "request_id", "now"}
+        if type(request) is not dict or set(request) != required:
+            raise ValueError("invalid exact resident cognition request")
+        if host_admission_verifier is None:
+            raise RuntimeError("resident host admission verifier absent: HELD")
+        if not callable(host_admission_verifier):
+            raise TypeError("host admission verifier must be callable")
+        # Host injection is in-process Python only, never CLI/env/HTTP input.
+        # This source cut admits only a synthetic development fixture. A real
+        # issuer/host verifier MUST be implemented before a real provider route.
+        decision = host_admission_verifier(
+            request["provider"], request["base_url"], request["model"],
+        )
+        if decision != "SYNTHETIC_SOURCE_FIXTURE_ONLY":
+            raise RuntimeError("real resident provider admission not installed: HELD")
+        from .native_cognition import admit_local_text_route, execute_text_request
+        portal = importlib.import_module("portal")
+        route = admit_local_text_route(
+            store=self.pre_active_store, portal=portal,
+            provider=request["provider"], base_url=request["base_url"],
+            model=request["model"],
+        )
+        return execute_text_request(
+            route, task=request["task"], request_id=request["request_id"],
+            now=request["now"],
+        )
+
     def close(self) -> None:
         self.pre_active_store.close()
 
@@ -186,7 +225,12 @@ class ResidentSupervisor:
                 self.child.wait(timeout=3)
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(
+    argv: list[str] | None = None,
+    *,
+    cognition_request: dict | None = None,
+    host_admission_verifier: Callable[[dict, str, str], str] | None = None,
+) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--components-root", type=Path, default=DEFAULT_COMPONENTS)
     parser.add_argument("--run-root", type=Path, default=DEFAULT_RUN_ROOT)
@@ -197,6 +241,11 @@ def main(argv: list[str] | None = None) -> int:
     server = None
     http_thread = None
     try:
+        if cognition_request is not None:
+            store.execute_cognition_fixture(
+                cognition_request,
+                host_admission_verifier=host_admission_verifier,
+            )
         server = open_loopback_server(lambda: status)
         http_thread = threading.Thread(target=server.serve_forever, daemon=True)
         http_thread.start()
