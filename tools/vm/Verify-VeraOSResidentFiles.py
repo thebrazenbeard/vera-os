@@ -66,6 +66,7 @@ def verify_image(stage: Path, source_root: Path, rootfs) -> dict[str, object]:
     if not isinstance(rows, list) or len(rows) != 4:
         raise ResidentIntegrityError("Expected exactly four resident source component records")
     observed = set()
+    expected_files: set[str] = set()
     total = 0
     for row in rows:
         if not isinstance(row, dict) or row.get("repository") not in EXPECTED_COMPONENTS:
@@ -89,12 +90,27 @@ def verify_image(stage: Path, source_root: Path, rootfs) -> dict[str, object]:
                relative in listed or not isinstance(expected_hash, str) or not HEXDIGEST.fullmatch(expected_hash):
                 raise ResidentIntegrityError("Unsafe or duplicate resident file inventory entry")
             listed.add(relative)
+            expected_files.add(relative)
             actual = rootfs.read("/opt/veraos/" + relative)
             if actual is None or hashlib.sha256(actual).hexdigest() != expected_hash:
                 raise ResidentIntegrityError("Resident image source byte mismatch: " + relative)
             total += 1
     if observed != set(EXPECTED_COMPONENTS):
         raise ResidentIntegrityError("Missing resident component")
+    # A copied directory-rootfs can contain stale packages from an older
+    # build, even when all new receipt files match. Reject those extra imports
+    # rather than allowing them to shadow the selected canonical sources.
+    if hasattr(rootfs, "root"):
+        components = rootfs.root / "opt/veraos/components"
+        actual_files = {
+            "components/" + path.relative_to(components).as_posix()
+            for path in components.rglob("*")
+            if path.is_file() or path.is_symlink()
+        }
+        if actual_files != expected_files:
+            raise ResidentIntegrityError(
+                "Unexpected or missing files in copied resident component tree"
+            )
     return {
         "schema": "VERA_OS_RESIDENT_IMAGE_ALL_FILE_AUDIT_V1",
         "status": "ALL_PINNED_SOURCE_FILES_IMAGE_BYTE_MATCH_NOT_RUNTIME_QUALIFIED",

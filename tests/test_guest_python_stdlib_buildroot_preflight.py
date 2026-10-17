@@ -39,7 +39,8 @@ def candidate(tmp_path, monkeypatch):
     profile = repo / "buildroot/configs/resident_defconfig"
     profile.write_text(
         "BR2_PACKAGE_PYTHON3=y\nBR2_PACKAGE_PYTHON3_SQLITE=y\n"
-        "BR2_PACKAGE_PYTHON3_SSL=y\nBR2_PACKAGE_COG_PLATFORM_DRM=y\n",
+        "BR2_PACKAGE_PYTHON3_SSL=y\nBR2_PACKAGE_COG_PLATFORM_DRM=y\n"
+        "BR2_PACKAGE_DEJAVU=y\nBR2_PACKAGE_DEJAVU_SANS=y\n",
         encoding="utf-8",
     )
     contract = {
@@ -50,7 +51,10 @@ def candidate(tmp_path, monkeypatch):
         },
         "requires": {
             "python_packages": [],
-            "browser_flags": ["BR2_PACKAGE_COG_PLATFORM_DRM"],
+            "browser_flags": [
+                "BR2_PACKAGE_COG_PLATFORM_DRM",
+                "BR2_PACKAGE_DEJAVU", "BR2_PACKAGE_DEJAVU_SANS",
+            ],
             "python_stdlib_flags": [
                 "BR2_PACKAGE_PYTHON3_SQLITE",
                 "BR2_PACKAGE_PYTHON3_SSL",
@@ -79,6 +83,8 @@ def test_guest_stdlib_flags_confirmed_from_upstream_and_source(candidate):
     assert receipt["status"] == "PINNED_SOURCE_SYMBOLS_VERIFIED_KCONFIG_NOT_RUN"
     assert receipt["image_built"] is False
     assert receipt["resident_runtime_qualified"] is False
+    assert receipt["ready_for_authorized_build"] is False
+    assert receipt["build_readiness"] == "NOT_READY_KCONFIG_UNRESOLVED"
 
 
 def test_missing_python_ssl_is_rejected_before_any_build(candidate):
@@ -110,3 +116,14 @@ def test_undefined_python_ssl_symbol_in_pinned_buildroot_is_rejected(candidate):
     )
     with pytest.raises(ValueError, match="BR2_PACKAGE_PYTHON3_SSL"):
         preflight.probe(upstream, repo)
+
+
+def test_missing_cog_font_or_drm_source_flags_rejected(candidate):
+    upstream, repo, profile, _ = candidate
+    original = profile.read_text(encoding="utf-8")
+    for flag in ("BR2_PACKAGE_COG_PLATFORM_DRM",
+                 "BR2_PACKAGE_DEJAVU", "BR2_PACKAGE_DEJAVU_SANS"):
+        profile.write_text(original.replace(flag + "=y\n", ""), encoding="utf-8")
+        with pytest.raises(ValueError, match=flag):
+            preflight.probe(upstream, repo)
+    profile.write_text(original, encoding="utf-8")

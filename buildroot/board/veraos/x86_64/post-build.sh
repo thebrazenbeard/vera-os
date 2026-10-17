@@ -29,9 +29,11 @@ if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
   # Both Vera Mono and Portal require Python >=3.12. Buildroot 2024.02.4
   # ships Python 3.11, so fail rather than embed incompatible code.
   target_python="$(readlink "$target_dir/usr/bin/python3" || true)"
+  # The selected Buildroot 2025.02.18 contract pins Python 3.12.14.
+  # Newer host interpreters cannot substitute for a different target ABI.
   case "$target_python" in
-    python3.12|python3.13|python3.14|python3.15|python3.16) ;;
-    *) echo "VeraOS resident runtime requires target Python >=3.12; observed $target_python" >&2; exit 1 ;;
+    python3.12|/usr/bin/python3.12) ;;
+    *) echo "VeraOS resident target must be pinned Python 3.12; observed $target_python" >&2; exit 1 ;;
   esac
 
   python3 "$repo_root/tools/vm/Stage-VeraOSResidentSources.py" \
@@ -41,6 +43,14 @@ if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
   cp -R "$stage/components/." "$target_dir/opt/veraos/components/"
   install -m 0644 "$stage/VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json" \
     "$target_dir/etc/veraos/architecture/VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json"
+
+  # SOURCE proof does not prove the target copy. Check the actual built
+  # tree's entire 431-file inventory, imported modules and PID1/GUI assets
+  # before Buildroot turns the tree into an image. Guest behavior stays HOLD.
+  python3 "$repo_root/tools/vm/Verify-VeraOSResidentFiles.py" \
+    --rootfs-directory "$target_dir" --stage "$stage" --repo-root "$repo_root"
+  python3 "$repo_root/tools/vm/Probe-ResidentTargetRootfs.py" \
+    --rootfs-directory "$target_dir" --repo-root "$repo_root"
 
   # Explicitly no auto-start or protected-effect admission here.
 fi

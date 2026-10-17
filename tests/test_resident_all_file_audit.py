@@ -84,6 +84,19 @@ class AllResidentFilesTest(unittest.TestCase):
         with self.assertRaisesRegex(audit.ResidentIntegrityError, "source byte mismatch"):
             self.verify()
 
+    def test_copied_rootfs_rejects_stale_extra_source_file(self):
+        image = self.root / "rootfs"
+        for virtual_path, body in self.bytes.items():
+            target = image / virtual_path.lstrip("/")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(body)
+        self.readback = audit._rootfs("directory", image, ROOT)
+        self.assertEqual(self.verify()["resident_files_verified"], 8)
+        orphan = image / "opt/veraos/components/vera_mono/src/vera_mono/old.py"
+        orphan.write_bytes(b"# stale import from previous image\\n")
+        with self.assertRaisesRegex(audit.ResidentIntegrityError, "Unexpected or missing files"):
+            self.verify()
+
     def test_wrong_embedded_receipt_fails(self):
         self.bytes[audit.ROOTFS_RECEIPT] += b"x"
         with self.assertRaisesRegex(audit.ResidentIntegrityError, "Embedded receipt differs"):

@@ -48,7 +48,9 @@
       "BR2_PACKAGE_MESA3D",
       "BR2_PACKAGE_WPEWEBKIT",
       "BR2_PACKAGE_COG",
-      "BR2_PACKAGE_COG_PLATFORM_DRM"
+      "BR2_PACKAGE_COG_PLATFORM_DRM",
+      "BR2_PACKAGE_DEJAVU",
+      "BR2_PACKAGE_DEJAVU_SANS"
     ],
     "target_core_code": [
       "thebrazenbeard/vera-mono",

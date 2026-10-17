@@ -62,6 +62,14 @@ def probe(source: Path, repo: Path = ROOT):
       "python_dependency_versions":package_sources,
       "profile":contract["candidate"]["source_defconfig"],
       "browser_kconfig_resolved":False,
+      "build_readiness":"NOT_READY_KCONFIG_UNRESOLVED",
+      "ready_for_authorized_build":False,
+      "missing_evidence":[
+        "Buildroot Kconfig resolved output for exact selected profile",
+        "compiled target Python extension imports",
+        "copied rootfs all-file and target prerequisite audits",
+        "PID1 supervisor and Cog graphical runtime observation"
+      ],
       "cross_compilation_qualified":False,
       "image_built":False,
       "resident_runtime_qualified":False,
