@@ -34,22 +34,16 @@ def test_http_refuses_fabricated_terminal_completion():
 
 
 def test_resident_handler_fails_closed_for_invented_completion(monkeypatch,tmp_path):
-    from test_native_admitted_cognition import STAGE,staged,descriptor,model_service
+    from test_native_admitted_cognition import STAGE,staged
     from veraos import resident,desktop
     staged()
-    original=resident.ResidentHandles.execute_cognition_fixture
 
-    def forged(self,request,*,host_admission_verifier=None):
-        # Return a syntactically plausible completed run, WITHOUT any
-        # durable Pre-Active event/run/journal. This is an untrusted callback.
-        return {
-            "status":"COMPLETED", "run_id":"invented-run",
-            "event_id":"invented-event","final_text":"forged output",
-            "provider_id":request["provider"]["provider_id"],
-            "route_id":request["provider"]["provider_id"],
-        }
+    def forged(task,request_id,worker_store):
+        # Fully plausible callback return with NO durable engine work.
+        return {"status":"COMPLETED", "run_id":"invented-run",
+                "event_id":"invented-event", "final_text":"forged output",
+                "provider_id":"offline-fixture", "route_id":"offline-fixture"}
 
-    monkeypatch.setattr(resident.ResidentHandles,"execute_cognition_fixture",forged)
     servers=[]
     monkeypatch.setattr(resident,"open_loopback_server",lambda status_provider,**kwargs:
                         servers.append(desktop.open_loopback_server(
@@ -61,16 +55,12 @@ def test_resident_handler_fails_closed_for_invented_completion(monkeypatch,tmp_p
                          payload={"task":"source only","request_id":"false-run"})
         observations.append((code,json.loads(body)))
     monkeypatch.setattr(resident,"serve_status",send)
-    with model_service() as (base,calls):
-        template={"provider":descriptor(base),"base_url":base,"model":"resident-probe"}
-        assert resident.main([
-            "--components-root",str(STAGE),
-            "--state-root",str(tmp_path/"state"),
-            "--run-root",str(tmp_path/"run")],
-            conversation_template=template,
-            host_admission_verifier=lambda *_:"SYNTHETIC_SOURCE_FIXTURE_ONLY",
-        )==0
-        assert calls==[]
+    assert resident.main([
+        "--components-root",str(STAGE),
+        "--state-root",str(tmp_path/"state"),
+        "--run-root",str(tmp_path/"run")],
+        source_fixture_execute=forged,
+    )==0
     assert len(observations)==1
     assert observations[0][0]!=200,observations
     assert observations[0][1]["status"]!="COMPLETED"
