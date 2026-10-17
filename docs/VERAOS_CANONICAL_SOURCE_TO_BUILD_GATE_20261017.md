@@ -38,3 +38,42 @@ SOURCE exact selected 4 repos and archive receipt PASS. Upstream Buildroot 2025.
 
 ## L1/L2 host contract and ownership
 Read PORTAL Desktop #52 source: desktop_cognize still uses its own operational cognition ledger, strips input text, and does not open Mono #77 canonical task before routing. The Codex A1 fix is PORTAL-owned; no edits to the Codex/PORTAL branch. Mono local_conversation.open_message already supports explicit stable conversation/message IDs, exact untrimmed literal input, task CAS/source digest, and cold recovery. No demonstrated Mono API gap required modifying #77. Separate PORTAL installed state/identity and VeraOS resident state/identity are NOT automatically one physical root; no migration/exclusive writer claim. V-E-R-A #6 remains a source and historical snapshot/evidence workspace, not a 44-repo guest dependency. Supabase/Drive/Synology/coordination data are not canonical memory or runtime boot requirements by presence. Training #106 scoped turn is not model admission. Source tests do not authorize an actual build, guest, model or effect.
+
+## 2026-10-17 Integration convergence follow-on (distinct newer PR #38 commit)
+
+The static target-rootfs gate now also requires three selected shared-library
+SONAMEs at their expected Buildroot /usr/lib paths: libsqlite3.so.0,
+libssl.so.3, libcrypto.so.3. Original gate incorrectly reported static-present
+even when all three were absent from a fixture with _sqlite3/_ssl extension
+names present. The source-level negative test reproduced three failing
+subcases before the fix and passes after it. This is a *file presence* check,
+not actual ELF DT_NEEDED resolution, ABI, linker closure or Python import.
+Resolved Kconfig, actual post-build target rootfs, its full source receipt,
+image hash, normal PID1/Cog, models and behavioral qualification still UNKNOWN
+or HELD; READY_FOR_AUTHORIZED_BUILD=false remains unchanged.
+
+PORTAL A1 ABI owner ACK at Bus #368 comment #6234499327 and Mono #77
+comment #6234501080: current Mono open_message already supports explicit
+untrusted UI conversation locator, message_id=request_id, exact literal text,
+task-key/digest/CAS, replay/conflict. Desktop must constrain request_id to
+Mono's narrower 96-character first-alphanumeric grammar, reject missing
+locator, preserve original text without stripping, retain bridge ID on unknown
+outcome, keep no-provider HELD, and not promote operational CognitionLedger
+or synthetic/model-advisory evidence. No Mono change or shared identity
+migration is warranted. The actual PORTAL/Codex implementation is separate.
+
+Source-only discovery awareness now records six verified exact-main-head
+repository descriptions (human-shield, physica, redworm, v-e-r-a,
+vera-model, vision) as a separate non-runtime
+VERA_OS_DISCOVERY_GAP_AWARENESS_V1.json. It does NOT replace the 90-entry
+legacy inventory, mutate any provider, add boot sources, or materialize
+the 44 V-E-R-A snapshots as guest dependencies. Its classification follows
+the private 96-repo PORTAL source review #371 but README/current main was
+read directly for all six. This overlay is not consumed by normal guest boot.
+
+PORTAL-owned VeraOS #37 source was re-read against latest Integration #38.
+Normal resident #38 retains the upstream bounded restart/supervisor model but
+adds stricter health checks and DONE/COMPLETED paired-terminal readback.
+No #37 mutation or independent QEMU/installed runtime claim. Host Windows
+local-session state mutex #52 is not cross-host/cross-session exclusivity;
+the two canonical identity-root tuples remain distinct.

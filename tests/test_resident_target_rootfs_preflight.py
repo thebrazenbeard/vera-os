@@ -47,6 +47,8 @@ class StaticTargetReadinessTests(unittest.TestCase):
                 name + ".cpython-312-x86_64-linux-gnu.so")
         for name in ("jsonschema", "cryptography", "yaml"):
             put("usr/lib/python3.12/site-packages/" + name + "/__init__.py")
+        for name in ("libsqlite3.so.0", "libssl.so.3", "libcrypto.so.3"):
+            put("usr/lib/" + name)
         put("usr/bin/cog")
         put("usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
         for name in ("pid1.py", "resident.py", "desktop.py"):
@@ -86,6 +88,17 @@ class StaticTargetReadinessTests(unittest.TestCase):
                 self.assertTrue(any(diagnostic in s for s in outcome["missing"]))
                 self.assertIs(outcome["target_import_executed"], False)
                 p.write_bytes(raw)
+
+    def test_missing_explicit_shared_library_dependencies_fail(self):
+        for soname in ("libsqlite3.so.0", "libssl.so.3", "libcrypto.so.3"):
+            with self.subTest(soname=soname):
+                path = self.root / "usr/lib" / soname
+                original = path.read_bytes()
+                path.unlink()
+                result = checker.audit(self.root, ROOT)
+                self.assertIn("/usr/lib/" + soname, result["missing"])
+                self.assertEqual(result["status"], "NOT_READY_MISSING_TARGET_PREREQUISITES")
+                path.write_bytes(original)
 
     def test_malformed_pid1_and_source_mismatch_fail(self):
         pid = self.root / "sbin/vera-init"

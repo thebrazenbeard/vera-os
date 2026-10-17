@@ -52,6 +52,11 @@ def audit(rootfs: Path, repo: Path = ROOT) -> dict[str, object]:
     for name in ("_sqlite3", "_ssl"):
         if not dyn.is_dir() or not list(dyn.glob(name + "*.so")):
             missing.append("python3.12 extension " + name)
+    # Known direct runtime linker inputs for the selected Buildroot profile.
+    # This is only a SONAME-presence guard. It does not inspect DT_NEEDED,
+    # resolve ABI/transitive dependencies or execute the target extensions.
+    for soname in ("libsqlite3.so.0", "libssl.so.3", "libcrypto.so.3"):
+        require("/usr/lib/" + soname)
     site = file("/usr/lib/python3.12/site-packages")
     for package in ("jsonschema", "cryptography", "yaml"):
         if not (site / package / "__init__.py").is_file():
