@@ -51,6 +51,22 @@ class DirectoryRootfs:
         path = self.root / virtual_path.lstrip("/")
         return path.readlink().as_posix() if path.is_symlink() else None
 
+    def component_files(self) -> set[str]:
+        base = self.root / "opt/veraos/components"
+        if not base.is_dir() or base.is_symlink():
+            raise AuditError("resident component directory missing or linked")
+        found: set[str] = set()
+        for file in base.rglob("*"):
+            if file.is_symlink() or (not file.is_file() and not file.is_dir()):
+                raise AuditError("unsupported or linked resident component path")
+            if file.is_file():
+                if not file.resolve().is_relative_to(base):
+                    raise AuditError("resident source path escapes component tree")
+                found.add("components/" + file.relative_to(base).as_posix())
+        if not found:
+            raise AuditError("resident component tree is empty")
+        return found
+
 
 class ExtRootfs:
     def __init__(self, path: Path):
@@ -83,6 +99,63 @@ class ExtRootfs:
         if b"File not found" in err or b"File not found" in out or b"not found by ext2_lookup" in err:
             return None
         return out
+
+    def component_files(self) -> set[str]:
+        """Enumerate entire ext2 resident tree using bounded, parseable debugfs.
+
+        Enumeration is necessary: matching expected hashes alone permits stale
+        import-shadowing files. No unverified listing can qualify image closure.
+        """
+        base = "/opt/veraos/components"
+        pending = [base]
+        visited: set[str] = set()
+        found: set[str] = set()
+        while pending:
+            directory = pending.pop()
+            if directory in visited or len(visited) >= 2048:
+                raise AuditError("repeated or excessive ext2 resident directories")
+            visited.add(directory)
+            self._safe_path(directory)
+            out, err = self._debugfs("ls -p " + directory)
+            if (not out or len(out) > 1024 * 1024
+                    or b"File not found" in out + err
+                    or b"not found by ext2_lookup" in out + err
+                    or b"not a directory" in out.lower() + err.lower()):
+                raise AuditError("missing or incomplete ext2 resident directory listing")
+            names: set[str] = set()
+            for raw in out.splitlines():
+                fields = raw.split(b"/")
+                if (len(fields) != 8 or fields[0] != b"" or fields[-1] != b""
+                        or any(re.fullmatch(rb"[0-9]+", f) is None
+                               for f in (fields[1], fields[3], fields[4], fields[6]))
+                        or re.fullmatch(rb"[0-7]{5,6}", fields[2]) is None):
+                    raise AuditError("malformed ext2 debugfs -p directory entry")
+                try:
+                    name = fields[5].decode("ascii")
+                except UnicodeDecodeError as exc:
+                    raise AuditError("unverifiable ext2 source entry name") from exc
+                if name in (".", ".."):
+                    continue
+                if not re.fullmatch(r"[A-Za-z0-9_.-]+", name):
+                    raise AuditError("unsafe ext2 resident component name")
+                if name in names:
+                    raise AuditError("duplicate ext2 resident component name")
+                names.add(name)
+                item = directory + "/" + name
+                self._safe_path(item)
+                mode = int(fields[2], 8) & 0o170000
+                if mode == 0o040000:
+                    pending.append(item)
+                elif mode == 0o100000:
+                    found.add("components/" + item[len(base) + 1:])
+                else:
+                    # Symlinks, devices and sockets can shadow expected code.
+                    raise AuditError("unsupported ext2 resident component inode")
+                if len(found) + len(pending) + len(visited) > 8192:
+                    raise AuditError("ext2 resident tree exceeds source closure bound")
+        if not found:
+            raise AuditError("ext2 resident source enumeration empty")
+        return found
 
     def symlink_target(self, virtual_path: str) -> str | None:
         self._safe_path(virtual_path)

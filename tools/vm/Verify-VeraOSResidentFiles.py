@@ -97,20 +97,20 @@ def verify_image(stage: Path, source_root: Path, rootfs) -> dict[str, object]:
             total += 1
     if observed != set(EXPECTED_COMPONENTS):
         raise ResidentIntegrityError("Missing resident component")
-    # A copied directory-rootfs can contain stale packages from an older
-    # build, even when all new receipt files match. Reject those extra imports
-    # rather than allowing them to shadow the selected canonical sources.
-    if hasattr(rootfs, "root"):
-        components = rootfs.root / "opt/veraos/components"
-        actual_files = {
-            "components/" + path.relative_to(components).as_posix()
-            for path in components.rglob("*")
-            if path.is_file() or path.is_symlink()
-        }
-        if actual_files != expected_files:
-            raise ResidentIntegrityError(
-                "Unexpected or missing files in copied resident component tree"
-            )
+    # Hashing the 431 expected files is insufficient: an ext2 image could
+    # additionally contain an older import-shadowing module. Require a
+    # complete enumerated component tree on BOTH directory and ext2 readers.
+    enumerate_files = getattr(rootfs, "component_files", None)
+    if not callable(enumerate_files):
+        raise ResidentIntegrityError("Cannot enumerate image component files")
+    try:
+        actual_files = enumerate_files()
+    except (OSError, ValueError) as exc:
+        raise ResidentIntegrityError("Cannot enumerate image component files") from exc
+    if actual_files != expected_files:
+        raise ResidentIntegrityError(
+            "Unexpected or missing files in copied resident component tree"
+        )
     return {
         "schema": "VERA_OS_RESIDENT_IMAGE_ALL_FILE_AUDIT_V1",
         "status": "ALL_PINNED_SOURCE_FILES_IMAGE_BYTE_MATCH_NOT_RUNTIME_QUALIFIED",

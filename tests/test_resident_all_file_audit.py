@@ -24,6 +24,13 @@ class FakeRootfs:
     def read(self, path):
         return self.files.get(path)
 
+    def component_files(self):
+        return {
+            path.removeprefix("/opt/veraos/")
+            for path in self.files
+            if path.startswith("/opt/veraos/components/")
+        }
+
 
 class AllResidentFilesTest(unittest.TestCase):
     def setUp(self):
@@ -95,6 +102,24 @@ class AllResidentFilesTest(unittest.TestCase):
         orphan = image / "opt/veraos/components/vera_mono/src/vera_mono/old.py"
         orphan.write_bytes(b"# stale import from previous image\\n")
         with self.assertRaisesRegex(audit.ResidentIntegrityError, "Unexpected or missing files"):
+            self.verify()
+
+    def test_ext2_image_extra_source_file_must_fail_closed(self):
+        class ImageReader(FakeRootfs):
+            def component_files(self):
+                return {
+                    path.lstrip("/").replace("opt/veraos/", "", 1)
+                    for path in self.files if path.startswith("/opt/veraos/components/")
+                } | {"components/vera_mono/old_shadow.py"}
+        self.readback = ImageReader(self.bytes)
+        with self.assertRaisesRegex(audit.ResidentIntegrityError, "Unexpected or missing files"):
+            self.verify()
+
+    def test_ext2_image_without_enumerator_fails_closed(self):
+        class ImageReader(FakeRootfs):
+            component_files = None
+        self.readback = ImageReader(self.bytes)
+        with self.assertRaisesRegex(audit.ResidentIntegrityError, "enumerat"):
             self.verify()
 
     def test_wrong_embedded_receipt_fails(self):
