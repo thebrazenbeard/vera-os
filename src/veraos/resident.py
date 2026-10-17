@@ -166,8 +166,12 @@ class ResidentSupervisor:
     def tick(self, now: float) -> str:
         if self.child is not None and self.child.poll() is None:
             info = self.health() if self.health else None
-            if (info and info.get("schema", "VERAOS_RESIDENT_STATUS_V1") == "VERAOS_RESIDENT_STATUS_V1"
-                    and info.get("pid") == self.child.pid and info.get("status")):
+            if (info and info.get("schema") == "VERAOS_RESIDENT_STATUS_V1"
+                    and info.get("pid") == self.child.pid
+                    and info.get("status") == "COMPOSED_NO_COGNITION"
+                    and info.get("canonical_runtime_qualified") is False
+                    and info.get("cognition_route_qualified") is False
+                    and info.get("protected_effect_authority") is False):
                 return str(info["status"])
             return "RUNNING_UNVERIFIED"
         self.child = None
@@ -206,12 +210,23 @@ def main(
         # The normal resident ALWAYS owns task intake. No admitted provider
         # means a durable HELD task, never a model dispatch or a fake answer.
         from vera_core.local_conversation import (
-            ConversationError, open_message, recover_message,
+            ConversationError, SourceObservationConflict, open_message, recover_message,
             reserve_source_trial, seal_source_observation,
         )
         from vera_core.portal_task_handoff import export_portal_route_request
         from portal.vera_task_handoff import assess_vera_task_route
         from portal import PortalRouteAdvertisement
+
+        class SourceReadbackContradiction(Exception):
+            """Persisted source evidence disagrees; HTTP must report UNKNOWN."""
+
+        def verify_source_readback(operation, ledger, worker_store, intake):
+            try:
+                return operation(ledger, worker_store, intake)
+            except SourceObservationConflict as exc:
+                # Persisted event/run/route contradiction is UNKNOWN, not
+                # a normal provider hold or a retryable task.
+                raise SourceReadbackContradiction("source evidence inconsistent") from exc
 
         fixture_lock = threading.Lock()
         if source_fixture_execute is not None:
@@ -232,11 +247,13 @@ def main(
                     if source_fixture_execute is None:
                         return {"status": "BLOCKED", "task_id": intake["task_id"]}
 
-                    current = recover_message(
+                    current = verify_source_readback(
+                        recover_message,
                         store.canonical_runtime.tasks, worker_store, intake,
                     )
                     if current["status"] == "SOURCE_COMPLETED_UNSEALED_NO_REDISPATCH":
-                        current = seal_source_observation(
+                        current = verify_source_readback(
+                            seal_source_observation,
                             store.canonical_runtime.tasks, worker_store, intake,
                         )
                     if current["status"] == "SOURCE_OBSERVATION_REVALIDATED":
@@ -280,7 +297,8 @@ def main(
                     result = source_fixture_execute(task, intake["task_id"], worker_store)
                     if type(result) is not dict or result.get("status") != "COMPLETED":
                         return {"status": "BLOCKED", "task_id": intake["task_id"]}
-                    checked = seal_source_observation(
+                    checked = verify_source_readback(
+                        seal_source_observation,
                         store.canonical_runtime.tasks, worker_store, intake,
                     )
                     if checked["status"] != "SOURCE_OBSERVATION_REVALIDATED":

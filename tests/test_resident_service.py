@@ -87,7 +87,14 @@ def test_supervisor_health_requires_live_process_and_fresh_local_ipc():
     child.poll.return_value = None
     child.pid = 4321
     create = Mock(return_value=child)
-    controller = ResidentSupervisor(["python"], launch=create, health=lambda: {"status": "COMPOSED_NO_COGNITION", "pid": 4321})
+    # A bare status and matching PID do not establish healthy unqualified
+    # resident state. Require exact schema and all explicit hold gates.
+    health = {"schema": "VERAOS_RESIDENT_STATUS_V1",
+              "status": "COMPOSED_NO_COGNITION", "pid": 4321,
+              "canonical_runtime_qualified": False,
+              "cognition_route_qualified": False,
+              "protected_effect_authority": False}
+    controller = ResidentSupervisor(["python"], launch=create, health=lambda: health)
     assert controller.tick(10.0) == "STARTING"
     assert controller.tick(11.0) == "COMPOSED_NO_COGNITION"
     child.poll.return_value = 1

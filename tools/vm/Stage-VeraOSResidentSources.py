@@ -29,6 +29,28 @@ COMPONENTS = {
 EXTENSIONS = frozenset({".py", ".json", ".yaml", ".yml", ".toml", ".md",
                         ".txt", ".csv", ".sql", ".ini", ".cfg", ".rst"})
 
+# Static source package readiness only. These imports are used by the normal
+# resident, not just optional development fixtures. Their path existence does
+# not authenticate Python imports inside a Buildroot guest or admit a model.
+REQUIRED_RESIDENT_FILES = frozenset({
+    "components/vera_mono/packages/vera_core/src/vera_core/__init__.py",
+    "components/vera_mono/packages/vera_core/src/vera_core/qualified_runtime.py",
+    "components/vera_mono/packages/vera_core/src/vera_core/state.py",
+    "components/vera_mono/packages/vera_core/src/vera_core/task_execution.py",
+    "components/vera_mono/packages/vera_core/src/vera_core/local_conversation.py",
+    "components/vera_mono/packages/vera_core/src/vera_core/portal_task_handoff.py",
+    "components/portal/portal/__init__.py",
+    "components/portal/portal/vera_task_handoff.py",
+    "components/pre_active/src/pre_active/__init__.py",
+    "components/volition/src/volition/__init__.py",
+})
+
+
+def _require_resident_source_closure(paths: set[str]) -> None:
+    missing = sorted(REQUIRED_RESIDENT_FILES - paths)
+    if missing:
+        raise StageError("Missing resident source import module(s): " + ", ".join(missing))
+
 
 class StageError(ValueError):
     pass
@@ -132,6 +154,7 @@ def stage(
                 "file_manifest_sha256": packed_hash,
                 "files": inventory,
             })
+        _require_resident_source_closure({p for row in rows for p in (x["path"] for x in row["files"])})
         receipt = {
             "schema": "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1",
             "components": sorted(rows, key=lambda x: x["repository"]),
@@ -161,8 +184,9 @@ def stage(
 def verify_stage(staging_root: Path, source_root: Path = ROOT) -> dict[str, object]:
     """Verify every allowlisted staged file against the exact pinned manifest.
 
-    This does not verify Python imports, installed native dependencies, a running
-    service, an independent reviewer, or protected effects.
+    Required resident module files are checked, but this does not execute Python
+    imports in a guest, verify installed native dependencies, a running service,
+    an independent reviewer, or protected effects.
     """
     staging_root = staging_root.resolve(strict=True)
     source_root = source_root.resolve(strict=True)
@@ -235,6 +259,7 @@ def verify_stage(staging_root: Path, source_root: Path = ROOT) -> dict[str, obje
     }
     if expected_files != observed_files:
         raise StageError("Staged component file inventory mismatch")
+    _require_resident_source_closure(expected_files)
     return {
         "schema": "VERA_OS_RESIDENT_STAGE_VERIFICATION_V1",
         "status": "PINNED_SOURCE_FILES_VERIFIED_NOT_INSTALLED",

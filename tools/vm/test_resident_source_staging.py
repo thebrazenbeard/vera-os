@@ -55,6 +55,13 @@ class ResidentStageTests(unittest.TestCase):
                 marker = repo/f"src/{component}/__init__.py"
             marker.parent.mkdir(parents=True, exist_ok=True)
             marker.write_bytes(b"committed marker\n")
+            for required in stager.REQUIRED_RESIDENT_FILES:
+                prefix = "components/" + component + "/"
+                if required.startswith(prefix):
+                    module = repo / required[len(prefix):]
+                    module.parent.mkdir(parents=True, exist_ok=True)
+                    if not module.exists():
+                        module.write_bytes(b"# required resident import fixture\n")
             git(repo, "add", ".")
             git(repo, "commit", "-qm", "frozen source")
             (repo / ".private-untracked").write_text("NOT FOR STAGE")
@@ -136,6 +143,67 @@ class ResidentStageTests(unittest.TestCase):
         receipt_path.write_text(json.dumps(receipt))
         with self.assertRaisesRegex(stager.StageError, "head mismatch"):
             stager.verify_stage(self.output, self.source_root)
+
+    def test_missing_required_mono_or_portal_module_in_commit_rejected(self):
+        for component, relative in [
+            ("vera_mono", "packages/vera_core/src/vera_core/local_conversation.py"),
+            ("vera_mono", "packages/vera_core/src/vera_core/portal_task_handoff.py"),
+            ("portal", "portal/vera_task_handoff.py"),
+            ("vera_mono", "packages/vera_core/src/vera_core/qualified_runtime.py"),
+        ]:
+            with self.subTest(component=component, relative=relative):
+                repo = self.checkouts / component
+                module = repo / relative
+                module.unlink()
+                git(repo, "add", "-u")
+                git(repo, "commit", "-qm", "old source without required module")
+                head = git(repo, "rev-parse", "HEAD")
+                for filename in ("VERA_OS_PORTFOLIO_COMPOSITION_V1.json",
+                                 "VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json"):
+                    fp = self.source_root/"architecture/portfolio"/filename
+                    obj = json.loads(fp.read_text())
+                    for binding in obj["repositories"]:
+                        if binding["repository"] == stager.COMPONENTS[component][0]:
+                            binding["exact_head"] = head
+                    fp.write_text(json.dumps(obj))
+                with self.assertRaisesRegex(stager.StageError, "Missing resident source import"):
+                    self.stage()
+                git(repo, "revert", "--no-edit", "HEAD")
+                self.pinned[stager.COMPONENTS[component][0]] = git(repo, "rev-parse", "HEAD")
+                for filename in ("VERA_OS_PORTFOLIO_COMPOSITION_V1.json",
+                                 "VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json"):
+                    fp = self.source_root/"architecture/portfolio"/filename
+                    obj = json.loads(fp.read_text())
+                    for binding in obj["repositories"]:
+                        if binding["repository"] == stager.COMPONENTS[component][0]:
+                            binding["exact_head"] = self.pinned[binding["repository"]]
+                    fp.write_text(json.dumps(obj))
+
+    def test_manifest_omits_required_module_even_when_receipt_rehashed(self):
+        self.stage()
+        receipt_file = self.output/"VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json"
+        receipt = json.loads(receipt_file.read_text())
+        missing = ("components/vera_mono/packages/vera_core/src/"
+                   "vera_core/local_conversation.py")
+        for record in receipt["components"]:
+            if record["repository"] == "thebrazenbeard/vera-mono":
+                record["files"] = [f for f in record["files"] if f["path"] != missing]
+                record["file_count"] = len(record["files"])
+                inventory = record["files"]
+                record["file_manifest_sha256"] = stager._digest(
+                    json.dumps(inventory,sort_keys=True,separators=(",",":")).encode())
+        (self.output/missing).unlink()
+        receipt_file.write_text(json.dumps(receipt))
+        with self.assertRaisesRegex(stager.StageError, "Missing resident source import"):
+            stager.verify_stage(self.output,self.source_root)
+
+    def test_plan_pin_diverges_from_composition_rejected(self):
+        fp = self.source_root/"architecture/portfolio/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json"
+        obj = json.loads(fp.read_text())
+        obj["repositories"][0]["exact_head"] = "7"*40
+        fp.write_text(json.dumps(obj))
+        with self.assertRaisesRegex(stager.StageError, "Exact source head mismatch"):
+            self.stage()
 
 
 if __name__ == "__main__":
