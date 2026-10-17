@@ -225,6 +225,18 @@ def make_handler(
             }:
                 self.send_json(502, {"status": "OUTCOME_UNKNOWN"})
                 return
+            if answer["status"] == "COMPLETED":
+                # A callback's status string cannot mint successful output.
+                # The resident additionally verifies the durable Pre-Active
+                # run/event/route before returning this terminal state.
+                run_id = answer.get("run_id")
+                text = answer.get("final_text")
+                if (type(run_id) is not str or not run_id
+                    or len(run_id) > 128
+                    or type(text) is not str or not text.strip()
+                    or len(text) > 8192):
+                    self.send_json(502, {"status": "OUTCOME_UNKNOWN"})
+                    return
             self.send_json(
                 200 if answer["status"] == "COMPLETED" else 202,
                 {
