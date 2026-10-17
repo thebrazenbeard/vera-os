@@ -276,7 +276,7 @@ def main(
                         worker_handles = ResidentHandles(
                             worker_store, store.canonical_runtime,
                         )
-                        return worker_handles.execute_cognition_fixture(
+                        result = worker_handles.execute_cognition_fixture(
                             {
                                 **conversation_template,
                                 "task": task,
@@ -285,6 +285,59 @@ def main(
                             },
                             host_admission_verifier=host_admission_verifier,
                         )
+                        if type(result) is dict and result.get("status") == "COMPLETED":
+                            # Reconcile the exact source-only response against
+                            # the same durable SQLite event, run, and route.
+                            # Mere callback completion is never display proof.
+                            run_id = result.get("run_id")
+                            event_id = result.get("event_id")
+                            text = result.get("final_text")
+                            if (type(run_id) is not str or not run_id
+                                or type(event_id) is not str or not event_id
+                                or type(text) is not str or not text.strip()):
+                                return {"status": "OUTCOME_UNKNOWN"}
+                            row = worker_store.connection.execute(
+                                """
+                                SELECT r.id, r.task, r.status, r.final_text,
+                                       r.capabilities_json, r.source_event_id,
+                                       e.kind, e.payload_json, e.dedup_key
+                                FROM runs AS r JOIN events AS e
+                                  ON e.id=r.source_event_id
+                                WHERE r.id=? AND e.id=?
+                                """,
+                                (run_id, event_id),
+                            ).fetchone()
+                            route = worker_store.connection.execute(
+                                """
+                                SELECT payload_json FROM journal
+                                WHERE subject_id=?
+                                  AND event_type='VERAOS_COGNITION_ROUTE_SELECTED'
+                                ORDER BY seq DESC LIMIT 1
+                                """,
+                                (event_id,),
+                            ).fetchone()
+                            try:
+                                route_data = json.loads(route["payload_json"]) if route else None
+                                event_data = json.loads(row["payload_json"]) if row else None
+                                capabilities = json.loads(row["capabilities_json"]) if row else None
+                            except (ValueError, TypeError):
+                                return {"status": "OUTCOME_UNKNOWN"}
+                            if (row is None or row["task"] != task
+                                or row["status"] != "COMPLETED"
+                                or row["final_text"] != text
+                                or row["source_event_id"] != event_id
+                                or row["kind"] != "task.requested"
+                                or row["dedup_key"] != f"veraos-text:{request_id}"
+                                or event_data != {"task": task, "capabilities": []}
+                                or capabilities != []
+                                or type(route_data) is not dict
+                                or route_data.get("provider_id") != conversation_template["provider"]["provider_id"]
+                                or route_data.get("model") != conversation_template["model"]
+                                or route_data.get("route_id") != result.get("route_id")
+                                or route_data.get("effect_class") != "COGNITION_ONLY"
+                                or result.get("provider_id") != conversation_template["provider"]["provider_id"]):
+                                return {"status": "OUTCOME_UNKNOWN"}
+                        return result
                     finally:
                         worker_store.close()
 
