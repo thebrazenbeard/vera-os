@@ -1,7 +1,7 @@
 {
   "canonical_runtime_absorption": {
     "canonical_runtime_repository": "thebrazenbeard/vera-mono",
-    "canonical_runtime_source_head": "959211d0ad237fa62006840f075c76c01deafb28",
+    "canonical_runtime_source_head": "89ba1d18da78e7e38f015cf8d8ef4f528aae9df8",
     "direct_sibling_runtime_dependency": false,
     "rule": "ABSORPTION_DOES_NOT_REPLACE_THE_DONOR_REPOSITORY_PRIMARY_PORTFOLIO_ROLE",
     "sources": [
@@ -1402,7 +1402,7 @@
       ],
       "decision": "PACKAGE_CANONICAL_RUNTIME",
       "direct_sibling_runtime_dependency": false,
-      "exact_head": "959211d0ad237fa62006840f075c76c01deafb28",
+      "exact_head": "89ba1d18da78e7e38f015cf8d8ef4f528aae9df8",
       "implementation_class": "CANONICAL_RUNTIME",
       "implementation_path": "PACKAGE_SELF_CONTAINED_RUNTIME",
       "repository": "thebrazenbeard/vera-mono",
