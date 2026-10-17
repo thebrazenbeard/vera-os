@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import re
 from typing import Callable
 
 
@@ -25,6 +26,7 @@ small,.muted{color:#a9c0c9}.notice{padding:10px 14px;border-left:3px solid #b5d1
 label{display:block;margin-bottom:10px}input{background:#182731;color:#a9c0c9;border:1px solid #36505a;padding:12px;width:100%;border-radius:8px}
 button{background:#36505a;color:#ccd9df;border:0;border-radius:8px;padding:12px;margin-top:8px}
 button:disabled{cursor:not-allowed;opacity:.55}ul{padding-left:19px}
+#conversation-result{white-space:pre-wrap;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -46,13 +48,51 @@ button:disabled{cursor:not-allowed;opacity:.55}ul{padding-left:19px}
 </div>
 <section>
 <h2>Conversation</h2>
-<label for="message">No local cognition route is connected.</label>
-<input id="message" type="text" disabled placeholder="Messages unavailable until a route is admitted">
-<button disabled>Send</button>
-<p class="muted">VeraOS will not simulate a model response or silently select a paid provider.</p>
+<label id="message-label" for="message">No local cognition route is connected.</label>
+<input id="message" type="text" maxlength="2048" disabled placeholder="Messages unavailable until a route is admitted">
+<button id="send" type="button" disabled>Send</button>
+<p id="conversation-result" role="status">No request submitted.</p>
+<p class="muted">Source fixtures are not authenticated model admission. VeraOS will not silently select a provider.</p>
 </section>
 </main>
 <script>
+let conversationAvailable=false;
+let sending=false;
+let requestSequence=0;
+function updateControls(){
+ const enabled=conversationAvailable&&!sending;
+ document.getElementById('message').disabled=!enabled;
+ document.getElementById('send').disabled=!enabled;
+}
+async function sendMessage(){
+ if(!conversationAvailable||sending)return;
+ const input=document.getElementById('message');
+ const task=input.value.trim();
+ if(!task||task.length>2048)return;
+ sending=true;updateControls();
+ const result=document.getElementById('conversation-result');
+ result.textContent='PENDING — awaiting local response';
+ requestSequence++;
+ const requestId='ui-'+Date.now().toString(36)+'-'+requestSequence.toString(36);
+ try{
+  const response=await fetch('/api/conversation',{
+   method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({task:task,request_id:requestId})
+  });
+  const payload=await response.json();
+  if(!response.ok){result.textContent=payload.status||'HELD_OR_UNAVAILABLE';return}
+  if(payload.status==='COMPLETED' && typeof payload.final_text==='string'){
+    result.textContent=payload.final_text;
+  }else{
+    result.textContent=payload.status||'PENDING';
+  }
+ }catch(error){result.textContent='LOCAL SERVICE UNAVAILABLE'}
+ finally{sending=false;updateControls()}
+}
+document.getElementById('send').addEventListener('click',sendMessage);
+document.getElementById('message').addEventListener('keydown',event=>{
+ if(event.key==='Enter'){event.preventDefault();sendMessage()}
+});
 async function refresh(){
 try{
  const response=await fetch('/api/status',{cache:'no-store'});
@@ -65,7 +105,15 @@ try{
  document.getElementById('canonical').textContent=s.canonical_runtime_qualified?'QUALIFIED':'UNQUALIFIED';
  document.getElementById('cognition').textContent=s.cognition_route_qualified?'AVAILABLE':'NO ROUTE';
  document.getElementById('effects').textContent=s.protected_effect_authority?'AUTHORIZED':'DENIED';
-}catch(error){document.getElementById('status').textContent='LOCAL SERVICE UNAVAILABLE';}
+ conversationAvailable=s.conversation_fixture_available===true;
+ document.getElementById('message-label').textContent=conversationAvailable
+  ? 'SOURCE FIXTURE ONLY — not an authenticated resident model'
+  : 'No local cognition route is connected.';
+ updateControls();
+}catch(error){
+ document.getElementById('status').textContent='LOCAL SERVICE UNAVAILABLE';
+ conversationAvailable=false;updateControls();
+}
 }
 refresh();setInterval(refresh,3000);
 </script>
@@ -74,8 +122,22 @@ refresh();setInterval(refresh,3000);
 """
 
 
-def make_handler(status_provider: Callable[[], dict]):
+_REQUEST_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,95}$")
+_MAX_REQUEST_BYTES = 4096
+
+
+def make_handler(
+    status_provider: Callable[[], dict],
+    *,
+    conversation_handler: Callable[[str, str], dict] | None = None,
+):
+    """Loopback UI. HTTP input contains text and ID, never provider credentials."""
+
     class Handler(BaseHTTPRequestHandler):
+        def setup(self) -> None:
+            self.request.settimeout(5.0)
+            super().setup()
+
         def send_bytes(self, code: int, body: bytes, content_type: str) -> None:
             self.send_response(code)
             self.send_header("Content-Type", content_type)
@@ -90,17 +152,100 @@ def make_handler(status_provider: Callable[[], dict]):
             self.end_headers()
             self.wfile.write(body)
 
+        def send_json(self, code: int, payload: dict) -> None:
+            self.send_bytes(
+                code, json.dumps(payload, sort_keys=True).encode("utf-8"),
+                "application/json; charset=utf-8",
+            )
+
         def do_GET(self):
             if self.path == "/":
                 self.send_bytes(200, DASHBOARD.encode("utf-8"), "text/html; charset=utf-8")
             elif self.path == "/api/status":
-                data = json.dumps(status_provider(), sort_keys=True).encode("utf-8")
-                self.send_bytes(200, data, "application/json")
+                self.send_json(200, status_provider())
             else:
                 self.send_bytes(404, b"Not Found", "text/plain; charset=utf-8")
 
         def do_POST(self):
-            self.send_bytes(405, b"Read-only local console", "text/plain; charset=utf-8")
+            if self.path != "/api/conversation":
+                self.send_json(404, {"status": "NOT_FOUND"})
+                return
+            if conversation_handler is None:
+                self.send_json(503, {"status": "HELD_NO_ADMITTED_PROVIDER"})
+                return
+            # No cross-origin write from another site in an ordinary browser.
+            # This is NOT authentication against other local processes.
+            expected = f"127.0.0.1:{self.server.server_port}"
+            if self.headers.get("Host") != expected:
+                self.send_json(403, {"status": "HELD_WRONG_HOST"})
+                return
+            origin = self.headers.get("Origin")
+            if origin != f"http://{expected}":
+                self.send_json(403, {"status": "HELD_WRONG_ORIGIN"})
+                return
+            if self.headers.get("Content-Type", "").lower() != "application/json":
+                self.send_json(415, {"status": "UNSUPPORTED_CONTENT_TYPE"})
+                return
+            size = self.headers.get("Content-Length", "")
+            if len(size) > 6 or not size.isascii() or not size.isdecimal():
+                self.send_json(411, {"status": "INVALID_LENGTH"})
+                return
+            count = int(size)
+            if not 0 < count <= _MAX_REQUEST_BYTES:
+                self.send_json(413, {"status": "REQUEST_TOO_LARGE"})
+                return
+            try:
+                raw = self.rfile.read(count)
+                request = json.loads(raw)
+            except (ValueError, UnicodeError):
+                self.send_json(400, {"status": "INVALID_JSON"})
+                return
+            if (type(request) is not dict
+                or set(request) != {"task", "request_id"}
+                or type(request["task"]) is not str
+                or not request["task"].strip()
+                or len(request["task"]) > 2048
+                or type(request["request_id"]) is not str
+                or _REQUEST_ID.fullmatch(request["request_id"]) is None):
+                self.send_json(400, {"status": "INVALID_REQUEST"})
+                return
+            try:
+                answer = conversation_handler(
+                    request["task"].strip(), request["request_id"],
+                )
+            except (ValueError, RuntimeError):
+                self.send_json(503, {"status": "HELD_OR_UNAVAILABLE"})
+                return
+            except Exception:
+                # No fabricated completion on unknown local model failure.
+                self.send_json(502, {"status": "OUTCOME_UNKNOWN"})
+                return
+            if type(answer) is not dict or answer.get("status") not in {
+                "PENDING", "COMPLETED", "FAILED", "BLOCKED", "CANCELLED",
+            }:
+                self.send_json(502, {"status": "OUTCOME_UNKNOWN"})
+                return
+            if answer["status"] == "COMPLETED":
+                # A callback's status string cannot mint successful output.
+                # The resident additionally verifies the durable Pre-Active
+                # run/event/route before returning this terminal state.
+                run_id = answer.get("run_id")
+                text = answer.get("final_text")
+                if (type(run_id) is not str or not run_id
+                    or len(run_id) > 128
+                    or type(text) is not str or not text.strip()
+                    or len(text) > 8192):
+                    self.send_json(502, {"status": "OUTCOME_UNKNOWN"})
+                    return
+            self.send_json(
+                200 if answer["status"] == "COMPLETED" else 202,
+                {
+                    "status": answer["status"],
+                    "request_id": request["request_id"],
+                    "run_id": answer.get("run_id"),
+                    "final_text": answer.get("final_text") if answer["status"] == "COMPLETED" else None,
+                },
+            )
 
         def log_message(self, format, *args):
             return
@@ -112,5 +257,9 @@ def open_loopback_server(
     status_provider: Callable[[], dict],
     *,
     port: int = 18765,
+    conversation_handler: Callable[[str, str], dict] | None = None,
 ) -> ThreadingHTTPServer:
-    return ThreadingHTTPServer(("127.0.0.1", port), make_handler(status_provider))
+    return ThreadingHTTPServer(
+        ("127.0.0.1", port),
+        make_handler(status_provider, conversation_handler=conversation_handler),
+    )

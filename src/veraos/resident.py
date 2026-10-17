@@ -40,45 +40,6 @@ class ResidentHandles:
     pre_active_store: object
     canonical_runtime: object
 
-    def execute_cognition_fixture(
-        self,
-        request: dict,
-        *,
-        host_admission_verifier: Callable[[dict, str, str], str] | None = None,
-    ) -> dict:
-        """One explicit host-injected, source-fixture-only cognition turn.
-
-        Normal CLI never configures this hook. No real-host verifier is
-        installed: even a purported 'VERIFIED_REAL' answer remains HOLD.
-        Structural provider PASS is never sufficient to invoke inference.
-        """
-        required = {"provider", "base_url", "model", "task", "request_id", "now"}
-        if type(request) is not dict or set(request) != required:
-            raise ValueError("invalid exact resident cognition request")
-        if host_admission_verifier is None:
-            raise RuntimeError("resident host admission verifier absent: HELD")
-        if not callable(host_admission_verifier):
-            raise TypeError("host admission verifier must be callable")
-        # Host injection is in-process Python only, never CLI/env/HTTP input.
-        # This source cut admits only a synthetic development fixture. A real
-        # issuer/host verifier MUST be implemented before a real provider route.
-        decision = host_admission_verifier(
-            request["provider"], request["base_url"], request["model"],
-        )
-        if decision != "SYNTHETIC_SOURCE_FIXTURE_ONLY":
-            raise RuntimeError("real resident provider admission not installed: HELD")
-        from .native_cognition import admit_local_text_route, execute_text_request
-        portal = importlib.import_module("portal")
-        route = admit_local_text_route(
-            store=self.pre_active_store, portal=portal,
-            provider=request["provider"], base_url=request["base_url"],
-            model=request["model"],
-        )
-        return execute_text_request(
-            route, task=request["task"], request_id=request["request_id"],
-            now=request["now"],
-        )
-
     def close(self) -> None:
         self.pre_active_store.close()
 
@@ -120,6 +81,7 @@ def compose_components(base: Path, state_root: Path) -> tuple[dict, object]:
         "canonical_runtime_open": True,
         "canonical_runtime_qualified": False,
         "cognition_route_qualified": False,
+        "conversation_fixture_available": False,
         "protected_effect_authority": False,
     }
     return status, ResidentHandles(store, canonical_runtime)
@@ -203,8 +165,12 @@ class ResidentSupervisor:
     def tick(self, now: float) -> str:
         if self.child is not None and self.child.poll() is None:
             info = self.health() if self.health else None
-            if (info and info.get("schema", "VERAOS_RESIDENT_STATUS_V1") == "VERAOS_RESIDENT_STATUS_V1"
-                    and info.get("pid") == self.child.pid and info.get("status")):
+            if (info and info.get("schema") == "VERAOS_RESIDENT_STATUS_V1"
+                    and info.get("pid") == self.child.pid
+                    and info.get("status") == "COMPOSED_NO_COGNITION"
+                    and info.get("canonical_runtime_qualified") is False
+                    and info.get("cognition_route_qualified") is False
+                    and info.get("protected_effect_authority") is False):
                 return str(info["status"])
             return "RUNNING_UNVERIFIED"
         self.child = None
@@ -228,8 +194,7 @@ class ResidentSupervisor:
 def main(
     argv: list[str] | None = None,
     *,
-    cognition_request: dict | None = None,
-    host_admission_verifier: Callable[[dict, str, str], str] | None = None,
+    source_fixture_execute: Callable[[str, str, object], dict] | None = None,
 ) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--components-root", type=Path, default=DEFAULT_COMPONENTS)
@@ -241,12 +206,75 @@ def main(
     server = None
     http_thread = None
     try:
-        if cognition_request is not None:
-            store.execute_cognition_fixture(
-                cognition_request,
-                host_admission_verifier=host_admission_verifier,
-            )
-        server = open_loopback_server(lambda: status)
+        if source_fixture_execute is not None:
+            # Python-injected OFFLINE test executor only. Not a CLI/env/HTTP
+            # option; no provider descriptor, URL, or network-capable model
+            # adapter is constructed by this production resident module.
+            # The external test source owns its deterministic fixture.
+            fixture_lock = threading.Lock()
+            status["conversation_fixture_available"] = True
+
+            def handle_text(task: str, request_id: str) -> dict:
+                with fixture_lock:
+                    pre_active = importlib.import_module("pre_active")
+                    worker_store = pre_active.Store(args.state_root / "pre-active.sqlite3")
+                    try:
+                        result = source_fixture_execute(task, request_id, worker_store)
+                        if type(result) is dict and result.get("status") == "COMPLETED":
+                            # Validate the original task and durable model event
+                            # before exposing this fixture result to the UI.
+                            run_id, event_id, answer_text = (
+                                result.get("run_id"),
+                                result.get("event_id"),
+                                result.get("final_text"),
+                            )
+                            if any(type(x) is not str or not x for x in (run_id, event_id, answer_text)):
+                                return {"status": "OUTCOME_UNKNOWN"}
+                            row = worker_store.connection.execute(
+                                """
+                                SELECT r.task, r.status, r.final_text,
+                                       r.capabilities_json, r.source_event_id,
+                                       e.kind, e.status AS event_status,
+                                       e.payload_json, e.dedup_key
+                                FROM runs AS r JOIN events AS e ON e.id=r.source_event_id
+                                WHERE r.id=? AND e.id=?
+                                """, (run_id, event_id),
+                            ).fetchone()
+                            route_rows = worker_store.connection.execute(
+                                """
+                                SELECT payload_json FROM journal
+                                WHERE subject_id=? AND event_type='VERAOS_COGNITION_ROUTE_SELECTED'
+                                ORDER BY seq DESC
+                                """, (event_id,),
+                            ).fetchall()
+                            try:
+                                event_data = json.loads(row["payload_json"]) if row else None
+                                caps = json.loads(row["capabilities_json"]) if row else None
+                                routes = [json.loads(r["payload_json"]) for r in route_rows]
+                            except (ValueError, TypeError):
+                                return {"status": "OUTCOME_UNKNOWN"}
+                            if (
+                                row is None or row["task"] != task
+                                or row["status"] != "COMPLETED"
+                                or row["final_text"] != answer_text
+                                or row["source_event_id"] != event_id
+                                or row["kind"] != "task.requested"
+                                or row["event_status"] != "DONE"
+                                or row["dedup_key"] != f"veraos-text:{request_id}"
+                                or event_data != {"task": task, "capabilities": []}
+                                or caps != [] or len(routes) != 1
+                                or routes[0].get("provider_id") != result.get("provider_id")
+                                or routes[0].get("route_id") != result.get("route_id")
+                                or routes[0].get("effect_class") != "COGNITION_ONLY"
+                            ):
+                                return {"status": "OUTCOME_UNKNOWN"}
+                        return result
+                    finally:
+                        worker_store.close()
+
+            server = open_loopback_server(lambda: status, conversation_handler=handle_text)
+        else:
+            server = open_loopback_server(lambda: status)
         http_thread = threading.Thread(target=server.serve_forever, daemon=True)
         http_thread.start()
         print("VERAOS_RESIDENT_COMPONENTS_COMPOSED_V1", flush=True)
