@@ -179,7 +179,7 @@ def test_ambiguous_run_does_not_redispatch_or_display(tmp_path):
     with running(tmp_path,fixture=died) as base:
         code,result=post(base,"uncertain task","u-1")
         assert code==202 and result["status"]=="BLOCKED"
-        assert hits==["u-1"]
+        assert len(hits)==1 and hits[0].startswith("ui-")
 
 
 def test_pre_active_substitution_and_task_dependency_hold(tmp_path):
@@ -267,9 +267,9 @@ def test_actual_pre_active_independent_tasks_finish_out_of_order(tmp_path):
             reserve_source_trial(ledger,intake,assess_vera_task_route(req,(route,)),
                                  target_id="offline-deterministic",route_id="offline-fixture")
         # Second task actually completes first, both with real Pre-Active Store.
-        fixture("task-b","b",h.pre_active_store)
+        fixture("task-b",b["task_id"],h.pre_active_store)
         assert seal_source_observation(ledger,h.pre_active_store,b)["status"]=="SOURCE_OBSERVATION_REVALIDATED"
-        fixture("task-a","a",h.pre_active_store)
+        fixture("task-a",a["task_id"],h.pre_active_store)
         assert seal_source_observation(ledger,h.pre_active_store,a)["status"]=="SOURCE_OBSERVATION_REVALIDATED"
         assert len(calls)==2
     finally:
@@ -329,3 +329,114 @@ def test_real_parallel_task_openings_use_distinct_atomic_journal_entries(tmp_pat
         h.close()
         del h
         gc.collect()
+
+def test_same_message_id_different_conversations_have_independent_worker_receipts(tmp_path):
+    fixture,calls=make_offline_fixture("SYNTHETIC: independent")
+    with running(tmp_path,fixture=fixture) as base:
+        first=post(base,"one context","m-1","conv-one")
+        second=post(base,"another context","m-1","conv-two")
+        assert first[0]==200,first
+        assert second[0]==200,second
+        assert first[1]["run_id"]!=second[1]["run_id"]
+        assert len(calls)==2
+    with running(tmp_path,fixture=fixture) as base:
+        again=post(base,"another context","m-1","conv-two")
+        assert again[1]["run_id"]==second[1]["run_id"]
+        assert len(calls)==2
+
+
+def test_cold_two_turn_history_is_evidence_not_memory_or_model_authority(tmp_path):
+    from vera_core.local_conversation import recover_conversation
+    with running(tmp_path) as base:
+        assert post(base,"First turn original context","m-1","continual")[0]==202
+        assert post(base,"Second turn follows it","m-2","continual")[0]==202
+    status,h=resident.compose_components(STAGE,tmp_path/"state")
+    try:
+        records=recover_conversation(
+            h.canonical_runtime.tasks,h.pre_active_store,"continual",
+        )
+        assert [x["text"] for x in records]==[
+            "First turn original context","Second turn follows it"]
+        assert {x["status"] for x in records}=={"PENDING_NO_ADMITTED_PROVIDER"}
+        assert all(x["source_digest"] and x["task_id"] for x in records)
+        assert all(x["accepted_as_task_result"] is False for x in records)
+    finally:
+        h.close()
+        del h
+        gc.collect()
+
+def get_history(base, conversation_id):
+    with urllib.request.urlopen(
+        base+"/api/conversation/history?conversation_id="+conversation_id,
+        timeout=8,
+    ) as response:
+        return response.status,json.loads(response.read())
+
+
+def test_cold_resident_http_multi_turn_context_from_canonical_ledger(tmp_path):
+    with running(tmp_path) as base:
+        assert post(base,"First turn: calibrate spindle","one","archive")[0]==202
+        assert post(base,"Second turn: report vibration","two","archive")[0]==202
+    with running(tmp_path) as base:
+        code,history=get_history(base,"archive")
+        assert code==200 and history["model_admitted"] is False
+        assert history["memory_admitted"] is False
+        assert [m["message_id"] for m in history["messages"]]==["one","two"]
+        assert [m["text"] for m in history["messages"]]==[
+            "First turn: calibrate spindle","Second turn: report vibration"]
+        assert all(m["status"]=="PENDING_NO_ADMITTED_PROVIDER" for m in history["messages"])
+        assert len({m["task_id"] for m in history["messages"]})==2
+        assert post(base,"Third turn: no inference","three","archive")[0]==202
+        assert len(get_history(base,"archive")[1]["messages"])==3
+        with pytest.raises(urllib.error.HTTPError) as e:
+            urllib.request.urlopen(base+"/api/conversation/history?conversation_id=bad!id")
+        assert e.value.code==400
+
+def test_cold_history_reports_held_after_task_invalidation(tmp_path):
+    with running(tmp_path) as base:
+        assert post(base,"source user task","m-1","invalidated")[0]==202
+    status,h=resident.compose_components(STAGE,tmp_path/"state")
+    try:
+        from vera_core.local_conversation import open_message
+        i=open_message(h.canonical_runtime.tasks,"invalidated","m-1","source user task")
+        h.canonical_runtime.tasks.bind_dependency(
+            i["task_id"],"stale",kind="COORDINATION_COMMAND",target_id="cmd:stale")
+    finally:
+        h.close()
+        del h
+        gc.collect()
+    with running(tmp_path) as base:
+        code,payload=get_history(base,"invalidated")
+        assert code==200 and payload["messages"][0]["status"]=="HELD_TASK_INVALIDATED"
+        assert payload["messages"][0]["accepted_as_task_result"] is False
+
+
+def test_failed_worker_event_cannot_be_recovered_as_completed_result(tmp_path):
+    fixture,calls=make_offline_fixture("SYNTHETIC: original")
+    with running(tmp_path,fixture=fixture) as base:
+        assert post(base,"observe once","q-1","forged-event")[0]==200
+    from pre_active import Store
+    store=Store(tmp_path/"state/pre-active.sqlite3")
+    try:
+        store.connection.execute(
+            "UPDATE events SET status='FAILED' WHERE dedup_key LIKE 'veraos-text:%'")
+        store.connection.commit()
+    finally:
+        store.close()
+    with running(tmp_path,fixture=fixture) as base:
+        code,history=get_history(base,"forged-event")
+        assert code==200
+        assert history["messages"][0]["status"]=="HELD_EVIDENCE_CONTRADICTION"
+        assert post(base,"observe once","q-1","forged-event")[0]!=200
+        assert len(calls)==1
+
+def test_http_rejects_text_normalization_under_existing_message_identity(tmp_path):
+    with running(tmp_path) as base:
+        code,_=post(base,"Exact original task","m-1","bytes")
+        assert code==202
+        assert post(base," Exact original task","m-1","bytes")[0]==400
+        assert post(base,"Exact original task ","m-1","bytes")[0]==400
+        assert post(base,"Exact original task","m-1","bytes")[0]==202
+        _,history=get_history(base,"bytes")
+        assert len(history["messages"])==1
+        assert history["messages"][0]["text"]=="Exact original task"

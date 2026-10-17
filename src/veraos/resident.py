@@ -277,7 +277,7 @@ def main(
                     # Source-only deterministic injected callback. The reservation
                     # is durable BEFORE invocation. Any crash/no outcome never
                     # causes a second invocation on subsequent HTTP retries.
-                    result = source_fixture_execute(task, request_id, worker_store)
+                    result = source_fixture_execute(task, intake["task_id"], worker_store)
                     if type(result) is not dict or result.get("status") != "COMPLETED":
                         return {"status": "BLOCKED", "task_id": intake["task_id"]}
                     checked = seal_source_observation(
@@ -300,7 +300,24 @@ def main(
                 finally:
                     worker_store.close()
 
-        server = open_loopback_server(lambda: status, conversation_handler=handle_text)
+        def handle_history(conversation_id: str) -> list[dict]:
+            # Read-only cold context from canonical task + source stores.
+            # No new task, model execution, memory admission or redispatch.
+            from vera_core.local_conversation import recover_conversation
+            with fixture_lock:
+                pre_active = importlib.import_module("pre_active")
+                worker_store = pre_active.Store(args.state_root / "pre-active.sqlite3")
+                try:
+                    return recover_conversation(
+                        store.canonical_runtime.tasks, worker_store, conversation_id,
+                    )
+                finally:
+                    worker_store.close()
+
+        server = open_loopback_server(
+            lambda: status, conversation_handler=handle_text,
+            history_handler=handle_history,
+        )
         http_thread = threading.Thread(target=server.serve_forever, daemon=True)
         http_thread.start()
         print("VERAOS_RESIDENT_COMPONENTS_COMPOSED_V1", flush=True)

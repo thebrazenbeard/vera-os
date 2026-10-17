@@ -5,6 +5,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import re
 from typing import Callable
+from urllib.parse import urlsplit, parse_qs
 
 
 DASHBOARD = """<!doctype html>
@@ -60,6 +61,7 @@ let conversationAvailable=false;
 let sending=false;
 let requestSequence=0;
 let syntheticFixture=false;
+let restoredOnce=false;
 const randomHex=()=>Array.from(crypto.getRandomValues(new Uint8Array(16)),
  x=>x.toString(16).padStart(2,'0')).join('');
 const CONVERSATION_KEY='veraos-local-conversation-v1';
@@ -117,6 +119,20 @@ document.getElementById('send').addEventListener('click',sendMessage);
 document.getElementById('message').addEventListener('keydown',event=>{
  if(event.key==='Enter'){event.preventDefault();sendMessage()}
 });
+async function restoreHistory(){
+ try{
+  const r=await fetch('/api/conversation/history?conversation_id='+encodeURIComponent(conversationId),
+                       {cache:'no-store'});
+  if(!r.ok)return;
+  const h=await r.json();
+  if(h.schema!=='VERAOS_CANONICAL_CONVERSATION_HISTORY_V1')return;
+  if(sending||!Array.isArray(h.messages)||!h.messages.length)return;
+  const shown=h.messages.slice(-8).map(m=>
+    '['+m.message_id+' | '+m.status+'] USER INPUT (UNVERIFIED): '+m.text);
+  document.getElementById('conversation-result').textContent=
+   'RECOVERED TASK EVIDENCE — NOT GOVERNED MEMORY\\n'+shown.join('\\n');
+ }catch(error){ /* retained in Mono ledger; do not invent a recovery */ }
+}
 async function refresh(){
 try{
  const response=await fetch('/api/status',{cache:'no-store'});
@@ -135,6 +151,7 @@ try{
   ? 'SOURCE FIXTURE ONLY — not an authenticated resident model'
   : 'Messages are recorded as tasks; model execution remains HELD.';
  updateControls();
+ if(conversationAvailable&&!restoredOnce){restoredOnce=true;restoreHistory();}
 }catch(error){
  document.getElementById('status').textContent='LOCAL SERVICE UNAVAILABLE';
  conversationAvailable=false;updateControls();
@@ -155,6 +172,7 @@ def make_handler(
     status_provider: Callable[[], dict],
     *,
     conversation_handler: Callable[[str, str], dict] | None = None,
+    history_handler: Callable[[str], list[dict]] | None = None,
 ):
     """Loopback UI. HTTP input contains text and ID, never provider credentials."""
 
@@ -188,6 +206,34 @@ def make_handler(
                 self.send_bytes(200, DASHBOARD.encode("utf-8"), "text/html; charset=utf-8")
             elif self.path == "/api/status":
                 self.send_json(200, status_provider())
+            elif urlsplit(self.path).path == "/api/conversation/history":
+                if history_handler is None:
+                    self.send_json(503, {"status": "HELD_HISTORY_UNAVAILABLE"})
+                    return
+                expected = f"127.0.0.1:{self.server.server_port}"
+                if self.headers.get("Host") != expected:
+                    self.send_json(403, {"status": "HELD_WRONG_HOST"})
+                    return
+                try:
+                    query = parse_qs(urlsplit(self.path).query, strict_parsing=True)
+                    cid = query["conversation_id"]
+                    if set(query) != {"conversation_id"} or len(cid) != 1 or (
+                        _REQUEST_ID.fullmatch(cid[0]) is None
+                    ):
+                        raise ValueError("invalid conversation")
+                    rows = history_handler(cid[0])
+                except (ValueError, KeyError, TypeError):
+                    self.send_json(400, {"status": "INVALID_CONVERSATION"})
+                    return
+                except Exception:
+                    self.send_json(503, {"status": "HELD_HISTORY_INCONSISTENT"})
+                    return
+                self.send_json(200, {
+                    "schema": "VERAOS_CANONICAL_CONVERSATION_HISTORY_V1",
+                    "conversation_id": cid[0], "messages": rows[-64:],
+                    "truncated": len(rows) > 64, "memory_admitted": False,
+                    "model_admitted": False,
+                })
             else:
                 self.send_bytes(404, b"Not Found", "text/plain; charset=utf-8")
 
@@ -229,6 +275,7 @@ def make_handler(
                 or set(request) not in ({"task", "request_id"}, {"task", "request_id", "conversation_id"})
                 or type(request["task"]) is not str
                 or not request["task"].strip()
+                or request["task"] != request["task"].strip()
                 or len(request["task"]) > 2048
                 or type(request["request_id"]) is not str
                 or _REQUEST_ID.fullmatch(request["request_id"]) is None
@@ -239,10 +286,10 @@ def make_handler(
                 return
             try:
                 answer = conversation_handler(
-                    request["task"].strip(), request["request_id"],
+                    request["task"], request["request_id"],
                     request["conversation_id"],
                 ) if "conversation_id" in request else conversation_handler(
-                    request["task"].strip(), request["request_id"],
+                    request["task"], request["request_id"],
                 )
             except (ValueError, RuntimeError):
                 self.send_json(503, {"status": "HELD_OR_UNAVAILABLE"})
@@ -276,6 +323,9 @@ def make_handler(
                     "run_id": answer.get("run_id"),
                     "task_id": answer.get("task_id"),
                     "synthetic": answer.get("synthetic") is True,
+                    "accepted_as_task_result": False,
+                    "model_authenticated": False,
+                    "protected_effect_authority": False,
                     "final_text": answer.get("final_text") if answer["status"] == "COMPLETED" else None,
                 },
             )
@@ -291,8 +341,9 @@ def open_loopback_server(
     *,
     port: int = 18765,
     conversation_handler: Callable[[str, str], dict] | None = None,
+    history_handler: Callable[[str], list[dict]] | None = None,
 ) -> ThreadingHTTPServer:
     return ThreadingHTTPServer(
         ("127.0.0.1", port),
-        make_handler(status_provider, conversation_handler=conversation_handler),
+        make_handler(status_provider, conversation_handler=conversation_handler, history_handler=history_handler),
     )
