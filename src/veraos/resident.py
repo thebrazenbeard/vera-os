@@ -165,8 +165,12 @@ class ResidentSupervisor:
     def tick(self, now: float) -> str:
         if self.child is not None and self.child.poll() is None:
             info = self.health() if self.health else None
-            if (info and info.get("schema", "VERAOS_RESIDENT_STATUS_V1") == "VERAOS_RESIDENT_STATUS_V1"
-                    and info.get("pid") == self.child.pid and info.get("status")):
+            if (info and info.get("schema") == "VERAOS_RESIDENT_STATUS_V1"
+                    and info.get("pid") == self.child.pid
+                    and info.get("status") == "COMPOSED_NO_COGNITION"
+                    and info.get("canonical_runtime_qualified") is False
+                    and info.get("cognition_route_qualified") is False
+                    and info.get("protected_effect_authority") is False):
                 return str(info["status"])
             return "RUNNING_UNVERIFIED"
         self.child = None
