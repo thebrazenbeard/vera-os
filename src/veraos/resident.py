@@ -230,7 +230,8 @@ def main(
                                 """
                                 SELECT r.task, r.status, r.final_text,
                                        r.capabilities_json, r.source_event_id,
-                                       e.kind, e.payload_json, e.dedup_key
+                                       e.kind, e.status AS event_status,
+                                       e.payload_json, e.dedup_key
                                 FROM runs AS r JOIN events AS e ON e.id=r.source_event_id
                                 WHERE r.id=? AND e.id=?
                                 """, (run_id, event_id),
@@ -254,6 +255,7 @@ def main(
                                 or row["final_text"] != answer_text
                                 or row["source_event_id"] != event_id
                                 or row["kind"] != "task.requested"
+                                or row["event_status"] != "DONE"
                                 or row["dedup_key"] != f"veraos-text:{request_id}"
                                 or event_data != {"task": task, "capabilities": []}
                                 or caps != [] or len(routes) != 1
