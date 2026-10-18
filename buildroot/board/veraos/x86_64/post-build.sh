@@ -51,6 +51,10 @@ if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
     --rootfs-directory "$target_dir" --stage "$stage" --repo-root "$repo_root"
   python3 "$repo_root/tools/vm/Probe-ResidentTargetRootfs.py" \
     --rootfs-directory "$target_dir" --repo-root "$repo_root"
+  # Actual target ELF64 dynamic dependencies must resolve transitively;
+  # source/package presence alone is not target native-link qualification.
+  python3 "$repo_root/tools/vm/Probe-ResidentELFClosure.py" \
+    --rootfs-directory "$target_dir"
 
   # Explicitly no auto-start or protected-effect admission here.
 fi
