@@ -79,8 +79,14 @@ class GuestParentSymlinkScopeTests(unittest.TestCase):
         outside = self.base / "host-libssl.so.3"
         real.rename(outside)
         real.symlink_to(outside)
-        report = self.audit()
-        self.assertIn("/usr/lib/libssl.so.3", report["missing"])
+        # Windows host-absolute links are rejected at traversal; on Linux
+        # their absolute target is rebased into the guest and is absent.
+        try:
+            report = self.audit()
+        except checker.TargetPrerequisiteError as exc:
+            self.assertIn("escapes rootfs", str(exc))
+        else:
+            self.assertIn("/usr/lib/libssl.so.3", report["missing"])
 
     def test_mismatched_guest_resident_source_rejected(self):
         resident = self.root / "opt/veraos/src/veraos/resident.py"
