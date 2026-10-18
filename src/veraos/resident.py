@@ -253,9 +253,12 @@ def main(
                             recover_message,
                             store.canonical_runtime.tasks, worker_store, intake,
                         )
-                        head = store.canonical_runtime.tasks.read(
+                        # The ledger's read(...).journal_head_digest is GLOBAL.
+                        # This acknowledgement is a task-scoped CAS/readback:
+                        # unrelated B must not invalidate an unchanged A.
+                        head = store.canonical_runtime.tasks.events(
                             intake["task_id"]
-                        ).journal_head_digest
+                        )[-1].event_digest
                         if (current["status"] != "PENDING_NO_ADMITTED_PROVIDER"
                                 or head != intake["opened_head"]):
                             return {"status": "BLOCKED", "task_id": intake["task_id"]}
