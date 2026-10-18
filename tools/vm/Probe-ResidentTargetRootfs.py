@@ -33,9 +33,25 @@ def audit(rootfs: Path, repo: Path = ROOT) -> dict[str, object]:
             raise TargetPrerequisiteError("target file escapes rootfs: " + guest)
         return path
 
+    def safe_file(guest: str) -> Path | None:
+        # Absolute symlinks inside Linux rootfs are guest paths, not host paths.
+        # Always follow the final component under rootfs before testing bytes.
+        path = file(guest)
+        for _ in range(20):
+            if not path.parent.resolve().is_relative_to(rootfs):
+                raise TargetPrerequisiteError("target file escapes rootfs: " + guest)
+            if not path.is_symlink():
+                return path if path.is_file() else None
+            link = path.readlink()
+            if link.drive or link.as_posix().startswith("//"):
+                raise TargetPrerequisiteError("target file escapes rootfs: " + guest)
+            path = (file(link.as_posix()) if link.as_posix().startswith("/")
+                    else path.parent / link)
+        raise TargetPrerequisiteError("target symlink chain too long: " + guest)
+
     missing: list[str] = []
     def require(guest: str) -> None:
-        if not file(guest).is_file():
+        if safe_file(guest) is None:
             missing.append(guest)
 
     # Exact selected 2025.02.18 Buildroot Python 3.12.14 major/minor.
@@ -50,7 +66,9 @@ def audit(rootfs: Path, repo: Path = ROOT) -> dict[str, object]:
         require("/usr/lib/python3.12/" + name)
     dyn = file("/usr/lib/python3.12/lib-dynload")
     for name in ("_sqlite3", "_ssl"):
-        if not dyn.is_dir() or not list(dyn.glob(name + "*.so")):
+        found = sorted(dyn.glob(name + "*.so")) if dyn.is_dir() else []
+        if not any(safe_file("/" + p.relative_to(rootfs).as_posix())
+                   for p in found):
             missing.append("python3.12 extension " + name)
     # Known direct runtime linker inputs for the selected Buildroot profile.
     # This is only a SONAME-presence guard. It does not inspect DT_NEEDED,
@@ -59,25 +77,28 @@ def audit(rootfs: Path, repo: Path = ROOT) -> dict[str, object]:
         require("/usr/lib/" + soname)
     site = file("/usr/lib/python3.12/site-packages")
     for package in ("jsonschema", "cryptography", "yaml"):
-        if not (site / package / "__init__.py").is_file():
+        if safe_file("/usr/lib/python3.12/site-packages/" +
+                     package + "/__init__.py") is None:
             missing.append("python3.12 import " + package)
 
     require("/usr/bin/cog")
     fonts = file("/usr/share/fonts")
-    if not fonts.is_dir() or not list(fonts.rglob("DejaVuSans.ttf")):
+    matches = sorted(fonts.rglob("DejaVuSans.ttf")) if fonts.is_dir() else []
+    if not any(safe_file("/" + p.relative_to(rootfs).as_posix())
+               for p in matches):
         missing.append("Cog font asset DejaVuSans.ttf")
     for name in ("pid1.py", "resident.py", "desktop.py"):
         guest = "/opt/veraos/src/veraos/" + name
         require(guest)
-        packed = file(guest)
+        packed = safe_file(guest)
         source = repo / "src/veraos" / name
-        if packed.is_file() and packed.read_bytes() != source.read_bytes():
+        if packed is not None and packed.read_bytes() != source.read_bytes():
             missing.append("source mismatch " + guest)
     launch = "/sbin/vera-init"
     require(launch)
-    packed = file(launch)
+    packed = safe_file(launch)
     source = repo / "buildroot/board/veraos/x86_64/rootfs-overlay/sbin/vera-init"
-    if packed.is_file():
+    if packed is not None:
         entry = packed.read_bytes()
         if entry != source.read_bytes() or not (
             entry.startswith(b"#!/usr/bin/python3\n")
