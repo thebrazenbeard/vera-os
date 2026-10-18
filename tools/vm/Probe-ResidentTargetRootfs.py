@@ -24,30 +24,55 @@ def audit(rootfs: Path, repo: Path = ROOT) -> dict[str, object]:
     if not rootfs.is_dir():
         raise TargetPrerequisiteError("target rootfs is not a directory")
 
+    def guest_path(guest: str, *, follow_final: bool = False) -> Path:
+        """Walk Linux guest symlinks component-wise without visiting host targets.
+
+        Even directory symlinks with absolute targets belong to the *guest*
+        namespace. Host Path.resolve() would instead follow /usr/lib -> /lib
+        on the workstation and falsely use (or reject) workstation bytes.
+        """
+        if (not isinstance(guest, str) or not guest.startswith("/")
+                or guest.startswith("//") or "\\" in guest or "\0" in guest
+                or ".." in guest.split("/")):
+            raise TargetPrerequisiteError("target file escapes rootfs: " + str(guest))
+        pending = [part for part in guest.split("/") if part and part != "."]
+        parts: list[str] = []
+        links = 0
+        while pending:
+            part = pending.pop(0)
+            if part == ".":
+                continue
+            if part == "..":
+                if not parts:
+                    raise TargetPrerequisiteError("target file escapes rootfs: " + guest)
+                parts.pop()
+                continue
+            # Reject Windows absolute/reparse input even on a Linux builder.
+            if ":" in part or "\\" in part:
+                raise TargetPrerequisiteError("target file escapes rootfs: " + guest)
+            path = rootfs.joinpath(*parts, part)
+            if path.is_symlink() and (pending or follow_final):
+                links += 1
+                if links > 20:
+                    raise TargetPrerequisiteError("target symlink chain too long: " + guest)
+                target = path.readlink().as_posix()
+                if (not target or target.startswith("//") or "\\" in target
+                        or "\0" in target):
+                    raise TargetPrerequisiteError("target file escapes rootfs: " + guest)
+                if target.startswith("/"):
+                    parts = []
+                pending = [*target.split("/"), *pending]
+                continue
+            parts.append(part)
+        return rootfs.joinpath(*parts)
+
     def file(guest: str) -> Path:
-        path = rootfs / guest.lstrip("/")
-        # Linux image symlinks may be absolute guest paths (/usr/bin/python3.12).
-        # Resolve parent directories to exclude host escapes, not the final
-        # guest-interpreter symlink against the Windows build workstation.
-        if ".." in Path(guest).parts or not path.parent.resolve().is_relative_to(rootfs):
-            raise TargetPrerequisiteError("target file escapes rootfs: " + guest)
-        return path
+        # Keep the final link unresolved where its literal target is audited.
+        return guest_path(guest)
 
     def safe_file(guest: str) -> Path | None:
-        # Absolute symlinks inside Linux rootfs are guest paths, not host paths.
-        # Always follow the final component under rootfs before testing bytes.
-        path = file(guest)
-        for _ in range(20):
-            if not path.parent.resolve().is_relative_to(rootfs):
-                raise TargetPrerequisiteError("target file escapes rootfs: " + guest)
-            if not path.is_symlink():
-                return path if path.is_file() else None
-            link = path.readlink()
-            if link.drive or link.as_posix().startswith("//"):
-                raise TargetPrerequisiteError("target file escapes rootfs: " + guest)
-            path = (file(link.as_posix()) if link.as_posix().startswith("/")
-                    else path.parent / link)
-        raise TargetPrerequisiteError("target symlink chain too long: " + guest)
+        path = guest_path(guest, follow_final=True)
+        return path if path.is_file() else None
 
     missing: list[str] = []
     def require(guest: str) -> None:
@@ -64,7 +89,7 @@ def audit(rootfs: Path, repo: Path = ROOT) -> dict[str, object]:
     for name in ("sqlite3/__init__.py", "ssl.py", "json/__init__.py",
                  "http/server.py", "socket.py"):
         require("/usr/lib/python3.12/" + name)
-    dyn = file("/usr/lib/python3.12/lib-dynload")
+    dyn = guest_path("/usr/lib/python3.12/lib-dynload", follow_final=True)
     for name in ("_sqlite3", "_ssl"):
         found = sorted(dyn.glob(name + "*.so")) if dyn.is_dir() else []
         if not any(safe_file("/" + p.relative_to(rootfs).as_posix())
@@ -75,14 +100,14 @@ def audit(rootfs: Path, repo: Path = ROOT) -> dict[str, object]:
     # resolve ABI/transitive dependencies or execute the target extensions.
     for soname in ("libsqlite3.so.0", "libssl.so.3", "libcrypto.so.3"):
         require("/usr/lib/" + soname)
-    site = file("/usr/lib/python3.12/site-packages")
+    site = guest_path("/usr/lib/python3.12/site-packages", follow_final=True)
     for package in ("jsonschema", "cryptography", "yaml"):
         if safe_file("/usr/lib/python3.12/site-packages/" +
                      package + "/__init__.py") is None:
             missing.append("python3.12 import " + package)
 
     require("/usr/bin/cog")
-    fonts = file("/usr/share/fonts")
+    fonts = guest_path("/usr/share/fonts", follow_final=True)
     matches = sorted(fonts.rglob("DejaVuSans.ttf")) if fonts.is_dir() else []
     if not any(safe_file("/" + p.relative_to(rootfs).as_posix())
                for p in matches):
