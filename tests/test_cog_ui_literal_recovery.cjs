@@ -212,3 +212,31 @@ test('unqualified synthetic fixture result cannot retire canonical pending ID', 
   assert.equal((await app.send()).length,1);
   assert.ok(app.backing.has('veraos-local-pending-message-v1'));
 });
+
+test('history.truncated MUST be explicitly false before canonical pending retirement', async () => {
+  const hostileValues = [
+    ['missing', d => { const h={...d}; delete h.truncated; return h; }],
+    ['string-false', d => ({...d,truncated:'false'})],
+    ['string-true', d => ({...d,truncated:'true'})],
+    ['null', d => ({...d,truncated:null})],
+    ['zero', d => ({...d,truncated:0})],
+    ['object', d => ({...d,truncated:{value:false}})],
+    ['array', d => ({...d,truncated:[]})],
+    ['boolean-true', d => ({...d,truncated:true})],
+  ];
+  for(const [name,historyMutator] of hostileValues){
+    const app=boot({task:'Original unchanged literal',historyMutator});
+    const first=await app.send();
+    assert.equal(first.length,1,name+' first intake');
+    const original=JSON.parse(app.backing.get('veraos-local-pending-message-v1'));
+    assert.equal(original.task,'Original unchanged literal',name);
+    assert.match(app.elems['conversation-result'].textContent,/UNKNOWN|unverified/i,name);
+    // An unacknowledged original cannot be silently replaced by another
+    // conversation message and must not produce a new request identity.
+    app.elems['message'].value='Different user text';
+    const after=await app.send();
+    assert.equal(after.length,1,name+' no second dispatch');
+    assert.equal(JSON.parse(app.backing.get('veraos-local-pending-message-v1')).request_id,
+                 original.request_id,name+' exact replay selector');
+  }
+});

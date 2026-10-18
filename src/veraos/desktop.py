@@ -115,7 +115,7 @@ async function noProviderAckMatches(payload,original){
   const data=await history.json();
   if(data.schema!=='VERAOS_CANONICAL_CONVERSATION_HISTORY_V1'
     ||data.conversation_id!==original.conversation_id
-    ||!Array.isArray(data.messages)||data.truncated===true
+    ||!Array.isArray(data.messages)||data.truncated!==false
     ||data.memory_admitted!==false||data.model_admitted!==false)return false;
   const found=data.messages.filter(m=>
     m.conversation_id===original.conversation_id
