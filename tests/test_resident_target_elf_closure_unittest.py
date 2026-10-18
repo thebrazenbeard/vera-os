@@ -192,5 +192,46 @@ class ELFClosure(unittest.TestCase):
             probe.audit(self.root)
 
 
+    def test_guest_absolute_parent_link_is_resolved_inside_rootfs(self):
+        lib = self.root / "usr/lib"
+        lib.rename(self.root / "lib-real")
+        lib.symlink_to("/lib-real", target_is_directory=True)
+        resolved, name = probe._inside(self.root, "/usr/lib/libssl.so.3")
+        self.assertEqual(resolved, self.root / "lib-real/libssl.so.3")
+        self.assertEqual(name, "/lib-real/libssl.so.3")
+        self.assertEqual(probe.audit(self.root)["unresolved"], [])
+
+    def test_guest_relative_parent_link_is_resolved_inside_rootfs(self):
+        lib = self.root / "usr/lib"
+        lib.rename(self.root / "lib-real")
+        lib.symlink_to("../lib-real", target_is_directory=True)
+        resolved, _ = probe._inside(self.root, "/usr/lib/libssl.so.3")
+        self.assertEqual(resolved, self.root / "lib-real/libssl.so.3")
+        self.assertEqual(probe.audit(self.root)["unresolved"], [])
+
+    def test_guest_absolute_final_link_preserves_guest_elf_closure(self):
+        target = self.root / "usr/lib/libssl.so.3"
+        target.rename(self.root / "libssl-real.so.3")
+        target.symlink_to("/libssl-real.so.3")
+        resolved, _ = probe._inside(self.root, "/usr/lib/libssl.so.3")
+        self.assertEqual(resolved, self.root / "libssl-real.so.3")
+        self.assertEqual(probe.audit(self.root)["unresolved"], [])
+
+    def test_guest_root_never_accepts_absolute_host_directory_decoy(self):
+        lib = self.root / "usr/lib"
+        outside = self.root.parent / "host-native"
+        lib.rename(outside)
+        lib.symlink_to(outside, target_is_directory=True)
+        with self.assertRaises(probe.ELFClosureError):
+            probe.audit(self.root)
+
+    def test_elf_parent_symlink_cycle_fails_closed(self):
+        lib = self.root / "usr/lib"
+        lib.rename(self.root / "lib-real")
+        lib.symlink_to("/usr/lib", target_is_directory=True)
+        with self.assertRaisesRegex(probe.ELFClosureError, "too long"):
+            probe.audit(self.root)
+
+
 if __name__ == "__main__":
     unittest.main()

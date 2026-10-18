@@ -25,29 +25,48 @@ _SEARCH = ("/lib", "/usr/lib", "/lib64", "/usr/lib64",
            "/usr/lib/x86_64-linux-gnu")
 _MAX_FILE = 512 * 1024 * 1024
 
-def _inside(root, guest):
-    if not guest.startswith("/") or "\0" in guest:
+def _inside(root, guest, *, directory=False):
+    """Resolve each Linux guest path component within root, never on the host.
+
+    Guest-absolute symlinks (including parents) reset to the guest root.
+    Relative symlink targets may ascend only while staying guest-rooted.
+    """
+    if (not isinstance(guest, str) or not guest.startswith("/")
+            or guest.startswith("//") or "\x00" in guest or "\\" in guest
+            or ".." in guest.split("/")):
         raise ELFClosureError("invalid guest absolute ELF path")
-    path = posixpath.normpath(guest)
-    if any(s == ".." for s in guest.split("/")):
-        raise ELFClosureError("guest ELF path traversal denied")
-    for _ in range(20):
-        file = root / path.lstrip("/")
-        if not file.is_symlink():
-            try:
-                safe = file.resolve(strict=True)
-            except (OSError, ValueError) as exc:
-                raise ELFClosureError("missing guest ELF " + path) from exc
-            if not safe.is_relative_to(root):
-                raise ELFClosureError("guest ELF escapes rootfs " + path)
-            return file, path
-        target = os.readlink(file)
-        path = posixpath.normpath(
-            target if target.startswith("/") else
-            posixpath.join(posixpath.dirname(path), target))
-        if not path.startswith("/"):
+    pending = guest.split("/")
+    parts = []
+    links = 0
+    while pending:
+        part = pending.pop(0)
+        if part in ("", "."):
+            continue
+        if part == "..":
+            if not parts:
+                raise ELFClosureError("guest ELF symlink escapes rootfs")
+            parts.pop()
+            continue
+        if ":" in part or "\\" in part or "\x00" in part:
             raise ELFClosureError("guest ELF symlink escapes rootfs")
-    raise ELFClosureError("guest ELF symlink chain too long")
+        current = root.joinpath(*parts, part)
+        if current.is_symlink():
+            links += 1
+            if links > 20:
+                raise ELFClosureError("guest ELF symlink chain too long")
+            target = current.readlink().as_posix()
+            if (not target or target.startswith("//")
+                    or "\\" in target or "\x00" in target):
+                raise ELFClosureError("guest ELF symlink escapes rootfs")
+            if target.startswith("/"):
+                parts = []
+            pending = target.split("/") + pending
+            continue
+        parts.append(part)
+    file = root.joinpath(*parts)
+    if not (file.is_dir() if directory else file.is_file()):
+        raise ELFClosureError("missing guest ELF " + guest)
+    return file, "/" + "/".join(parts)
 
 def _range(data, offset, length):
     if offset < 0 or length < 0 or offset + length > len(data):
@@ -157,18 +176,22 @@ def audit(rootfs: Path):
         (py + "/lib-dynload", "_ssl*.so", "_ssl"),
         (py + "/lib-dynload", "_sqlite3*.so", "_sqlite3"),
         (py + "/site-packages/cryptography/hazmat/bindings", "_rust*.so", "cryptography")):
-        directory = root / prefix.lstrip("/")
-        found = sorted(directory.glob(pattern)) if directory.is_dir() else []
+        directory, _ = _inside(root, prefix, directory=True)
+        found = sorted(directory.glob(pattern))
         if not found:
             raise ELFClosureError("required native Python extension missing: " + label)
         roots.extend(prefix + "/" + item.name for item in found)
     # Include all optional compiled Python extensions discovered in this target
     # and each site package; closure includes their transitive DT_NEEDED too.
     for prefix in (py + "/lib-dynload", py + "/site-packages"):
-        folder = root / prefix.lstrip("/")
-        if folder.is_dir():
-            roots += ["/" + p.relative_to(root).as_posix()
-                      for p in sorted(folder.rglob("*.so"))]
+        try:
+            folder, _ = _inside(root, prefix, directory=True)
+        except ELFClosureError as exc:
+            if not str(exc).startswith("missing guest ELF "):
+                raise
+            continue
+        roots += [prefix + "/" + p.relative_to(folder).as_posix()
+                  for p in sorted(folder.rglob("*.so"))]
     pending = sorted(set(roots))
     files, edges, interpreters, visited = {}, [], [], set()
     while pending:
@@ -198,9 +221,13 @@ def audit(rootfs: Path):
             candidates = []
             for folder in search:
                 p = posixpath.join(folder, lib)
-                if (root / p.lstrip("/")).exists() or (root / p.lstrip("/")).is_symlink():
-                    resolved, target_guest = _inside(root, p)
-                    candidates.append(target_guest)
+                try:
+                    _, target_guest = _inside(root, p)
+                except ELFClosureError as exc:
+                    if not str(exc).startswith("missing guest ELF "):
+                        raise
+                    continue
+                candidates.append(target_guest)
             candidates = sorted(set(candidates))
             if not candidates:
                 raise ELFClosureError("unresolved ELF DT_NEEDED " + lib + " from " + normalized)
