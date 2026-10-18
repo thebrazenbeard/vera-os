@@ -71,6 +71,7 @@ def _read_elf(path):
     _range(data, phoff, phnum * phentsize)
     loads = []
     dynamic = None
+    interpreter = None
     for i in range(phnum):
         (ptyp, _flags, off, virt, _phys, sz, memsz, _align) = struct.unpack_from(
             "<IIQQQQQQ", data, phoff + i * phentsize)
@@ -81,8 +82,25 @@ def _read_elf(path):
             if dynamic is not None:
                 raise ELFClosureError("multiple ELF dynamic segments")
             dynamic = (off, sz)
+        if ptyp == 3:  # PT_INTERP: Linux refuses to start without this loader.
+            if interpreter is not None:
+                raise ELFClosureError("multiple PT_INTERP segments")
+            if not 2 <= sz <= 256 or sz != memsz:
+                raise ELFClosureError("malformed PT_INTERP size")
+            raw = _range(data, off, sz)
+            if raw[-1:] != b"\0" or b"\0" in raw[:-1]:
+                raise ELFClosureError("PT_INTERP must be one NUL-terminated path")
+            try:
+                interpreter = raw[:-1].decode("ascii")
+            except UnicodeDecodeError as exc:
+                raise ELFClosureError("PT_INTERP non-ASCII path") from exc
+            if (not interpreter.startswith("/")
+                    or posixpath.normpath(interpreter) != interpreter
+                    or not re.fullmatch(r"/[A-Za-z0-9_+./-]+", interpreter)
+                    or ".." in interpreter.split("/")):
+                raise ELFClosureError("PT_INTERP unsafe interpreter path")
     if dynamic is None:
-        return (), hashlib.sha256(data).hexdigest()
+        return (), hashlib.sha256(data).hexdigest(), interpreter
     if dynamic[1] % 16 or dynamic[1] > 256 * 1024:
         raise ELFClosureError("unbounded or unaligned ELF dynamic table")
     _range(data, *dynamic)
@@ -98,7 +116,7 @@ def _read_elf(path):
         raise ELFClosureError("ELF DT_RPATH/RUNPATH not yet supported: HOLD")
     needed_offsets = [v for t, v in tags if t == 1]
     if not needed_offsets:
-        return (), hashlib.sha256(data).hexdigest()
+        return (), hashlib.sha256(data).hexdigest(), interpreter
     strtabs = [v for t, v in tags if t == 5]
     lengths = [v for t, v in tags if t == 10]
     if len(strtabs) != 1 or len(lengths) != 1 or not lengths[0]:
@@ -127,7 +145,7 @@ def _read_elf(path):
         if name in needed:
             raise ELFClosureError("ELF repeated DT_NEEDED")
         needed.append(name)
-    return tuple(needed), hashlib.sha256(data).hexdigest()
+    return tuple(needed), hashlib.sha256(data).hexdigest(), interpreter
 
 def audit(rootfs: Path):
     root = Path(rootfs).resolve(strict=True)
@@ -152,7 +170,7 @@ def audit(rootfs: Path):
             roots += ["/" + p.relative_to(root).as_posix()
                       for p in sorted(folder.rglob("*.so"))]
     pending = sorted(set(roots))
-    files, edges, visited = {}, [], set()
+    files, edges, interpreters, visited = {}, [], [], set()
     while pending:
         guest = pending.pop(0)
         target, normalized = _inside(root, guest)
@@ -163,8 +181,17 @@ def audit(rootfs: Path):
         visited.add(normalized)
         if not target.is_file():
             raise ELFClosureError("ELF dependency not a regular file")
-        needed, digest = _read_elf(target)
+        needed, digest, interpreter = _read_elf(target)
         files[normalized] = digest
+        if interpreter is not None:
+            try:
+                _, loader = _inside(root, interpreter)
+            except ELFClosureError as exc:
+                raise ELFClosureError(
+                    "missing or unsafe PT_INTERP interpreter " + interpreter
+                    + " from " + normalized) from exc
+            interpreters.append({"importer": normalized, "interpreter": loader})
+            pending.append(loader)  # Examine the loader ELF and its dependencies too.
         for lib in needed:
             # Buildroot fixed lib dirs plus the binary's own directory.
             search = (posixpath.dirname(normalized),) + _SEARCH
@@ -188,6 +215,7 @@ def audit(rootfs: Path):
         "native_files_checked": len(files),
         "source_files_sha256": files,
         "edges": sorted(edges, key=lambda e: (e["importer"], e["needed"])),
+        "interpreters": sorted(interpreters, key=lambda e: e["importer"]),
         "unresolved": [],
         "target_import_executed": False,
         "buildroot_kconfig_resolved_by_this_probe": False,

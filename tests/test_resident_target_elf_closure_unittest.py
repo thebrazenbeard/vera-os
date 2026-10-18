@@ -38,6 +38,21 @@ def elf(needed=(), machine=62, klass=2, corrupt=False):
     return bytes(out)
 
 
+def elf_with_interp(needed=(), interpreter=b"/lib64/ld-linux-x86-64.so.2\0",
+                    invalid_bounds=False, extra_interp=False):
+    payload = bytearray(elf(needed))
+    struct.pack_into("<H", payload, 56, 4 if extra_interp else 3)
+    size = len(interpreter)
+    payload[0x380:0x380+size] = interpreter
+    struct.pack_into("<IIQQQQQQ", payload, 64+2*56, 3, 4, 0x380, 0x380, 0,
+                     1025 if invalid_bounds else size,
+                     1025 if invalid_bounds else size, 1)
+    if extra_interp:
+        struct.pack_into("<IIQQQQQQ", payload, 64+3*56, 3, 4,
+                         0x380, 0x380, 0, size, size, 1)
+    return bytes(payload)
+
+
 class ELFClosure(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="veraos-elf-")
@@ -76,6 +91,63 @@ class ELFClosure(unittest.TestCase):
         assert hook.index("Probe-ResidentTargetRootfs.py") < hook.index("Probe-ResidentELFClosure.py")
         assert hook.index("Probe-ResidentELFClosure.py") < hook.index("Explicitly no auto-start")
         assert 'if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then' in hook
+
+    def test_executable_pt_interp_missing_loader_is_not_closed(self):
+        self.write("/usr/bin/python3.12",elf_with_interp(["libpython3.12.so.1.0"]))
+        with self.assertRaisesRegex(probe.ELFClosureError, "interpreter|loader"):
+            probe.audit(self.root)
+
+    def test_present_interpreter_recorded_and_transitively_audited(self):
+        self.write("/usr/bin/cog",elf_with_interp(["libcog.so.0"]))
+        self.write("/lib64/ld-linux-x86-64.so.2",elf(["libc.so.6"]))
+        report=probe.audit(self.root)
+        self.assertTrue(any(x["interpreter"]=="/lib64/ld-linux-x86-64.so.2"
+                            and x["importer"]=="/usr/bin/cog"
+                            for x in report["interpreters"]))
+        self.assertIn("/lib64/ld-linux-x86-64.so.2",report["source_files_sha256"])
+
+    def test_relative_and_traversing_interpreter_path_rejected(self):
+        for bad in [b"ld-linux-x86-64.so.2\0",b"/../../etc/shadow\0",
+                    b"/lib64/ld-linux.so\0junk"]:
+            with self.subTest(path=bad):
+                self.write("/usr/bin/cog",elf_with_interp(["libcog.so.0"],bad))
+                with self.assertRaises(probe.ELFClosureError):
+                    probe.audit(self.root)
+
+    def test_interpreter_program_header_outside_file_rejected(self):
+        self.write("/usr/bin/cog",elf_with_interp(["libcog.so.0"],invalid_bounds=True))
+        with self.assertRaises(probe.ELFClosureError):
+            probe.audit(self.root)
+
+    def test_multiple_interpreter_program_headers_rejected(self):
+        self.write("/usr/bin/cog",elf_with_interp(["libcog.so.0"],extra_interp=True))
+        with self.assertRaises(probe.ELFClosureError):
+            probe.audit(self.root)
+
+    def test_interpreter_file_exists_but_is_not_elf_rejected(self):
+        self.write("/usr/bin/cog",elf_with_interp(["libcog.so.0"]))
+        self.write("/lib64/ld-linux-x86-64.so.2",b"not a native loader")
+        with self.assertRaises(probe.ELFClosureError):
+            probe.audit(self.root)
+
+    def test_interpreter_file_is_wrong_target_architecture_rejected(self):
+        self.write("/usr/bin/cog",elf_with_interp(["libcog.so.0"]))
+        self.write("/lib64/ld-linux-x86-64.so.2",elf(machine=183))
+        with self.assertRaisesRegex(probe.ELFClosureError,"x86_64"):
+            probe.audit(self.root)
+
+    def test_actual_vn2_host_elf_pt_interp_matches_readelf_source_only(self):
+        import re, subprocess
+        binary=Path("/usr/bin/python3.12")
+        if not binary.is_file():
+            self.skipTest("host Python not present")
+        result=subprocess.run(["readelf","-l",str(binary)],capture_output=True,text=True)
+        self.assertEqual(result.returncode,0)
+        m=re.search(r"Requesting program interpreter: ([^]]+)",result.stdout)
+        self.assertIsNotNone(m)
+        # This is a host ELF parser cross-check, not a VeraOS target acceptance.
+        _needs,_sha,interp=probe._read_elf(binary)
+        self.assertEqual(interp,m.group(1))
 
     def test_missing_transitive_library_fails_closed(self):
         (self.root/"lib/libc.so.6").unlink()
