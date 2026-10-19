@@ -277,5 +277,28 @@ class ELFClosure(unittest.TestCase):
         self.assertTrue(swapped[0])
 
 
+    @unittest.skipUnless(os.name == "posix", "Linux descriptor check; Windows source fixture unqualified")
+    def test_in_place_same_size_guest_elf_write_during_read_fails_closed(self):
+        from unittest import mock
+        cog = self.root / "usr/bin/cog"
+        baseline = cog.read_bytes()
+        self.assertEqual(len(baseline), 1024)
+        native_fdopen = probe.os.fdopen
+        changed = [False]
+        def modify_before_read(fd, *args, **kwargs):
+            # Run after descriptor-root containment validation but before read.
+            if os.readlink("/proc/self/fd/" + str(fd)) == str(cog) and not changed[0]:
+                changed[0] = True
+                with cog.open("r+b") as output:
+                    output.seek(len(baseline)-1)
+                    output.write(b"!")
+            return native_fdopen(fd, *args, **kwargs)
+        with mock.patch.object(probe.os, "fdopen", side_effect=modify_before_read):
+            with self.assertRaisesRegex(probe.ELFClosureError, "changed during"):
+                probe.audit(self.root)
+        self.assertTrue(changed[0])
+        self.assertEqual(cog.stat().st_size, len(baseline))
+
+
 if __name__ == "__main__":
     unittest.main()

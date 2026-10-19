@@ -208,7 +208,10 @@ def _read_guest_elf(root: Path, path: Path):
         with os.fdopen(os.dup(fd), "rb") as opened:
             data = opened.read(_MAX_FILE + 1)
         confirm_contained()
-        if len(data) != st.st_size:
+        after = os.fstat(fd)
+        if (len(data) != st.st_size or
+                (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns) !=
+                (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns)):
             raise ELFClosureError("guest ELF changed during bounded read")
         return _parse_elf_bytes(data)
     finally:
