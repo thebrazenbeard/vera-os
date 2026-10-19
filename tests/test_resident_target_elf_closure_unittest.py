@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 import struct
+import os
 import tempfile
 import unittest
 
@@ -231,6 +232,49 @@ class ELFClosure(unittest.TestCase):
         lib.symlink_to("/usr/lib", target_is_directory=True)
         with self.assertRaisesRegex(probe.ELFClosureError, "too long"):
             probe.audit(self.root)
+
+
+    @unittest.skipUnless(os.name == "posix", "Linux post-build descriptor check; Windows source fixture unqualified")
+    def test_guest_mutation_after_validation_must_not_consume_host_elf(self):
+        from unittest import mock
+        cog = self.root / "usr/bin/cog"
+        host_decoy = self.root.parent / "host-decoy-elf"
+        host_decoy.write_bytes(elf(["libcog.so.0"]))
+        original_inside = probe._inside
+        swapped = [False]
+        def interleave(root, guest, *, directory=False):
+            resolved, normalized = original_inside(root, guest, directory=directory)
+            if guest == "/usr/bin/cog" and not swapped[0]:
+                swapped[0] = True
+                resolved.unlink()
+                resolved.symlink_to(host_decoy)
+            return resolved, normalized
+        with mock.patch.object(probe, "_inside", side_effect=interleave):
+            with self.assertRaises(probe.ELFClosureError):
+                probe.audit(self.root)
+        self.assertTrue(swapped[0])
+
+
+    @unittest.skipUnless(os.name == "posix", "Linux post-build descriptor check; Windows source fixture unqualified")
+    def test_parent_directory_swapped_after_validation_must_not_hash_host_elf(self):
+        from unittest import mock
+        guest_dir = self.root / "usr/bin"
+        outside = self.root.parent / "host-elf-bin"
+        outside.mkdir()
+        (outside / "cog").write_bytes(elf(["libcog.so.0"]))
+        original_inside = probe._inside
+        swapped = [False]
+        def interleave(root, guest, *, directory=False):
+            resolved, normalized = original_inside(root, guest, directory=directory)
+            if guest == "/usr/bin/cog" and not swapped[0]:
+                swapped[0] = True
+                guest_dir.rename(self.root / "old-usr-bin")
+                guest_dir.symlink_to(outside, target_is_directory=True)
+            return resolved, normalized
+        with mock.patch.object(probe, "_inside", side_effect=interleave):
+            with self.assertRaises(probe.ELFClosureError):
+                probe.audit(self.root)
+        self.assertTrue(swapped[0])
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ from pathlib import Path
 import posixpath
 import re
 import struct
+import stat
 import sys
 
 class ELFClosureError(ValueError):
@@ -74,10 +75,17 @@ def _range(data, offset, length):
     return data[offset:offset + length]
 
 def _read_elf(path):
+    """Direct host-source ELF parser used by explicit host smoke tests."""
     size = path.stat().st_size
     if size < 64 or size > _MAX_FILE:
         raise ELFClosureError("ELF file empty or exceeds fixed bound")
-    data = path.read_bytes()
+    return _parse_elf_bytes(path.read_bytes())
+
+
+def _parse_elf_bytes(data):
+    size = len(data)
+    if size < 64 or size > _MAX_FILE:
+        raise ELFClosureError("ELF file empty or exceeds fixed bound")
     if data[:4] != b"\x7fELF" or data[4] != 2 or data[5] != 1:
         raise ELFClosureError("ELF64 little-endian target required")
     (typ, machine, ver, _entry, phoff, _shoff, _flags,
@@ -166,6 +174,46 @@ def _read_elf(path):
         needed.append(name)
     return tuple(needed), hashlib.sha256(data).hexdigest(), interpreter
 
+
+def _read_guest_elf(root: Path, path: Path):
+    """On Linux, verify the *opened descriptor* is guest-rooted before reading.
+
+    _inside is a useful guest path resolver, but the directory may be changed
+    after it returns. Never follow a late outside symlink to hash its bytes.
+    A stable full-image snapshot is still a separate qualification requirement.
+    """
+    if os.name != "posix":
+        # Windows cannot use Linux /proc/self/fd containment here. This is a
+        # source-fixture fallback, NOT a mutable-rootfs security qualification.
+        return _read_elf(path)
+    if not hasattr(os, "O_NOFOLLOW") or not Path("/proc/self/fd").is_dir():
+        raise ELFClosureError("descriptor-rooted ELF inspection unavailable")
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0))
+    except OSError as exc:
+        raise ELFClosureError("guest ELF entry changed before open") from exc
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or not 64 <= st.st_size <= _MAX_FILE:
+            raise ELFClosureError("guest ELF is not a bounded regular file")
+        def confirm_contained():
+            try:
+                location = os.readlink("/proc/self/fd/" + str(fd))
+            except OSError as exc:
+                raise ELFClosureError("cannot verify opened ELF descriptor") from exc
+            if (not location.startswith("/") or location.endswith(" (deleted)")
+                    or not Path(location).is_relative_to(root)):
+                raise ELFClosureError("opened ELF descriptor escapes or changed outside guest root")
+        confirm_contained()
+        with os.fdopen(os.dup(fd), "rb") as opened:
+            data = opened.read(_MAX_FILE + 1)
+        confirm_contained()
+        if len(data) != st.st_size:
+            raise ELFClosureError("guest ELF changed during bounded read")
+        return _parse_elf_bytes(data)
+    finally:
+        os.close(fd)
+
 def audit(rootfs: Path):
     root = Path(rootfs).resolve(strict=True)
     if not root.is_dir():
@@ -204,7 +252,7 @@ def audit(rootfs: Path):
         visited.add(normalized)
         if not target.is_file():
             raise ELFClosureError("ELF dependency not a regular file")
-        needed, digest, interpreter = _read_elf(target)
+        needed, digest, interpreter = _read_guest_elf(root, target)
         files[normalized] = digest
         if interpreter is not None:
             try:
