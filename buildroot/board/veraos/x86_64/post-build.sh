@@ -18,6 +18,12 @@ install -m 0644 "$repo_root/architecture/capabilities/VERA_OS_PORTFOLIO_CAPABILI
 
 
 if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
+  # Only the 2025 resident guest candidate is eligible here. The packaged
+  # V1 boot contract remains an explicitly historical 2024 baseline.
+  if [ "${VERAOS_RESIDENT_GUEST_PROFILE:-}" != "2025.02.18" ]; then
+    echo "Explicit VERAOS_RESIDENT_GUEST_PROFILE=2025.02.18 required" >&2
+    exit 1
+  fi
   # This is an opt-in source packaging stage, not service activation.
   stage="${VERAOS_RESIDENT_STAGE:-}"
   if [ -z "$stage" ] || [ ! -d "$stage/components" ] ||
@@ -38,6 +44,12 @@ if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
 
   python3 "$repo_root/tools/vm/Stage-VeraOSResidentSources.py" \
     --verify-stage "$stage" --repo-root "$repo_root"
+  # Sidecar is a SOURCE-GUEST PROFILE only; never claim final output/images
+  # or a booted/selected QualifiedVeraRuntime from successful source staging.
+  python3 "$repo_root/tools/vm/Verify-VeraOSResidentGuestProfile.py" \
+    --stage "$stage" --repo-root "$repo_root"
+  install -m 0644 "$repo_root/architecture/os/VERA_OS_RESIDENT_GUEST_PROFILE_V1.json" \
+    "$target_dir/etc/veraos/architecture/VERA_OS_RESIDENT_GUEST_PROFILE_V1.json"
 
   install -d "$target_dir/opt/veraos/components"
   cp -R "$stage/components/." "$target_dir/opt/veraos/components/"
