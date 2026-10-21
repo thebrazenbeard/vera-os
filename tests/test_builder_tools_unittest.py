@@ -28,7 +28,11 @@ class BuilderToolTests(unittest.TestCase):
         self.alias.symlink_to(self.binary)
 
     def measure(self, expected=None):
-        with patch.object(module.shutil, "which", return_value=str(self.alias)):
+        # Some restricted builders mount /tmp noexec. Mock only the kernel's
+        # X_OK decision for this synthetic file; the real inventory checks it.
+        can_execute = bool(self.binary.stat().st_mode & 0o111)
+        with patch.object(module.shutil, "which", return_value=str(self.alias)), \
+                patch.object(module.os, "access", return_value=can_execute):
             return module.measure_tool("make", expected_sha256=expected)
 
     def test_real_open_descriptor_bytes_and_alias_flag(self):
