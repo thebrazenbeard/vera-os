@@ -63,7 +63,7 @@ class BuilderInputsTests(unittest.TestCase):
     def test_even_existing_images_directory_not_selected(self):
         (self.builder / "output/images").mkdir(parents=True)
         report = self.inspect()
-        self.assertTrue(report.output_images_present_unqualified)
+        self.assertTrue(report.source_tree_output_images_present_unqualified)
         self.assertFalse(report.selected_final_image)
 
     def test_wrong_head_or_tag_held(self):
