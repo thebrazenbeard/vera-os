@@ -36,7 +36,7 @@ class BuilderInputSnapshot:
     python_version_source: str
     buildroot_source_clean: bool
     selected_stage_receipt_sha256: str
-    output_images_present_unqualified: bool
+    source_tree_output_images_present_unqualified: bool
     source_input_status: str = "SOURCE_INPUTS_MATCH_ONLY"
     host_toolchain_provenance_verified: bool = False
     rebuild_reproducible_verified: bool = False
@@ -95,7 +95,7 @@ def inspect_builder_inputs(
         tag_peeled_commit=peeled, defconfig_sha256=digest,
         python_version_source=version, buildroot_source_clean=True,
         selected_stage_receipt_sha256=receipt,
-        output_images_present_unqualified=(root / "output/images").exists(),
+        source_tree_output_images_present_unqualified=(root / "output/images").exists(),
     )
 
 
