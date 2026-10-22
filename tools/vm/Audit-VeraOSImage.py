@@ -124,10 +124,12 @@ class ExtRootfs:
                 raise AuditError("missing or incomplete ext2 resident directory listing")
             names: set[str] = set()
             for raw in out.splitlines():
+                if not raw.strip():
+                    continue
                 fields = raw.split(b"/")
                 if (len(fields) != 8 or fields[0] != b"" or fields[-1] != b""
                         or any(re.fullmatch(rb"[0-9]+", f) is None
-                               for f in (fields[1], fields[3], fields[4], fields[6]))
+                               for f in (fields[1], fields[3], fields[4]))
                         or re.fullmatch(rb"[0-7]{5,6}", fields[2]) is None):
                     raise AuditError("malformed ext2 debugfs -p directory entry")
                 try:
@@ -145,8 +147,12 @@ class ExtRootfs:
                 self._safe_path(item)
                 mode = int(fields[2], 8) & 0o170000
                 if mode == 0o040000:
+                    if fields[6] != b"":
+                        raise AuditError("malformed ext2 directory size field")
                     pending.append(item)
                 elif mode == 0o100000:
+                    if re.fullmatch(rb"[0-9]+", fields[6]) is None:
+                        raise AuditError("malformed ext2 file size field")
                     found.add("components/" + item[len(base) + 1:])
                 else:
                     # Symlinks, devices and sockets can shadow expected code.
