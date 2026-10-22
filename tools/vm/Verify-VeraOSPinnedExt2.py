@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit a private exact-byte ext2 snapshot, not a mutable path alias.
+"""Audit exact ext2 bytes through a kernel-sealed file descriptor.
 
 Source-only bounded verification; no future boot/runtime/effect qualification.
 """
@@ -81,6 +81,90 @@ def pinned_ext2_snapshot(image: Path, expected_sha256: str):
     finally:
         os.close(fd)
 
+MAX_SEALED_IMAGE_BYTES = 128 * 1024 * 1024
+
+@contextmanager
+def pinned_sealed_ext2(image: Path, expected_sha256: str):
+    """Yield kernel-sealed exact bytes to existing debugfs reader via parent FD.
+
+    Holds if more than 128MiB is required, never silently falls back to the
+    mutable private path snapshot. This audits ONE captured image, not a later
+    OS bootloader or continuously selected source pathname.
+    """
+    image = Path(os.path.abspath(image))
+    if (os.name != "posix" or not hasattr(os, "memfd_create")
+            or not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "MFD_ALLOW_SEALING")
+            or len(expected_sha256) != 64
+            or any(x not in "0123456789abcdef" for x in expected_sha256)):
+        raise ArtifactCustodyError("Linux sealed memfd and lowercase SHA256 required")
+    import fcntl  # Linux-only; module can still be imported on Windows for source inspection.
+    required = (fcntl.F_SEAL_WRITE | fcntl.F_SEAL_GROW |
+                fcntl.F_SEAL_SHRINK | fcntl.F_SEAL_SEAL)
+    try:
+        source_fd = os.open(image, os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0))
+    except OSError as exc:
+        raise ArtifactCustodyError("cannot open selected ext2 without following links") from exc
+    try:
+        before = os.fstat(source_fd)
+        if not stat.S_ISREG(before.st_mode):
+            raise ArtifactCustodyError("selected ext2 is not a regular file")
+        if before.st_size <= 0 or before.st_size > MAX_SEALED_IMAGE_BYTES:
+            raise ArtifactCustodyError("selected ext2 exceeds sealed image size limit")
+        memfd = os.memfd_create("veraos-verified-ext2",
+                               os.MFD_ALLOW_SEALING | getattr(os, "MFD_CLOEXEC", 0))
+        try:
+            h = hashlib.sha256()
+            with os.fdopen(os.dup(source_fd), "rb", closefd=True) as source:
+                while chunk := source.read(1024 * 1024):
+                    h.update(chunk)
+                    remaining = memoryview(chunk)
+                    while remaining:
+                        count = os.write(memfd, remaining)
+                        if count <= 0:
+                            raise ArtifactCustodyError("failed to copy ext2 into sealed descriptor")
+                        remaining = remaining[count:]
+            copied = h.hexdigest()
+            if (copied != expected_sha256 or os.fstat(memfd).st_size != before.st_size
+                    or _identity(os.fstat(source_fd)) != _identity(before)):
+                raise ArtifactCustodyError("selected ext2 changed or digest mismatch during capture")
+            try:
+                current = os.stat(image, follow_symlinks=False)
+            except OSError as exc:
+                raise ArtifactCustodyError("selected ext2 pathname disappeared") from exc
+            if _identity(current) != _identity(before):
+                raise ArtifactCustodyError("selected ext2 alias changed during capture")
+            fcntl.fcntl(memfd, fcntl.F_ADD_SEALS, required)
+            if fcntl.fcntl(memfd, fcntl.F_GET_SEALS) != required:
+                raise ArtifactCustodyError("ext2 descriptor missing kernel write seals")
+            # Independent byte readback of the SEALED inode, not the original alias.
+            check = hashlib.sha256()
+            offset = 0
+            while offset < before.st_size:
+                block = os.pread(memfd, min(1024 * 1024, before.st_size-offset), offset)
+                if not block:
+                    raise ArtifactCustodyError("sealed ext2 unexpectedly truncated")
+                check.update(block)
+                offset += len(block)
+            if check.hexdigest() != copied:
+                raise ArtifactCustodyError("sealed ext2 byte readback differs from captured source")
+            ref = Path(f"/proc/{os.getpid()}/fd/{memfd}")
+            try:
+                yield ref, {"image_sha256": copied, "image_bytes": before.st_size,
+                            "seals_applied": True, "same_uid_pathname_immutable": False}
+            finally:
+                try:
+                    current = os.stat(image, follow_symlinks=False)
+                    if (_identity(current) != _identity(before)
+                            or _identity(os.fstat(source_fd)) != _identity(before)
+                            or fcntl.fcntl(memfd, fcntl.F_GET_SEALS) != required):
+                        raise ArtifactCustodyError("selected ext2 alias or descriptor changed during audit")
+                except OSError as exc:
+                    raise ArtifactCustodyError("selected ext2 pathname unavailable after audit") from exc
+        finally:
+            os.close(memfd)
+    finally:
+        os.close(source_fd)
+
 def verify_pinned(image: Path, stage: Path, source_root: Path, expected_sha256: str):
     """Invoke VeraOS #40 ext2 reader and full resident-stage verifier unchanged."""
     source_root = Path(source_root).resolve(strict=True)
@@ -90,10 +174,14 @@ def verify_pinned(image: Path, stage: Path, source_root: Path, expected_sha256: 
         raise ArtifactCustodyError("resident verifier unavailable")
     verifier = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(verifier)
-    with pinned_ext2_snapshot(image, expected_sha256) as (snapshot, identity):
-        rootfs = verifier._rootfs("ext2", snapshot, source_root)
+    with pinned_sealed_ext2(image, expected_sha256) as (sealed, identity):
+        rootfs = verifier._rootfs("ext2", image, source_root)
+        # Reuse the exact #40 parser; its debugfs calls now all reopen the
+        # immutable kernel memfd inode, never a mutable copied pathname.
+        rootfs.image = sealed
         result = verifier.verify_image(stage, source_root, rootfs)
-    return {**result, **identity, "artifact_custody": "PINNED_FOR_THIS_AUDIT_ONLY",
+    return {**result, **identity, "artifact_custody": "SEALED_MEMFD_FOR_THIS_AUDIT_ONLY",
+            "selected_source_path_continuity_qualified": False,
             "later_boot_consumer_qualified": False}
 
 def main() -> int:
