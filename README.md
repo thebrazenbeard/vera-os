@@ -32,6 +32,9 @@ Primary goals:
 - [`docs/03-model-and-agent-boundary.md`](docs/03-model-and-agent-boundary.md) — what belongs in models versus the Vera runtime
 - [`docs/04-security-and-authority-model.md`](docs/04-security-and-authority-model.md) — OS-level governance direction
 - [`docs/05-open-questions.md`](docs/05-open-questions.md) — unresolved architecture questions
+- [`docs/06-two-model-cricket-review.md`](docs/06-two-model-cricket-review.md) — candidate Vera Core / independent Cricket Micro review architecture.
+- [`docs/07-node-resident-agency-and-model-locality.md`](docs/07-node-resident-agency-and-model-locality.md) — node-local agency versus models, governed identity, offline lease boundaries.
+- [`experiments/cricket_dual_model/`](experiments/cricket_dual_model/) — synthetic comparison baseline and optional local model critic pilot (research only).
 
 ## Status
 
