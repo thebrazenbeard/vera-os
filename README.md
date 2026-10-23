@@ -2,7 +2,7 @@
 
 # vera-os
 
-Vera OS is a working architecture for a local, persistent, agentic Vera runtime built on Linux rather than around a single chat application.
+VeraOS is the intended **primary system-facing workspace/interface** for the persistent governed Vera runtime, and the architecture for the local operating environment hosting it. A separately qualified Vera-trained neural model is the preferred local cognition candidate; P.O.R.T.A.L. coordinates work and the selected model route, while Vera Mono retains identity, memory and effect authority. None of those roles requires the model to be present for VeraOS to boot.
 
 ## Current direction
 
@@ -32,6 +32,8 @@ Primary goals:
 - [`docs/03-model-and-agent-boundary.md`](docs/03-model-and-agent-boundary.md) — what belongs in models versus the Vera runtime
 - [`docs/04-security-and-authority-model.md`](docs/04-security-and-authority-model.md) — OS-level governance direction
 - [`docs/05-open-questions.md`](docs/05-open-questions.md) — unresolved architecture questions
+
+- [`docs/06-veraos-portal-model-integration.md`](docs/06-veraos-portal-model-integration.md) — proposed primary VeraOS interface, P.O.R.T.A.L. model-consumption handoff, degraded states and evidence gates
 
 ## Status
 
