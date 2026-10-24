@@ -49,6 +49,7 @@ class WorkspaceStartupSafetyTests(unittest.TestCase):
         self.assertNotIn("tasks", settings)
 
     def test_known_disguised_executable_blobs_absent(self):
+        self.assertFalse((ROOT / "public/fonts/fa-solid-500.woff2").exists())
         for path in ROOT.rglob("*"):
             if ".git" in path.parts or not path.is_file():
                 continue
