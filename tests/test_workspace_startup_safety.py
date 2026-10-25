@@ -18,7 +18,22 @@ BLOCKED_FONT_NAMES = {"fa-solid.lkf", "fa-solid-500.woff2"}
 
 
 def read_jsonc(path: Path) -> object:
-    return json.loads(re.sub(r",\s*(?=[}\]])", "", path.read_text(encoding="utf-8")))
+    def unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        value: dict[str, object] = {}
+        for key, item in pairs:
+            if key in value:
+                raise ValueError("ambiguous duplicate editor configuration key")
+            value[key] = item
+        return value
+
+    def reject_constant(_: str) -> None:
+        raise ValueError("nonfinite editor configuration number")
+
+    return json.loads(
+        re.sub(r",\s*(?=[}\]])", "", path.read_text(encoding="utf-8")),
+        object_pairs_hook=unique_object,
+        parse_constant=reject_constant,
+    )
 
 
 def has_folder_open(value: object) -> bool:
@@ -59,12 +74,17 @@ def unsafe_editor_configs(root: Path) -> list[str]:
         relative = path.relative_to(root)
         if ".git" in relative.parts or path.is_symlink() or not path.is_file():
             continue
-        name = path.name.casefold()
-        in_editor_dir = path.parent.name.casefold() == ".vscode"
+        # Windows resolves some trailing-dot/space spellings as the same path.
+        name = path.name.rstrip(" .").casefold()
+        in_editor_dir = path.parent.name.rstrip(" .").casefold() == ".vscode"
         if not ((in_editor_dir and name in {"tasks.json", "settings.json"})
                 or name.endswith(".code-workspace")):
             continue
-        data = read_jsonc(path)
+        try:
+            data = read_jsonc(path)
+        except (OSError, UnicodeError, ValueError):
+            findings.append(relative.as_posix() + " (unreadable or ambiguous editor JSON)")
+            continue
         content = json.dumps(data).casefold()
         if has_folder_open(data) or any(name in content for name in BLOCKED_FONT_NAMES):
             findings.append(relative.as_posix() + " (autostart or known loader)")
@@ -128,6 +148,22 @@ class WorkspaceStartupSafetyTests(unittest.TestCase):
             )
             findings = unsafe_editor_configs(root)
             self.assertEqual(2, len(findings), findings)
+
+    def test_windows_aliases_and_duplicate_json_fail_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            editor = root / ".VSCODE."
+            editor.mkdir()
+            (editor / "TASKS.JSON.").write_text(
+                '{"tasks":[{"runOn":"folderOpen"}]}', encoding="utf-8",
+            )
+            (root / "aliased.CODE-WORKSPACE.").write_text(
+                '{"tasks":{},"tasks":{"tasks":[{"runOn":"folderOpen"}]}}',
+                encoding="utf-8",
+            )
+            findings = unsafe_editor_configs(root)
+            self.assertEqual(2, len(findings), findings)
+            self.assertTrue(any("(unreadable or ambiguous editor JSON)" in x for x in findings))
 
 
 if __name__ == "__main__":
