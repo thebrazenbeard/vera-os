@@ -1,8 +1,8 @@
 param(
     [string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")),
     [string]$ArtifactRoot = "D:\VeraOS\vm\artifacts",
-    [string]$BuilderImage = "veraos-buildroot-builder:2024.02.4",
-    [string]$BuildVolume = "veraos-buildroot-work",
+    [string]$BuilderImage = "",
+    [string]$BuildVolume = "",
     [int]$Jobs = 4,
     [ValidateSet("CORE_BOOT", "BROWSER", "RESIDENT_BROWSER")]
     [string]$Profile = "CORE_BOOT",
@@ -42,6 +42,22 @@ switch ($Profile) {
         }
     }
 }
+# Keep 2024 and 2025 build caches separate by default; callers may select
+# explicit isolated names but source/commit validation remains mandatory.
+if (-not $BuilderImage) {
+    if ($Profile -eq "RESIDENT_BROWSER") {
+        $BuilderImage = "veraos-buildroot-builder:2025.02.18"
+    } else {
+        $BuilderImage = "veraos-buildroot-builder:2024.02.4"
+    }
+}
+if (-not $BuildVolume) {
+    if ($Profile -eq "RESIDENT_BROWSER") {
+        $BuildVolume = "veraos-resident-browser-python312-20261012"
+    } else {
+        $BuildVolume = "veraos-buildroot-work"
+    }
+}
 if ($ResidentSourceStage -and $Profile -ne "RESIDENT_BROWSER") {
     throw "Resident source staging is allowed only for RESIDENT_BROWSER"
 }
@@ -59,6 +75,20 @@ if ($ResidentSourceStage) {
         throw "Resident source stage must be external to the VeraOS checkout"
     }
 }
+if ($artifacts.Equals($repo, [StringComparison]::OrdinalIgnoreCase) -or
+    $artifacts.StartsWith($repo + [IO.Path]::DirectorySeparatorChar,
+                         [StringComparison]::OrdinalIgnoreCase)) {
+    throw "VeraOS build artifacts must be outside the source checkout"
+}
+# A qualified image receipt must never be silently replaced by a later build.
+# Existing unrelated files in ArtifactRoot are left untouched.
+foreach ($name in @("veraos-buildroot-build.sh", "veraos-bzImage",
+                   "veraos-rootfs.ext2", "veraos-bzImage.sha256",
+                   "veraos-rootfs.ext2.sha256", "veraos-build-result.json")) {
+    if (Test-Path -LiteralPath (Join-Path $artifacts $name)) {
+        throw "Refusing to overwrite existing VeraOS build artifact: $name"
+    }
+}
 New-Item -ItemType Directory -Force $artifacts | Out-Null
 
 & docker build -t $BuilderImage -f $builderDockerfile $repo
@@ -72,7 +102,7 @@ if ($existingVolume -ne $BuildVolume) {
 }
 
 $script = @'
-set -eu
+set -euC
 expected="$VERAOS_BUILDROOT_COMMIT"
 if [ ! -d /work/buildroot/.git ]; then
   git clone --depth 1 --branch "$VERAOS_BUILDROOT_VERSION" https://github.com/buildroot/buildroot.git /work/buildroot
@@ -91,18 +121,21 @@ make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot olddefc
 make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot BR2_JLEVEL="$VERAOS_JOBS" -j"$VERAOS_JOBS"
 test -f /work/output/images/bzImage
 test -f /work/output/images/rootfs.ext2
-cp /work/output/images/bzImage /artifacts/veraos-bzImage
-cp /work/output/images/rootfs.ext2 /artifacts/veraos-rootfs.ext2
+cp -n /work/output/images/bzImage /artifacts/veraos-bzImage
+cp -n /work/output/images/rootfs.ext2 /artifacts/veraos-rootfs.ext2
 sha256sum /artifacts/veraos-bzImage > /artifacts/veraos-bzImage.sha256
 sha256sum /artifacts/veraos-rootfs.ext2 > /artifacts/veraos-rootfs.ext2.sha256
 '@
 $script = $script -replace "`r`n", "`n"
 $scriptPath = Join-Path $artifacts "veraos-buildroot-build.sh"
-[System.IO.File]::WriteAllText(
-    $scriptPath,
-    $script,
-    [System.Text.UTF8Encoding]::new($false)
-)
+$scriptHandle = [IO.File]::Open($scriptPath, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+try {
+    $scriptBytes = [Text.UTF8Encoding]::new($false).GetBytes($script)
+    $scriptHandle.Write($scriptBytes, 0, $scriptBytes.Length)
+    $scriptHandle.Flush($true)
+} finally {
+    $scriptHandle.Dispose()
+}
 
 $dockerArgs = @(
     "run", "--rm",
@@ -130,6 +163,7 @@ if ($residentSourceStageResolved) {
         "--user", "1000:1000",
         "--env", "HOME=/home/vera-build",
         "--env", "VERAOS_REQUIRE_RESIDENT_CORE=1",
+        "--env", "VERAOS_RESIDENT_GUEST_PROFILE=2025.02.18",
         "--env", "VERAOS_RESIDENT_STAGE=/resident",
         "--mount", "type=bind,source=$residentSourceStageResolved,target=/resident,readonly"
     ) + $dockerArgs[2..($dockerArgs.Count - 1)]
@@ -172,9 +206,12 @@ $result = [ordered]@{
 }
 $resultJson = $result | ConvertTo-Json -Depth 4
 $resultPath = Join-Path $artifacts "veraos-build-result.json"
-[System.IO.File]::WriteAllText(
-    $resultPath,
-    $resultJson + [Environment]::NewLine,
-    [System.Text.UTF8Encoding]::new($false)
-)
+$receiptHandle = [IO.File]::Open($resultPath, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+try {
+    $receiptBytes = [Text.UTF8Encoding]::new($false).GetBytes($resultJson + [Environment]::NewLine)
+    $receiptHandle.Write($receiptBytes, 0, $receiptBytes.Length)
+    $receiptHandle.Flush($true)
+} finally {
+    $receiptHandle.Dispose()
+}
 $resultJson
