@@ -107,6 +107,12 @@ def audit(rootfs: Path, repo: Path = ROOT) -> dict[str, object]:
             missing.append("python3.12 import " + package)
 
     require("/usr/bin/cog")
+    # PID1 calls this exact executable to raise loopback. An image with Cog
+    # present but no usable ip tool would never start the local console.
+    # File presence alone is insufficient for a directly executed program.
+    loopback_tool = safe_file("/sbin/ip")
+    if loopback_tool is None or not (loopback_tool.stat().st_mode & 0o111):
+        missing.append("/sbin/ip executable")
     fonts = guest_path("/usr/share/fonts", follow_final=True)
     matches = sorted(fonts.rglob("DejaVuSans.ttf")) if fonts.is_dir() else []
     if not any(safe_file("/" + p.relative_to(rootfs).as_posix())

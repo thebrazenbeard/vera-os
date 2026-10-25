@@ -130,5 +130,51 @@ class PinnedKconfig(unittest.TestCase):
         self.assertEqual(actual["requested_symbols_retained"],51)
         self.assertFalse(actual["image_built"])
 
+    def _select_v2(self):
+        self.pins["schema"] = "VERAOS_BUILDROOT_KCONFIG_PINNED_INPUTS_V2"
+        self.pins["veraos_reviewed_source_head"] = "10dfe758479573468b091cd260c57e8d65cc6942"
+        self.pins["buildroot_source_commit"] = "d030e36bbc9669230c015be971b14b6e062cfdde"
+        self.save()
+
+    def test_v2_accepts_exact_reviewed_source_pin_without_claiming_image(self):
+        self._select_v2()
+        result = self.audit()
+        self.assertEqual(result["source_head"], "10dfe758479573468b091cd260c57e8d65cc6942")
+        self.assertFalse(result["image_built"])
+        self.assertFalse(result["protected_effect_authority"])
+
+    def test_v2_rejects_placeholder_or_future_reviewed_head(self):
+        self._select_v2()
+        for bad_head in ("test-fixture", "f" * 40):
+            self.pins["veraos_reviewed_source_head"] = bad_head
+            self.save()
+            with self.assertRaisesRegex(mod.KconfigHold, "reviewed source"):
+                self.audit()
+
+    def test_v2_rejects_wrong_upstream_commit(self):
+        self._select_v2()
+        self.pins["buildroot_source_commit"] = "f" * 40
+        self.save()
+        with self.assertRaisesRegex(mod.KconfigHold, "Buildroot source"):
+            self.audit()
+
+    def test_v2_rejects_postbuild_drift(self):
+        self._select_v2()
+        (self.external/"post-build.sh").write_bytes(b"#!/bin/sh\nexit 42\n")
+        with self.assertRaisesRegex(mod.KconfigHold, "Git blob mismatch"):
+            self.audit()
+
+    def test_v2_candidate_matches_reviewed_exact_git_tree(self):
+        pins = json.loads((HERE/"architecture/os/VERAOS_PINNED_BUILDROOT_KCONFIG_V2.json").read_text())
+        self.assertEqual(pins["schema"], "VERAOS_BUILDROOT_KCONFIG_PINNED_INPUTS_V2")
+        self.assertEqual(pins["veraos_reviewed_source_head"],
+                         "10dfe758479573468b091cd260c57e8d65cc6942")
+        self.assertEqual(pins["buildroot_source_commit"],
+                         "d030e36bbc9669230c015be971b14b6e062cfdde")
+        self.assertEqual(len(pins["external_git_blob_sha1"]), 10)
+        # GitHub exact-head blob on 2026-10-25; historical V1 has 52c7de61...
+        self.assertEqual(pins["external_git_blob_sha1"]["board/veraos/x86_64/post-build.sh"],
+                         "836e94cc2eebd96a31a85c533dcc12240bbe1823")
+
 if __name__ == "__main__":
     unittest.main()

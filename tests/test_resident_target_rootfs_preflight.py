@@ -49,6 +49,7 @@ class StaticTargetReadinessTests(unittest.TestCase):
             put("usr/lib/python3.12/site-packages/" + name + "/__init__.py")
         for name in ("libsqlite3.so.0", "libssl.so.3", "libcrypto.so.3"):
             put("usr/lib/" + name)
+        put("sbin/ip").chmod(0o755)
         put("usr/bin/cog")
         put("usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
         for name in ("pid1.py", "resident.py", "desktop.py"):
@@ -59,7 +60,7 @@ class StaticTargetReadinessTests(unittest.TestCase):
 
     def test_complete_static_tree_does_not_prove_runtime(self):
         result = checker.audit(self.root, ROOT)
-        self.assertEqual(result["status"], "TARGET_ROOTFS_STATIC_PRESENT_GUEST_UNQUALIFIED")
+        self.assertEqual(result["status"], "TARGET_ROOTFS_STATIC_PRESENT_GUEST_UNQUALIFIED", result["missing"])
         self.assertEqual(result["missing"], [])
         for key in ("target_import_executed", "pid1_executed", "cog_rendered",
                     "image_built_by_this_probe", "model_activated",
@@ -99,6 +100,17 @@ class StaticTargetReadinessTests(unittest.TestCase):
                 self.assertIn("/usr/lib/" + soname, result["missing"])
                 self.assertEqual(result["status"], "NOT_READY_MISSING_TARGET_PREREQUISITES")
                 path.write_bytes(original)
+
+    def test_missing_or_nonexecutable_pid1_loopback_tool_holds(self):
+        # PID1 invokes this exact absolute path before it admits Cog.
+        loopback_tool = self.root / "sbin/ip"
+        loopback_tool.unlink()
+        self.assertIn("/sbin/ip executable", checker.audit(self.root, ROOT)["missing"])
+        loopback_tool.write_bytes(b"synthetic host-only fixture")
+        loopback_tool.chmod(0o644)
+        self.assertIn("/sbin/ip executable", checker.audit(self.root, ROOT)["missing"])
+        loopback_tool.chmod(0o755)
+        self.assertNotIn("/sbin/ip executable", checker.audit(self.root, ROOT)["missing"])
 
     def test_malformed_pid1_and_source_mismatch_fail(self):
         pid = self.root / "sbin/vera-init"

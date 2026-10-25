@@ -109,20 +109,40 @@ if [ ! -d /work/buildroot/.git ]; then
 fi
 actual="$(git -C /work/buildroot rev-parse HEAD)"
 test "$actual" = "$expected"
+test -z "$(git -C /work/buildroot status --porcelain=v1)" || {
+  echo "Buildroot checkout is dirty; refusing unverifiable source reuse" >&2
+  exit 13
+}
 if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
   python_major="$(sed -n 's/^PYTHON3_VERSION_MAJOR = //p' /work/buildroot/package/python3/python3.mk | head -1)"
   case "$python_major" in
     3.12|3.13|3.14|3.15|3.16) ;;
     *) echo "Resident source packaging requires Buildroot Python >=3.12; version major $python_major" >&2; exit 12 ;;
   esac
+  # Do not build into an older cached output directory. The Buildroot source
+  # and shared download cache may be reused, but target/toolchain packages,
+  # configured headers, and rootfs/image bytes must start from empty output.
+  case "${VERAOS_SOURCE_HEAD:-}" in
+    *[!0123456789abcdef]*|'')
+      echo "Resident build requires a validated Git source head" >&2; exit 13 ;;
+  esac
+  test "${#VERAOS_SOURCE_HEAD}" -eq 40 || {
+    echo "Resident build requires a 40-character Git head" >&2; exit 13
+  }
+  output="/work/output-resident-$VERAOS_SOURCE_HEAD"
+  mkdir "$output" || {
+    echo "Refusing to reuse resident Buildroot output: $output" >&2; exit 13
+  }
+else
+  output=/work/output
 fi
-make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot "$VERAOS_DEFCONFIG"
-make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot olddefconfig
-make -C /work/buildroot O=/work/output BR2_EXTERNAL=/workspace/buildroot BR2_JLEVEL="$VERAOS_JOBS" -j"$VERAOS_JOBS"
-test -f /work/output/images/bzImage
-test -f /work/output/images/rootfs.ext2
-cp -n /work/output/images/bzImage /artifacts/veraos-bzImage
-cp -n /work/output/images/rootfs.ext2 /artifacts/veraos-rootfs.ext2
+make -C /work/buildroot O="$output" BR2_EXTERNAL=/workspace/buildroot "$VERAOS_DEFCONFIG"
+make -C /work/buildroot O="$output" BR2_EXTERNAL=/workspace/buildroot olddefconfig
+make -C /work/buildroot O="$output" BR2_EXTERNAL=/workspace/buildroot BR2_JLEVEL="$VERAOS_JOBS" -j"$VERAOS_JOBS"
+test -f "$output/images/bzImage"
+test -f "$output/images/rootfs.ext2"
+cp -n "$output/images/bzImage" /artifacts/veraos-bzImage
+cp -n "$output/images/rootfs.ext2" /artifacts/veraos-rootfs.ext2
 sha256sum /artifacts/veraos-bzImage > /artifacts/veraos-bzImage.sha256
 sha256sum /artifacts/veraos-rootfs.ext2 > /artifacts/veraos-rootfs.ext2.sha256
 '@
@@ -163,6 +183,7 @@ if ($residentSourceStageResolved) {
         "--user", "1000:1000",
         "--env", "HOME=/home/vera-build",
         "--env", "VERAOS_REQUIRE_RESIDENT_CORE=1",
+        "--env", "VERAOS_SOURCE_HEAD=$sourceHead",
         "--env", "VERAOS_RESIDENT_GUEST_PROFILE=2025.02.18",
         "--env", "VERAOS_RESIDENT_STAGE=/resident",
         "--mount", "type=bind,source=$residentSourceStageResolved,target=/resident,readonly"

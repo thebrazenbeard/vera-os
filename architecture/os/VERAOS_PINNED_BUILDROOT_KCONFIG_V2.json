@@ -1,0 +1,48 @@
+{
+  "schema": "VERAOS_BUILDROOT_KCONFIG_PINNED_INPUTS_V2",
+  "veraos_reviewed_source_head": "10dfe758479573468b091cd260c57e8d65cc6942",
+  "buildroot_source_commit": "d030e36bbc9669230c015be971b14b6e062cfdde",
+  "buildroot_version": "2025.02.18",
+  "upstream_archive_sha256": "32e0115b41fc3a3659f13ed64b14843a98b0ccc0ac4b9edc50f918f952369419",
+  "defconfig": "configs/veraos_x86_64_resident_browser_defconfig",
+  "external_git_blob_sha1": {
+    "external.desc": "261c4ef35328ce666980a4f0aeac81a23386d1be",
+    "external.mk": "f7c40481dc88ead2b3cd5af6262dd0eb85627dce",
+    "Config.in": "9700ff6ef51443fbdc9dc90ab30cf08376326e63",
+    "configs/veraos_x86_64_resident_browser_defconfig": "227ec1a766ce0a84b0c5af35249358600b46ee7d",
+    "board/veraos/patches/cog/0001-drm-allow-unassigned-crtc-for-cold-boot.patch": "2a9c4caddc80d41f9e51e304908ac789a2852c06",
+    "board/veraos/patches/cog/0002-drm-shm-frame-row-bounds.patch": "baf4d57230180b39fc63efcfdea1a228cb6a8158",
+    "board/veraos/patches/cog/0003-drm-do-not-clobber-wl-shm-userdata.patch": "af4a1aae8d81593609028a632669ce93ebba117e",
+    "board/veraos/x86_64/post-build.sh": "836e94cc2eebd96a31a85c533dcc12240bbe1823",
+    "board/veraos/x86_64/rootfs-overlay/sbin/vera-init": "e527ffbe57801f248334f199203915a2cd325aec",
+    "board/veraos/x86_64/rootfs-overlay/sbin/vera-virtio-probe": "e022c1b3da23834206d550ce160c3dd01962a351"
+  },
+  "required_effective_symbols": [
+    "BR2_x86_64",
+    "BR2_TOOLCHAIN_BUILDROOT_GLIBC",
+    "BR2_INIT_NONE",
+    "BR2_PACKAGE_PYTHON3",
+    "BR2_PACKAGE_PYTHON3_SQLITE",
+    "BR2_PACKAGE_PYTHON3_SSL",
+    "BR2_PACKAGE_PYTHON_JSONSCHEMA",
+    "BR2_PACKAGE_PYTHON_CRYPTOGRAPHY",
+    "BR2_PACKAGE_PYTHON_PYYAML",
+    "BR2_PACKAGE_COG",
+    "BR2_PACKAGE_COG_PLATFORM_DRM",
+    "BR2_PACKAGE_WPEWEBKIT",
+    "BR2_PACKAGE_MESA3D",
+    "BR2_PACKAGE_MESA3D_OPENGL_EGL",
+    "BR2_PACKAGE_DEJAVU",
+    "BR2_PACKAGE_DEJAVU_SANS",
+    "BR2_LINUX_KERNEL",
+    "BR2_TARGET_ROOTFS_EXT2",
+    "BR2_TARGET_ROOTFS_EXT2_4"
+  ],
+  "external_paths": {
+    "BR2_GLOBAL_PATCH_DIR": "dir",
+    "BR2_ROOTFS_OVERLAY": "dir",
+    "BR2_ROOTFS_POST_BUILD_SCRIPT": "executable"
+  },
+  "input_stage": "PINNED_GIT_BLOBS_AND_UPSTREAM_ARCHIVE",
+  "proof_ceiling": "SOURCE_AND_EFFECTIVE_KCONFIG_ONLY_NO_TOOLCHAIN_OR_IMAGE"
+}

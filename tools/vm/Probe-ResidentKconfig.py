@@ -88,8 +88,19 @@ def _external_reference(root: Path, effective: dict[str,str], key: str, kind: st
 def audit(manifest_path: Path, external_root: Path, effective_config: Path,
           upstream_archive: Path) -> dict:
     pins = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
-    if pins.get("schema") != "VERAOS_BUILDROOT_KCONFIG_PINNED_INPUTS_V1":
+    schema = pins.get("schema")
+    if schema not in {"VERAOS_BUILDROOT_KCONFIG_PINNED_INPUTS_V1",
+                      "VERAOS_BUILDROOT_KCONFIG_PINNED_INPUTS_V2"}:
         raise KconfigHold("unsupported Kconfig pinned input schema")
+    if schema == "VERAOS_BUILDROOT_KCONFIG_PINNED_INPUTS_V2":
+        # V1 remains historical; V2 describes the independently reviewed
+        # recovery source and does not review a future commit automatically.
+        if pins.get("veraos_reviewed_source_head") != \
+                "10dfe758479573468b091cd260c57e8d65cc6942":
+            raise KconfigHold("V2 reviewed source head not admitted")
+        if pins.get("buildroot_source_commit") != \
+                "d030e36bbc9669230c015be971b14b6e062cfdde":
+            raise KconfigHold("V2 Buildroot source commit not admitted")
     root = Path(external_root).resolve(strict=True)
     if not root.is_dir():
         raise KconfigHold("missing BR2_EXTERNAL directory")
