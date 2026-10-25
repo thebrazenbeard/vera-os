@@ -67,13 +67,15 @@ class VirtioRPC:
             while True:
                 if b"\n" in self.pending:
                     frame,self.pending=self.pending.split(b"\n",1)
+                    if len(frame)+1>MAX_FRAME:
+                        raise RuntimeError("VirtIO response too long")
                     response=json.loads(frame)
                     if not isinstance(response,dict) or response.get("id")!=obj["id"]:
                         raise RuntimeError("Unexpected VirtIO reply identity")
                     if response.get("ok") is not True:
                         raise RuntimeError(str(response.get("error","relay refused"))[:180])
                     return response
-                if len(self.pending)>MAX_FRAME:
+                if len(self.pending)>=MAX_FRAME:
                     raise RuntimeError("VirtIO response too long")
                 left=deadline-time.monotonic()
                 if left<=0 or not select.select([self.fd],[],[],left)[0]:
