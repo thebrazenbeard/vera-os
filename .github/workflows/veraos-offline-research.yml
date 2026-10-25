@@ -53,6 +53,8 @@ jobs:
         run: python -m unittest discover -s tests -p test_vm_qualification_custody_unittest.py -v
       - name: Verify pinned resident staging and symlink ancestry rejection
         run: python -m unittest discover -s tools/vm -p test_resident_source_staging.py -v
+      - name: Verify disabled legacy chat HTTP method contract
+        run: python -m unittest discover -s tests -p test_legacy_chat_allow_unittest.py -v
 
   windows-powershell-source:
     runs-on: windows-latest
