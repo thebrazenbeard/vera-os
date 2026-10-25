@@ -66,6 +66,14 @@ if ($Profile -eq "RESIDENT_BROWSER") {
     # Catch frozen-source pin conflicts before image-builder creation or CPU work.
     # This is a static gate, not evidence of a booted resident.
     & (Join-Path $repo "tools\vm\Assert-VeraOSPortfolioPinset.ps1") -RepoRoot $repo
+    # Resident Buildroot requires .py and .pyc: Python bytecode-only removes
+    # .py before the target post-build source prerequisite audit runs.
+    $residentConfig = Join-Path $repo "buildroot\configs\veraos_x86_64_resident_browser_defconfig"
+    $residentConfigText = [IO.File]::ReadAllText($residentConfig)
+    if ($residentConfigText -cnotmatch "(?m)^BR2_PACKAGE_PYTHON3_PY_PYC=y\r?$" -or
+        $residentConfigText -cmatch "(?m)^BR2_PACKAGE_PYTHON3_PYC_ONLY=y\r?$") {
+        throw "Resident Buildroot requires .py and .pyc sources for post-build rootfs validation"
+    }
 }
 
 $residentSourceStageResolved = $null

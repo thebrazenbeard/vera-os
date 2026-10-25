@@ -31,6 +31,8 @@ jobs:
         run: python -m unittest discover -s tests -p test_virtio_frame_bounds.py -v
       - name: Verify prebuild resident pinset source guard
         run: python -m unittest discover -s tests -p test_resident_boot_pinset_preflight.py -v
+      - name: Require Python sources in the resident image profile
+        run: python -m unittest discover -s tests -p test_resident_python_source_packaging.py -v
       - name: Verify Buildroot wrapper source contract
         run: python -m unittest discover -s tests -p test_resident_builder_wrapper_contract.py -v
       - name: Verify resident dependency source contract

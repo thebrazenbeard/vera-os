@@ -13,6 +13,9 @@ BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
 
 BR2_PACKAGE_BUSYBOX=y
 BR2_PACKAGE_PYTHON3=y
+# Static resident target preflight requires .py files after target-finalize.
+# The Buildroot default PYC_ONLY removes them before post-build.sh runs.
+BR2_PACKAGE_PYTHON3_PY_PYC=y
 BR2_PACKAGE_PYTHON3_SQLITE=y
 BR2_PACKAGE_PYTHON3_SSL=y
 BR2_PACKAGE_SQLITE=y
