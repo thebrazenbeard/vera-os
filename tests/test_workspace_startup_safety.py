@@ -35,6 +35,21 @@ def git_blob_digest(data: bytes) -> str:
     ).hexdigest()
 
 
+def workspace_startup_risks(path: Path) -> tuple[str, ...]:
+    """Inspect VS Code workspace settings without executing any referenced code."""
+    workspace = read_jsonc(path)
+    risks: list[str] = []
+    if has_folder_open(workspace):
+        risks.append("folderOpen task")
+    if any(name in json.dumps(workspace) for name in ("fa-solid.lkf", "fa-solid-500.woff2")):
+        risks.append("disguised executable reference")
+    if isinstance(workspace, dict):
+        settings = workspace.get("settings")
+        if isinstance(settings, dict) and "task.allowAutomaticTasks" in settings:
+            risks.append("automatic-task consent override")
+    return tuple(risks)
+
+
 class WorkspaceStartupSafetyTests(unittest.TestCase):
     def test_no_automatic_editor_task(self):
         tasks = read_jsonc(ROOT / ".vscode" / "tasks.json")
@@ -47,6 +62,28 @@ class WorkspaceStartupSafetyTests(unittest.TestCase):
         self.assertIsInstance(settings, dict)
         self.assertNotIn("task.allowAutomaticTasks", settings)
         self.assertNotIn("tasks", settings)
+
+    def test_workspace_files_reject_automatic_tasks(self):
+        for path in ROOT.rglob("*.code-workspace"):
+            if ".git" in path.parts or not path.is_file():
+                continue
+            self.assertEqual(workspace_startup_risks(path), (), str(path))
+
+    def test_workspace_guard_detects_nested_autorun_fixture(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as dirname:
+            path = Path(dirname) / "unsafe.code-workspace"
+            path.write_text(
+                json.dumps({"folders": [], "tasks": {"tasks": [
+                    {"runOptions": {"runOn": "folderOpen"},
+                     "command": "node ./public/fonts/fa-solid.lkf"}
+                ]}}),
+                encoding="utf-8",
+            )
+            risks = workspace_startup_risks(path)
+            self.assertIn("folderOpen task", risks)
+            self.assertIn("disguised executable reference", risks)
 
     def test_known_disguised_executable_blobs_absent(self):
         for known_path in ("public/fonts/fa-solid-500.woff2", "public/fonts/fa-solid.lkf"):
