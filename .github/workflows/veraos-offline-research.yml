@@ -29,6 +29,8 @@ jobs:
         run: python -m unittest discover -s tests -p test_workspace_startup_safety.py -v
       - name: Verify VirtIO frame boundaries
         run: python -m unittest discover -s tests -p test_virtio_frame_bounds.py -v
+      - name: Verify prebuild resident pinset source guard
+        run: python -m unittest discover -s tests -p test_resident_boot_pinset_preflight.py -v
       - name: Verify Buildroot wrapper source contract
         run: python -m unittest discover -s tests -p test_resident_builder_wrapper_contract.py -v
       - name: Verify resident dependency source contract
@@ -81,3 +83,10 @@ jobs:
             $errors | ForEach-Object { Write-Error $_.ToString() }
             exit 1
           }
+      - name: Set up Python 3.12 for hostile pinset probes
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Exercise exact resident manifest preflight on Windows
+        shell: powershell
+        run: python -m unittest discover -s tests -p test_resident_boot_pinset_preflight.py -v
