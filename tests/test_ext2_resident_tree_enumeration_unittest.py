@@ -18,7 +18,8 @@ BASE = "/opt/veraos/components"
 def ls(*items):
     # debugfs(8) -p documented /inode/mode/uid/gid/name/size/ format.
     return b"\n".join(
-        f"/{i + 20}/{mode}/0/0/{name}/0/".encode("ascii")
+        # debugfs -p reports no size for directories; files have byte sizes.
+        f"/{i + 20}/{mode}/0/0/{name}/{'0' if mode.startswith('10') else ''}/".encode("ascii")
         for i, (mode, name) in enumerate(items)
     ) + b"\n"
 
