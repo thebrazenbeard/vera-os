@@ -2,7 +2,7 @@
 
 # vera-os
 
-Vera OS is a working architecture for a local, persistent, agentic Vera runtime built on Linux rather than around a single chat application.
+Vera OS is an architectural proposal for a local, persistent, agentic Vera runtime built on Linux rather than around a single chat application.
 
 ## Current direction
 
@@ -36,3 +36,7 @@ Primary goals:
 ## Status
 
 This repository is in **architecture discovery**. Documents record the current working model and should not be read as proof that any component has been implemented, installed, deployed, or validated.
+
+At the source-containment baseline on `main` (`d2cb6c4`, PR #48), this tree is primarily design documents and static assets, plus a source-only editor-startup safety check. It does **not** contain a verified, deployable NixOS Vera stack, running `verad`, local model serving, durable agent state service, or authenticated multi-agent runtime. Historical Debian/Buildroot observations and unmerged experimental pull requests are separate evidence, not proof of current host readiness.
+
+PR #48 removed a concealed VS Code folder-open task that invoked JavaScript disguised as a font. The regression check scans known dangerous source patterns without executing them; it does **not** establish whether any earlier checkout or workstation ran that file, whether installed copies are clean, or whether other threats exist. Revalidate source and boot/runtime evidence before treating any later branch as deployable.
