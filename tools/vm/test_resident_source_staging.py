@@ -122,6 +122,28 @@ class ResidentStageTests(unittest.TestCase):
             self.stage()
         self.assertEqual(sentry.read_text(), "keep")
 
+    def test_symlinked_parent_inside_checkout_denied_without_side_effect(self):
+        alias = self.root / "outside-alias"
+        try:
+            alias.symlink_to(self.checkouts, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("The filesystem does not support directory symlinks")
+        forbidden = alias / "in-checkout-stage"
+        with self.assertRaisesRegex(stager.StageError, "inside source or checkout"):
+            stager.stage(self.checkouts, forbidden, self.source_root)
+        self.assertFalse((self.checkouts / "in-checkout-stage").exists())
+
+    def test_nested_symlinked_parent_inside_source_denied_before_mkdir(self):
+        alias = self.root / "source-alias"
+        try:
+            alias.symlink_to(self.source_root, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest("The filesystem does not support directory symlinks")
+        forbidden = alias / "nested" / "stage"
+        with self.assertRaisesRegex(stager.StageError, "inside source or checkout"):
+            stager.stage(self.checkouts, forbidden, self.source_root)
+        self.assertFalse((self.source_root / "nested").exists())
+
     def test_modified_staged_bytes_fail_reverification(self):
         self.stage()
         marker = self.output / "components/portal/portal/__init__.py"

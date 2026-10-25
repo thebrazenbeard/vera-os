@@ -83,11 +83,24 @@ def stage(
     source_root = source_root.resolve(strict=True)
     if not checkout_root.is_dir() or destination.exists() or destination.is_symlink():
         raise StageError("Checkout root must exist and staging destination must not exist")
-    if destination == checkout_root or checkout_root in destination.parents or \
-       destination == source_root or source_root in destination.parents:
+    # Resolve existing aliases before any mkdir. A lexical output path outside
+    # checkout/source can traverse a symlink whose physical parent is inside
+    # either protected tree.
+    physical_parent = destination.parent.resolve(strict=False)
+    physical_destination = physical_parent / destination.name
+    if physical_destination == checkout_root or checkout_root in physical_destination.parents or \
+       physical_destination == source_root or source_root in physical_destination.parents:
         raise StageError("Staging output cannot be inside source or checkout tree")
     composition, plan = _load_bindings(source_root)
     destination.parent.mkdir(parents=True, exist_ok=True)
+    # Pin writes to the resolved parent; never follow a potentially swapped
+    # user-supplied alias during the temporary-directory rename.
+    actual_parent = destination.parent.resolve(strict=True)
+    if actual_parent != physical_parent:
+        raise StageError("Staging output parent changed during admission")
+    destination = actual_parent / destination.name
+    if destination.exists() or destination.is_symlink():
+        raise StageError("Staging destination must not exist")
     with tempfile.TemporaryDirectory(prefix=".veraos-resident-", dir=destination.parent) as tmp:
         tmp_path = Path(tmp)
         rows = []

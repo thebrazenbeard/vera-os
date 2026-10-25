@@ -43,4 +43,9 @@ jobs:
         run: python -m unittest discover -s tests -p test_resident_qemu_qualification.py -v
       - name: Verify versioned pinned Buildroot Kconfig contracts
         run: python -m unittest discover -s tests -p test_resident_pinned_kconfig_unittest.py -v
-
+      - name: Verify VM qualification wrapper and evidence custody
+        run: python -m unittest discover -s tests -p test_vm_contract.py -v
+      - name: Adversarial VM qualifier custody checks
+        run: python -m unittest discover -s tests -p test_vm_qualification_custody_unittest.py -v
+      - name: Verify pinned resident staging and symlink ancestry rejection
+        run: python -m unittest discover -s tools/vm -p test_resident_source_staging.py -v

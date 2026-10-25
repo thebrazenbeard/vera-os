@@ -13,7 +13,37 @@ $ErrorActionPreference = "Stop"
 $repo = [System.IO.Path]::GetFullPath($RepoRoot)
 $artifacts = [System.IO.Path]::GetFullPath($ArtifactRoot)
 $logs = [System.IO.Path]::GetFullPath($LogRoot)
+
+function Assert-NoLinkedAncestor {
+    param([string]$Path)
+    $cursor = [System.IO.Path]::GetFullPath($Path)
+    while ($cursor) {
+        $item = Get-Item -LiteralPath $cursor -Force -ErrorAction SilentlyContinue
+        if ($item -and (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0)) {
+            throw "Linked/junction path not admitted for VM qualification: $cursor"
+        }
+        $parent = [System.IO.Path]::GetDirectoryName($cursor)
+        if (-not $parent -or $parent -eq $cursor) { break }
+        $cursor = $parent
+    }
+}
+
+Assert-NoLinkedAncestor $repo
+Assert-NoLinkedAncestor $artifacts
+Assert-NoLinkedAncestor $logs
 New-Item -ItemType Directory -Force $logs | Out-Null
+Assert-NoLinkedAncestor $logs
+if (-not (Test-Path -LiteralPath $artifacts -PathType Container)) {
+    throw "Missing VeraOS artifact directory: $artifacts"
+}
+
+# Every invocation owns a new log directory and Docker identity. Never delete
+# or truncate evidence from a prior run or a same-named ambient container.
+$runId = [guid]::NewGuid().ToString("N")
+$runLogs = Join-Path $logs "veraos-qualification-$runId"
+if (Test-Path -LiteralPath $runLogs) { throw "Run directory collision: $runLogs" }
+New-Item -ItemType Directory -Path $runLogs -ErrorAction Stop | Out-Null
+Assert-NoLinkedAncestor $runLogs
 
 $kernel = Join-Path $artifacts "veraos-bzImage"
 $rootfs = Join-Path $artifacts "veraos-rootfs.ext2"
@@ -73,17 +103,24 @@ if ($buildReceipt.RootfsSha256 -ne $rootfsSha256) { throw "VeraOS rootfs hash do
 $buildReceiptSha256 = ((Get-FileHash $buildReceiptPath -Algorithm SHA256).Hash.ToLowerInvariant())
 
 $dockerfile = Join-Path $repo "tools\vm\qemu-runner.Dockerfile"
-& docker build -t $RunnerImage -f $dockerfile $repo
+# Never replace a globally shared mutable runner tag. Resolve the unique
+# build tag to an immutable image ID and run by ID for all qualification steps.
+$runnerTag = "$RunnerImage-$runId"
+& docker build -t $runnerTag -f $dockerfile $repo
 if ($LASTEXITCODE -ne 0) { throw "QEMU runner image build failed" }
+$runnerImageId = [string](& docker image inspect --format '{{.Id}}' $runnerTag | Select-Object -First 1)
+$runnerImageId = $runnerImageId.Trim()
+if ($LASTEXITCODE -ne 0 -or $runnerImageId -notmatch '^sha256:[0-9a-f]{64}$') {
+    throw "QEMU runner image has no immutable Docker image ID"
+}
 
-$overlay = Join-Path $logs "veraos-qualification-overlay.qcow2"
-Remove-Item $overlay -Force -ErrorAction SilentlyContinue
+$overlay = Join-Path $runLogs "veraos-qualification-overlay.qcow2"
 $qemuImgArgs = @(
-    "run", "--rm",
+    "run", "--rm", "--network", "none",
     "--entrypoint", "qemu-img",
     "--mount", "type=bind,source=$artifacts,target=/artifacts,readonly",
-    "--mount", "type=bind,source=$logs,target=/logs",
-    $RunnerImage,
+    "--mount", "type=bind,source=$runLogs,target=/logs",
+    $runnerImageId,
     "create", "-f", "qcow2", "-F", "raw",
     "-b", "/artifacts/veraos-rootfs.ext2",
     "/logs/veraos-qualification-overlay.qcow2"
@@ -112,21 +149,18 @@ function Invoke-VeraBootPass {
         [string]$ExpectedPersistence
     )
 
-    $name = "veraos-vm-qualification-$Pass"
-    $existingContainer = (& docker ps -aq --filter "name=^/$name$" | Select-Object -First 1)
-    if ($existingContainer) {
-        & docker rm -f $existingContainer | Out-Null
-    }
-
-    $stdout = Join-Path $logs "veraos-vm-pass$Pass.stdout.log"
-    $stderr = Join-Path $logs "veraos-vm-pass$Pass.stderr.log"
-    Remove-Item $stdout,$stderr -Force -ErrorAction SilentlyContinue
+    $name = "veraos-vm-$runId-$Pass"
+    $cidPath = Join-Path $runLogs "pass$Pass.cid"
+    $stdout = Join-Path $runLogs "veraos-vm-pass$Pass.stdout.log"
+    $stderr = Join-Path $runLogs "veraos-vm-pass$Pass.stderr.log"
 
     $dockerArgs = @(
-        "run", "--rm", "--name", $name,
+        "run", "--rm", "--network", "none",
+        "--cidfile", $cidPath, "--name", $name,
+        "--label", "veraos.qualifier.run=$runId",
         "--mount", "type=bind,source=$artifacts,target=/artifacts,readonly",
-        "--mount", "type=bind,source=$logs,target=/logs",
-        $RunnerImage,
+        "--mount", "type=bind,source=$runLogs,target=/logs",
+        $runnerImageId,
         "-m", "$MemoryMiB",
         "-smp", "$CpuCount",
         "-accel", "tcg",
@@ -143,12 +177,20 @@ function Invoke-VeraBootPass {
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     $bootMarker = $null
     $persistenceMarker = $null
+    $dwellStart = $null
+    $dwellQualified = $false
+    $fatalMarker = $false
 
+    $ownedContainerId = $null
     try {
         while ((Get-Date) -lt $deadline) {
             $text = ""
             if (Test-Path $stdout) { $text += Get-Content $stdout -Raw -ErrorAction SilentlyContinue }
             if (Test-Path $stderr) { $text += Get-Content $stderr -Raw -ErrorAction SilentlyContinue }
+            if ($text -match '(?im)Kernel panic|Oops:|BUG: unable to handle kernel') {
+                $fatalMarker = $true
+                break
+            }
             if ($text -match [regex]::Escape($expectedBoot)) {
                 $bootMarker = $expectedBoot
             }
@@ -156,7 +198,15 @@ function Invoke-VeraBootPass {
                 $persistenceMarker = $ExpectedPersistence
             }
             if ($bootMarker -and $persistenceMarker) {
-                break
+                # A marker printed immediately before a crash is not a
+                # qualified boot. Require five seconds of continued process
+                # liveness after both markers are present.
+                if ($process.HasExited) { break }
+                if (-not $dwellStart) { $dwellStart = Get-Date }
+                if (((Get-Date) - $dwellStart).TotalSeconds -ge 5) {
+                    $dwellQualified = $true
+                    break
+                }
             }
             if ($process.HasExited) { break }
             Start-Sleep -Milliseconds 500
@@ -164,14 +214,35 @@ function Invoke-VeraBootPass {
         }
     }
     finally {
-        $runningContainer = (& docker ps -q --filter "name=^/$name$" | Select-Object -First 1)
-        if ($runningContainer) {
-            & docker stop -t 1 $runningContainer | Out-Null
+        # --cidfile is created by Docker for our unique run. Cleanup must use
+        # only this exact ID, never a name filter that could match someone
+        # else's container.
+        if (Test-Path -LiteralPath $cidPath) {
+            $candidateId = [IO.File]::ReadAllText($cidPath).Trim()
+            if ($candidateId -match '^[0-9a-f]{64}$') { $ownedContainerId = $candidateId }
         }
-        if (-not $process.HasExited) { $process.WaitForExit(5000) | Out-Null }
+        if ($ownedContainerId) {
+            # JSON avoids Windows PowerShell native-argument quoting of a
+            # double-quoted Go-template map key.
+            $labelsJson = [string](& docker inspect --format '{{json .Config.Labels}}' $ownedContainerId 2>$null | Select-Object -First 1)
+            if ($LASTEXITCODE -eq 0 -and $labelsJson) {
+                $labels = $labelsJson | ConvertFrom-Json
+                if ($labels.'veraos.qualifier.run' -eq $runId) {
+                    & docker stop -t 1 $ownedContainerId | Out-Null
+                }
+            }
+        }
+        if (-not $process.HasExited) {
+            $finished = $process.WaitForExit(5000)
+            $process.Refresh()
+            if (-not $finished -or -not $process.HasExited) {
+                throw "VM qualification Docker process remained live after owned cleanup"
+            }
+        }
     }
 
-    if (-not $bootMarker -or -not $persistenceMarker) {
+    if (-not $ownedContainerId -or -not $bootMarker -or -not $persistenceMarker -or
+        -not $dwellQualified -or $fatalMarker) {
         $tail = ""
         if (Test-Path $stdout) { $tail += (Get-Content $stdout -Tail 160 | Out-String) }
         if (Test-Path $stderr) { $tail += (Get-Content $stderr -Tail 160 | Out-String) }
@@ -184,6 +255,8 @@ function Invoke-VeraBootPass {
         persistence_marker = $persistenceMarker
         stdout = $stdout
         stderr = $stderr
+        stdout_sha256 = ((Get-FileHash $stdout -Algorithm SHA256).Hash.ToLowerInvariant())
+        stderr_sha256 = ((Get-FileHash $stderr -Algorithm SHA256).Hash.ToLowerInvariant())
     }
 }
 
@@ -192,12 +265,21 @@ $secondPersistence = "VERAOS_PERSISTENCE_READY_V1 boot_ordinal=2 previous_boot_o
 $firstBoot = Invoke-VeraBootPass -Pass 1 -ExpectedPersistence $firstPersistence
 $secondBoot = Invoke-VeraBootPass -Pass 2 -ExpectedPersistence $secondPersistence
 
-$qemuVersion = (& docker run --rm $RunnerImage --version | Select-Object -First 1)
+$qemuVersion = (& docker run --rm --network none $runnerImageId --version | Select-Object -First 1)
+if ($LASTEXITCODE -ne 0) { throw "QEMU runner version query failed" }
 
+$receiptPath = Join-Path $artifacts "veraos-vm-qualification-$runId.json"
 $receipt = [ordered]@{
     schema = "VERA_OS_VM_QUALIFICATION_V3"
     qualified = $true
     observed_at = (Get-Date).ToString("o")
+    run_id = $runId
+    receipt_path = $receiptPath
+    run_log_root = $runLogs
+    host_log_acl_qualified = $false
+    runner_image_tag = $runnerTag
+    runner_image_id = $runnerImageId
+    runner_image_source_attestation_qualified = $false
     product_base = "VERA"
     linux_role = "KERNEL_DRIVER_HARDWARE_SUBSTRATE"
     image_builder = ("BUILDROOT_" + ([string]$buildReceipt.BuildrootVersion).Replace(".", "_"))
@@ -226,6 +308,16 @@ $receipt = [ordered]@{
         $firstBoot.persistence_marker,
         $secondBoot.persistence_marker
     )
+    pass_logs = @(
+        [ordered]@{
+            stdout = $firstBoot.stdout; stderr = $firstBoot.stderr
+            stdout_sha256 = $firstBoot.stdout_sha256; stderr_sha256 = $firstBoot.stderr_sha256
+        },
+        [ordered]@{
+            stdout = $secondBoot.stdout; stderr = $secondBoot.stderr
+            stdout_sha256 = $secondBoot.stdout_sha256; stderr_sha256 = $secondBoot.stderr_sha256
+        }
+    )
     canonical_memory_qualified = $false
     supabase_replacement_qualified = $false
     qualification_disk = "DISPOSABLE_QCOW2_OVERLAY"
@@ -243,6 +335,16 @@ $receipt = [ordered]@{
     claim_ceiling = "VM_BOOT_RESTART_LIFECYCLE_PERSISTENCE_GUEST_COMPOSITION_AND_PORTFOLIO_PLAN_ONLY_NOT_RESIDENT_IMPORT_NOT_COG_RENDER_NOT_LOCAL_MODEL_NOT_OFFLINE_PORTFOLIO_MOUNT_NOT_BARE_METAL_NOT_PROTECTED_EFFECT"
 }
 
-$receiptPath = Join-Path $artifacts "veraos-vm-qualification.json"
-$receipt | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 $receiptPath
-$receipt | ConvertTo-Json -Depth 6
+# Create a new immutable evidence file: an existing receipt, including a
+# symlink, must fail instead of being truncated. The caller receives its path.
+$json = $receipt | ConvertTo-Json -Depth 6
+$payload = [System.Text.UTF8Encoding]::new($false).GetBytes($json + [Environment]::NewLine)
+$receiptFile = [IO.File]::Open($receiptPath, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+try {
+    $receiptFile.Write($payload, 0, $payload.Length)
+    $receiptFile.Flush($true)
+}
+finally {
+    $receiptFile.Dispose()
+}
+$json
