@@ -261,10 +261,14 @@ def make_handler(
             self.request.settimeout(5.0)
             super().setup()
 
-        def send_bytes(self, code: int, body: bytes, content_type: str) -> None:
+        def send_bytes(
+            self, code: int, body: bytes, content_type: str, *, allow: str | None = None,
+        ) -> None:
             self.send_response(code)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(body)))
+            if allow is not None:
+                self.send_header("Allow", allow)
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header(
@@ -275,10 +279,10 @@ def make_handler(
             self.end_headers()
             self.wfile.write(body)
 
-        def send_json(self, code: int, payload: dict) -> None:
+        def send_json(self, code: int, payload: dict, *, allow: str | None = None) -> None:
             self.send_bytes(
                 code, json.dumps(payload, sort_keys=True).encode("utf-8"),
-                "application/json; charset=utf-8",
+                "application/json; charset=utf-8", allow=allow,
             )
 
         def do_GET(self):
@@ -321,7 +325,7 @@ def make_handler(
             if self.path == "/api/chat":
                 # Preserve the legacy chat route's explicit method hold.
                 # Only /api/conversation can reach governed task intake.
-                self.send_json(405, {"status": "METHOD_NOT_ALLOWED"})
+                self.send_json(405, {"status": "METHOD_NOT_ALLOWED"}, allow="")
                 return
             if self.path != "/api/conversation":
                 self.send_json(404, {"status": "NOT_FOUND"})
