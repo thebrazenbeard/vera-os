@@ -49,3 +49,33 @@ jobs:
         run: python -m unittest discover -s tests -p test_vm_qualification_custody_unittest.py -v
       - name: Verify pinned resident staging and symlink ancestry rejection
         run: python -m unittest discover -s tools/vm -p test_resident_source_staging.py -v
+
+  windows-powershell-source:
+    runs-on: windows-latest
+    steps:
+      - name: Check out exact subject
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source head
+        shell: powershell
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if ((git rev-parse HEAD).Trim() -ne $env:EXPECTED_SHA) {
+            throw "Windows parser job checkout differs from exact source"
+          }
+      - name: Parse VM qualification wrapper with Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path "tools/vm/Test-VeraOSVm.ps1"),
+            [ref]$tokens, [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.ToString() }
+            exit 1
+          }
