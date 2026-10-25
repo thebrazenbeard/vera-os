@@ -35,6 +35,8 @@ jobs:
         run: python -m unittest discover -s tests -p test_native_builder_artifact_safety.py -v
       - name: Verify fresh resident build output custody
         run: python -m unittest discover -s tests -p test_resident_builder_fresh_output.py -v
+      - name: Verify Windows Git Buildroot parser line endings
+        run: python -m unittest discover -s tests -p test_buildroot_checkout_eol.py -v
       - name: Verify target rootfs required executables
         run: python -m unittest discover -s tests -p test_resident_target_rootfs_preflight.py -v
       - name: Verify QEMU research qualifier contracts

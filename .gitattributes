@@ -1,3 +1,10 @@
 *.sh text eol=lf
 *.patch text eol=lf
 buildroot/board/veraos/x86_64/rootfs-overlay/sbin/* text eol=lf
+# GNU make/Buildroot parse these as data/configuration. On Windows CRLF in
+# external.desc turns the external-tree name into the invalid "VERAOS\r".
+buildroot/external.desc text eol=lf
+buildroot/external.mk text eol=lf
+buildroot/Config.in text eol=lf
+buildroot/configs/*_defconfig text eol=lf
+buildroot/BUILDROOT_VERSION text eol=lf
