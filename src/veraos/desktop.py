@@ -318,6 +318,11 @@ def make_handler(
                 self.send_bytes(404, b"Not Found", "text/plain; charset=utf-8")
 
         def do_POST(self):
+            if self.path == "/api/chat":
+                # Preserve the legacy chat route's explicit method hold.
+                # Only /api/conversation can reach governed task intake.
+                self.send_json(405, {"status": "METHOD_NOT_ALLOWED"})
+                return
             if self.path != "/api/conversation":
                 self.send_json(404, {"status": "NOT_FOUND"})
                 return

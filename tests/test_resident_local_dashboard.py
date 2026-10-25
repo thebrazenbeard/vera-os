@@ -41,6 +41,13 @@ def test_dashboard_served_only_via_local_http_with_truthful_runtime_state():
         with pytest.raises(HTTPError) as caught:
             urlopen(Request(root + "/api/chat", data=b"hello", method="POST"), timeout=2)
         assert caught.value.code == 405
+        # The legacy chat route remains disabled, not a cognition backdoor.
+        with pytest.raises(HTTPError) as other_post:
+            urlopen(Request(root + "/api/unknown", data=b"hello", method="POST"), timeout=2)
+        assert other_post.value.code == 404
+        with pytest.raises(HTTPError) as chat_get:
+            urlopen(root + "/api/chat", timeout=2)
+        assert chat_get.value.code == 404
     finally:
         server.shutdown()
         server.server_close()
