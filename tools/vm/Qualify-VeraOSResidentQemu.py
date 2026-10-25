@@ -21,8 +21,8 @@ import uuid
 BUILDROOT_COMMIT = "d030e36bbc9669230c015be971b14b6e062cfdde"
 # This is the reviewed *image-build source*, not the revision containing the
 # research-only qualifier. Keep these two source identities distinct.
-EXPECTED_SOURCE_HEAD = "e1773d7c69916ffb75b6edb52b8b4472080b32b5"
-TRUSTED_STAGE_VERIFIER_BLOB = "64395340a7cd9d45b016c770092544b7566f303c"
+EXPECTED_SOURCE_HEAD = "290901171763540ec26d1c652082a0dba3672475"
+TRUSTED_STAGE_VERIFIER_BLOB = "65f096f59381625d26e6d4cffc2629cefbffcbb3"
 SHA40 = re.compile(r"[0-9a-f]{40}\Z")
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 IMAGE_ID = re.compile(r"sha256:[0-9a-f]{64}\Z")
