@@ -62,6 +62,12 @@ if ($ResidentSourceStage -and $Profile -ne "RESIDENT_BROWSER") {
     throw "Resident source staging is allowed only for RESIDENT_BROWSER"
 }
 
+if ($Profile -eq "RESIDENT_BROWSER") {
+    # Catch frozen-source pin conflicts before image-builder creation or CPU work.
+    # This is a static gate, not evidence of a booted resident.
+    & (Join-Path $repo "tools\vm\Assert-VeraOSPortfolioPinset.ps1") -RepoRoot $repo
+}
+
 $residentSourceStageResolved = $null
 if ($ResidentSourceStage) {
     $residentSourceStageResolved = [System.IO.Path]::GetFullPath($ResidentSourceStage)
