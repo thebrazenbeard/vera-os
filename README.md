@@ -32,6 +32,20 @@ Primary goals:
 - [`docs/03-model-and-agent-boundary.md`](docs/03-model-and-agent-boundary.md) — what belongs in models versus the Vera runtime
 - [`docs/04-security-and-authority-model.md`](docs/04-security-and-authority-model.md) — OS-level governance direction
 - [`docs/05-open-questions.md`](docs/05-open-questions.md) — unresolved architecture questions
+- [`docs/13-local-ollama-probe-v1.md`](docs/13-local-ollama-probe-v1.md) — bounded **source-only** local inference manifest/generation check
+
+## Executable source-only local inference probe
+
+`scripts/local_ollama_probe.py` is a standard-library-only probe of an
+already-running Ollama server bound to numeric loopback. It requires an
+independently supplied exact Ollama **manifest** digest, rejects redirects and
+oversized/ambiguous responses, and optionally sends one fixed bounded
+generation prompt. It installs nothing and never acquires credentials.
+
+An accepted Ollama manifest or returned token stream is **not** evidence that
+the pinned Vera SmolLM/LoRA adapter, a persistent identity, a governed `verad`,
+or a bootable VeraOS has been installed. The source and regression tests are a
+reusable compatibility gate, not an operating-system build or live activation.
 
 ## Status
 
