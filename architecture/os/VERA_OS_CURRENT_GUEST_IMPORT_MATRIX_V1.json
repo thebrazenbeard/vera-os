@@ -1,0 +1,255 @@
+{
+  "schema": "VERAOS_ACTUAL_SELECTED_GUEST_IMPORT_MATRIX_V1",
+  "status": "SOURCE_IMPORT_EVIDENCE_ONLY_NOT_TARGET_IMPORT_OR_INSTALLED_IMAGE",
+  "reviewed_subjects": {
+    "veraos": "394ea836b3c85590d6f3f6ba514c5d16aabdb050",
+    "mono": "89ba1d18da78e7e38f015cf8d8ef4f528aae9df8",
+    "mono_main": "16a2828dfa7fb7e6c0e19004f014bc68fc47badf",
+    "portal": "36fa04da4e5eb383fecf463c72a43b94ca47d7e5",
+    "pre_active": "1f23a809d7274df506e03e2d9052525538c3bcf6",
+    "volition": "dbc628d376515a0a523b1eecdf62129cca5d6b08",
+    "typed_architecture": "64d6b520dc50327ff8e6f17b3e41f449c4b7b044",
+    "portal_static_closure": "31fe46807f1c41a197f1c155bc0171c144bd8e8f"
+  },
+  "source_stage": {
+    "selected_components": [
+      {
+        "name": "vera_mono",
+        "source_files": 316
+      },
+      {
+        "name": "portal",
+        "source_files": 89
+      },
+      {
+        "name": "pre_active",
+        "source_files": 18
+      },
+      {
+        "name": "volition",
+        "source_files": 8
+      }
+    ],
+    "total_files": 431,
+    "receipt_sha256": "6f0031c1fcbaed41e4e3f6947e90a92ed5656ac3e09329de7d8e0b0f8417eca5",
+    "stage_is_real_image": false,
+    "eol_note": "Windows checkout CRLF materialization can differ from immutable Git LF bytes; stage receipt binds staged bytes, not Git raw blob identity"
+  },
+  "processes": [
+    {
+      "name": "selected_init",
+      "executable": "/sbin/vera-init",
+      "python_module": "veraos.pid1",
+      "source": "src/veraos/pid1.py",
+      "git_blob": "bc38666e058db50c65d7064aa78d01f93eb23d09",
+      "role": "one normal Linux init supervising resident and local Cog"
+    },
+    {
+      "name": "resident_child",
+      "python_module": "veraos.resident",
+      "source": "src/veraos/resident.py",
+      "git_blob": "3dae5a0e692e2068d353c228956243a45d1b3814",
+      "role": "loopback HTTP + governed local canonical task host; no provider by default"
+    },
+    {
+      "name": "cog_browser",
+      "executable": "/usr/bin/cog",
+      "role": "DRM/WPEWebKit browser only; not task/memory/effect owner"
+    }
+  ],
+  "actual_selected_imports": [
+    {
+      "importer": "src/veraos/resident.py",
+      "importer_blob": "3dae5a0e692e2068d353c228956243a45d1b3814",
+      "syntax": "importlib.import_module('vera_core')",
+      "target": "vera_core",
+      "package": "vera_mono/packages/vera_core/src/vera_core",
+      "target_module": "vera_core/__init__.py",
+      "target_git_blob": "df846be43924dbb4a9d3ec6028daffdea02eec60",
+      "called_api": "QualifiedVeraRuntime.from_state_directory(VeraStateDirectory(...))",
+      "process": "resident_child",
+      "classification": "CURRENT_COMPOSITION_REQUIRED"
+    },
+    {
+      "importer": "src/veraos/resident.py",
+      "importer_blob": "3dae5a0e692e2068d353c228956243a45d1b3814",
+      "syntax": "importlib.import_module('portal')",
+      "target": "portal",
+      "package": "portal",
+      "target_module": "portal/__init__.py",
+      "target_git_blob": "3fc6f3f164936616d858a37ad4a7c41dbb3461c8",
+      "called_api": "resolve_portal_route attribute at startup; PortalRouteAdvertisement and assess_vera_task_route imported",
+      "process": "resident_child",
+      "classification": "CURRENT_COMPOSITION_REQUIRED_EAGER_PACKAGE_IMPORT"
+    },
+    {
+      "importer": "src/veraos/resident.py",
+      "importer_blob": "3dae5a0e692e2068d353c228956243a45d1b3814",
+      "syntax": "importlib.import_module('pre_active')",
+      "target": "pre_active",
+      "package": "pre_active/src",
+      "target_module": "pre_active/__init__.py",
+      "target_git_blob": "d04ff07b632b1a48e2e706c44f2cdaca4449da1f",
+      "called_api": "pre_active.Store opens operational SQLite at composition and per message",
+      "process": "resident_child",
+      "classification": "CURRENT_COMPOSITION_REQUIRED_OPERATIONAL_ONLY"
+    },
+    {
+      "importer": "src/veraos/resident.py",
+      "importer_blob": "3dae5a0e692e2068d353c228956243a45d1b3814",
+      "syntax": "importlib.import_module('volition')",
+      "target": "volition",
+      "package": "volition/src",
+      "target_module": "volition/__init__.py",
+      "target_git_blob": "caca9a8bad494dc4417c4b4ff3ea57d356a97e19",
+      "called_api": "volition.VolitionEngine constructed at composition; no accepted cognitive/permission action",
+      "process": "resident_child",
+      "classification": "CURRENT_COMPOSITION_REQUIRED_CONSTRUCTION_ADVISORY"
+    },
+    {
+      "importer": "src/veraos/resident.py",
+      "importer_blob": "3dae5a0e692e2068d353c228956243a45d1b3814",
+      "syntax": "from vera_core.local_conversation import ...",
+      "target": "vera_core.local_conversation",
+      "package": "vera_mono/packages/vera_core/src",
+      "target_module": "vera_core/local_conversation.py",
+      "target_git_blob": "d243d2efd01777655e511d91ea816fd804488ecf",
+      "called_api": "open_message, recover_message, reserve_source_trial, seal_source_observation, recover_conversation",
+      "process": "resident_child",
+      "classification": "CURRENT_TASK_AND_SOURCE_RECOVERY_ABI"
+    },
+    {
+      "importer": "src/veraos/resident.py",
+      "importer_blob": "3dae5a0e692e2068d353c228956243a45d1b3814",
+      "syntax": "from vera_core.portal_task_handoff import ...",
+      "target": "vera_core.portal_task_handoff",
+      "package": "vera_mono/packages/vera_core/src",
+      "target_module": "vera_core/portal_task_handoff.py",
+      "target_git_blob": "a55d12e55f5f8c833bec4a2c4e1b04228c9e540e",
+      "called_api": "export_portal_route_request; source-only advisory route",
+      "process": "resident_child",
+      "classification": "CURRENT_SOURCE_IMPORT_FIXTURE_PATH"
+    },
+    {
+      "importer": "src/veraos/resident.py",
+      "importer_blob": "3dae5a0e692e2068d353c228956243a45d1b3814",
+      "syntax": "from portal.vera_task_handoff import ...",
+      "target": "portal.vera_task_handoff",
+      "package": "portal",
+      "target_module": "portal/vera_task_handoff.py",
+      "target_git_blob": "0df90c41f6dcdd86b0496fab6688bd5eba52540d",
+      "called_api": "assess_vera_task_route; returns advisory only",
+      "process": "resident_child",
+      "classification": "CURRENT_SOURCE_IMPORT_FIXTURE_PATH"
+    },
+    {
+      "importer": "src/veraos/resident.py",
+      "importer_blob": "3dae5a0e692e2068d353c228956243a45d1b3814",
+      "syntax": "from portal import ...",
+      "target": "portal",
+      "package": "portal",
+      "target_module": "portal/__init__.py",
+      "target_git_blob": "3fc6f3f164936616d858a37ad4a7c41dbb3461c8",
+      "called_api": "PortalRouteAdvertisement; eager import graph 14 from .module links",
+      "process": "resident_child",
+      "classification": "CURRENT_PACKAGE_INITIALIZER_EAGER_TRANSITIVE_IMPORTS"
+    }
+  ],
+  "portal_selected_subset": {
+    "selected_python_source_files": 89,
+    "portal_package_python_modules": 43,
+    "ast_reachable_upper_bound": 19,
+    "ast_unreached": 24,
+    "ast_import_references": 47,
+    "bootstrap_eager_imports": 14,
+    "runner_subpackage_staged": true,
+    "external_windows_portal_host_process_required": false,
+    "external_project_runner_service_required": false,
+    "static_reachability_is_target_runtime_proof": false
+  },
+  "runtime_dependencies": {
+    "target_python": "3.12.14",
+    "python_stdlib": [
+      "sqlite3",
+      "ssl",
+      "json",
+      "http.server",
+      "socket",
+      "hashlib",
+      "threading",
+      "subprocess",
+      "importlib"
+    ],
+    "third_party_python": [
+      {
+        "name": "jsonschema",
+        "source": "Mono/PORTAL import",
+        "buildroot_symbol": "BR2_PACKAGE_PYTHON_JSONSCHEMA"
+      },
+      {
+        "name": "cryptography",
+        "source": "Mono",
+        "buildroot_symbol": "BR2_PACKAGE_PYTHON_CRYPTOGRAPHY",
+        "native_extension": "cryptography/hazmat/bindings/_rust*.so"
+      },
+      {
+        "name": "PyYAML",
+        "import_name": "yaml",
+        "source": "PORTAL",
+        "buildroot_symbol": "BR2_PACKAGE_PYTHON_PYYAML"
+      }
+    ],
+    "native_elf": [
+      "libsqlite3.so.0",
+      "libssl.so.3",
+      "libcrypto.so.3"
+    ],
+    "gui": [
+      "Cog DRM",
+      "WPEWebKit",
+      "Mesa DRM",
+      "DejaVu Sans"
+    ],
+    "buildroot": "2025.02.18",
+    "buildroot_commit": "d030e36bbc9669230c015be971b14b6e062cfdde",
+    "configuration": "buildroot/configs/veraos_x86_64_resident_browser_defconfig",
+    "kconfig_resolved": false,
+    "target_import_verified": false,
+    "target_transitive_elf_verified": false,
+    "image_built": false,
+    "graphical_boot_verified": false
+  },
+  "state_owners": {
+    "linux_canonical": "/var/lib/veraos/resident/vera-state",
+    "linux_operational": "/var/lib/veraos/resident/pre-active.sqlite3",
+    "linux_lifecycle": "/var/lib/veraos/lifecycle",
+    "linux_ephemeral": "/run/veraos",
+    "windows_canonical": "<desktop runtime root>/state/vera",
+    "physical_root_shared": false,
+    "active_writer_shared": false,
+    "ui_locator_is_identity": false
+  },
+  "interface": {
+    "canonical_api": "vera_core.local_conversation.open_message(tasks,conversation_id,message_id,exact_literal)",
+    "canonical_task_status": "PENDING_NO_ADMITTED_PROVIDER",
+    "desktop_ui": "HELD",
+    "veraos_http": "BLOCKED",
+    "ambiguous": "OUTCOME_UNKNOWN_NO_REDISPATCH",
+    "head": "per task TASK_OPENED + expected-task-head CAS",
+    "recovery": "recover_message/recover_conversation read-only; no duplicate effects",
+    "provider_admitted": false,
+    "memory_effect_admitted": false
+  },
+  "portability_gates": {
+    "source_stage": "EXISTING_SOURCE_ONLY_VERIFIED",
+    "actual_import_graph": "SOURCE_EVIDENCE_NOT_TARGET",
+    "effective_buildroot_kconfig": "NOT_RESOLVED",
+    "python_target": "NOT_EXECUTED",
+    "elf_transitive": "SYNTHETIC_SCANNER_ONLY",
+    "rootfs_member_hashes": "NO_BUILT_ROOTFS",
+    "real_ext2_image": "NOT_BUILT",
+    "normal_pid1_cog": "NOT_BOOTED",
+    "two_cold_boots": "NOT_EXECUTED",
+    "model_provider_effects": "HOLD"
+  }
+}

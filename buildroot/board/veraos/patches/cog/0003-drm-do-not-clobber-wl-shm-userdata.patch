@@ -1,0 +1,68 @@
+From: VeraOS isolated build qualification <veraos@local.invalid>
+Subject: [PATCH] drm: preserve Wayland SHM resource user data
+
+Wayland's wl_shm_buffer_get() retrieves wl_shm_buffer* using
+wl_resource_get_user_data(resource). Replacing that resource data with
+CogDrmModesetRenderer* silently corrupts later frame metadata and causes
+out-of-bounds access or rejected frames when a buffer is reused.
+
+Store the renderer as an owner field on Cog's internal buffer_object.
+Do not change wl_resource user data in creation or destruction. This
+works for both normal and SHM buffers and keeps the destroy listener
+linked to its own buffer's owner.
+
+Upstream Cog 0.18.4 source compatibility patch, not standalone proof
+of runtime/graphical qualification.
+
+--- a/platform/drm/cog-drm-modeset-renderer.c
++++ b/platform/drm/cog-drm-modeset-renderer.c
+@@ -73,8 +73,9 @@
+ 
+     uint32_t            fb_id;
+     struct gbm_bo      *bo;
+     struct wl_resource *buffer_resource;
++    void               *owner;
+ 
+     struct {
+         struct wl_resource                 *resource;
+         struct wpe_fdo_shm_exported_buffer *shm_buffer;
+@@ -136,16 +137,15 @@
+ static void
+ destroy_buffer_notify(struct wl_listener *listener, void *data)
+ {
+     struct buffer_object  *buffer = wl_container_of(listener, buffer, destroy_listener);
+-    CogDrmModesetRenderer *renderer = wl_resource_get_user_data(buffer->buffer_resource);
++    CogDrmModesetRenderer *renderer = buffer->owner;
+ 
+     if (renderer->committed_buffer == buffer)
+         renderer->committed_buffer = NULL;
+ 
+     wl_list_remove(&buffer->link);
+ 
+-    wl_resource_set_user_data(buffer->buffer_resource, NULL);
+     destroy_buffer(renderer, buffer);
+ }
+ 
+ static struct buffer_object *
+@@ -215,9 +215,9 @@
+     struct buffer_object *buffer = g_new0(struct buffer_object, 1);
+     wl_list_insert(&self->buffer_list, &buffer->link);
+     buffer->destroy_listener.notify = destroy_buffer_notify;
+     wl_resource_add_destroy_listener(buffer_resource, &buffer->destroy_listener);
+-    wl_resource_set_user_data(buffer_resource, self);
++    buffer->owner = self;
+ 
+     buffer->fb_id = fb_id;
+     buffer->bo = bo;
+     buffer->buffer_resource = buffer_resource;
+@@ -270,9 +270,9 @@
+     struct buffer_object *buffer = g_new0(struct buffer_object, 1);
+     wl_list_insert(&self->buffer_list, &buffer->link);
+     buffer->destroy_listener.notify = destroy_buffer_notify;
+     wl_resource_add_destroy_listener(buffer_resource, &buffer->destroy_listener);
+-    wl_resource_set_user_data(buffer_resource, self);
++    buffer->owner = self;
+ 
+     buffer->fb_id = fb_id;
+     buffer->bo = bo;
+     buffer->buffer_resource = buffer_resource;

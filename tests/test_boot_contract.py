@@ -1,0 +1,211 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from veraos.boot_contract import BootContractError, validate_boot_contract
+from veraos.lifecycle_state import (
+    LifecycleStateError,
+    STATE_FILENAME,
+    advance_lifecycle_state,
+    persistence_marker,
+)
+from veraos.pid1 import boot_marker, main as pid1_main, prepare_boot_state
+
+
+BOOT_CONTRACT = ROOT / "architecture" / "os" / "VERA_OS_BOOT_CONTRACT_V1.json"
+COMPOSITION = ROOT / "architecture" / "portfolio" / "VERA_OS_PORTFOLIO_COMPOSITION_V1.json"
+CAPABILITY_MAP = ROOT / "architecture" / "capabilities" / "VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json"
+IMPLEMENTATION_PLAN = ROOT / "architecture" / "portfolio" / "VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json"
+
+
+class VeraOsBootContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.contract = json.loads(BOOT_CONTRACT.read_text(encoding="utf-8"))
+        cls.composition = json.loads(COMPOSITION.read_text(encoding="utf-8"))
+        cls.capability_map = json.loads(CAPABILITY_MAP.read_text(encoding="utf-8"))
+        cls.implementation_plan = json.loads(IMPLEMENTATION_PLAN.read_text(encoding="utf-8"))
+
+    def test_vera_is_base_and_linux_buildroot_are_substrate(self) -> None:
+        validate_boot_contract(self.contract)
+        product = self.contract["product"]
+        self.assertEqual("VERA", product["base_identity"])
+        self.assertEqual("KERNEL_DRIVER_HARDWARE_SUBSTRATE", product["linux_role"])
+        self.assertEqual("BUILDROOT", product["image_builder"])
+        self.assertFalse(product["image_builder_is_os_identity"])
+        self.assertEqual("RETIRED", product["nixos_primary_path_status"])
+
+    def test_runtime_owners_and_boot_independence_are_exact(self) -> None:
+        runtime = self.contract["runtime"]
+        self.assertEqual("thebrazenbeard/vera-mono", runtime["identity_runtime_owner"])
+        self.assertEqual("thebrazenbeard/rezon", runtime["reasoning_owner"])
+        self.assertEqual(
+            "thebrazenbeard/mosaic",
+            runtime["model_composition_owner"],
+        )
+        self.assertEqual("thebrazenbeard/portal", runtime["provider_router"])
+        self.assertFalse(runtime["cognition_provider_required_for_boot"])
+        self.assertFalse(runtime["trained_vera_model_required_for_boot"])
+
+    def test_portfolio_boot_gate_binds_composition_capabilities_and_implementation(self) -> None:
+        portfolio = self.contract["portfolio"]
+        self.assertEqual(
+            "/etc/veraos/architecture/VERA_OS_PORTFOLIO_COMPOSITION_V1.json",
+            portfolio["composition_manifest"],
+        )
+        self.assertEqual(
+            "/etc/veraos/architecture/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json",
+            portfolio["capability_map"],
+        )
+        self.assertEqual(
+            "/etc/veraos/architecture/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json",
+            portfolio["implementation_plan"],
+        )
+        self.assertTrue(portfolio["validate_before_ready"])
+
+    def test_lifecycle_persistence_is_required_but_not_canonical_memory(self) -> None:
+        persistence = self.contract["persistence"]
+        self.assertEqual(
+            "VERAOS_LIFECYCLE_STATE_V1",
+            persistence["lifecycle_state_schema"],
+        )
+        self.assertEqual(
+            "/var/lib/veraos/lifecycle",
+            persistence["lifecycle_state_root"],
+        )
+        self.assertTrue(persistence["required_before_ready"])
+        self.assertFalse(persistence["canonical_memory"])
+        self.assertFalse(persistence["supabase_replacement"])
+
+    def test_lifecycle_state_advances_without_claiming_memory_continuity(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            first = advance_lifecycle_state(root, now=lambda: 100.0)
+            second = advance_lifecycle_state(root, now=lambda: 200.0)
+            self.assertEqual(1, first.boot_ordinal)
+            self.assertEqual(0, first.previous_boot_ordinal)
+            self.assertEqual(2, second.boot_ordinal)
+            self.assertEqual(1, second.previous_boot_ordinal)
+            self.assertIn("boot_ordinal=2", persistence_marker(second))
+            self.assertIn("canonical_memory=false", persistence_marker(second))
+            self.assertIn("supabase_replacement=false", persistence_marker(second))
+            persisted = json.loads((root / STATE_FILENAME).read_text(encoding="utf-8"))
+            self.assertEqual(2, persisted["boot_ordinal"])
+
+    def test_lifecycle_state_fails_closed_on_invalid_existing_state(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / STATE_FILENAME).write_text(
+                json.dumps({
+                    "schema": "WRONG",
+                    "boot_ordinal": 9,
+                    "canonical_memory": False,
+                    "supabase_replacement": False,
+                }),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(LifecycleStateError, "schema mismatch"):
+                advance_lifecycle_state(root)
+
+    def test_persistence_cannot_be_promoted_to_canonical_memory(self) -> None:
+        bad = json.loads(json.dumps(self.contract))
+        bad["persistence"]["canonical_memory"] = True
+        with self.assertRaisesRegex(
+            BootContractError,
+            "cannot claim canonical memory",
+        ):
+            validate_boot_contract(bad)
+
+    def test_restart_persistence_is_an_explicit_vm_gate(self) -> None:
+        qualification = self.contract["qualification"]
+        self.assertEqual(
+            "VERAOS_BOOT_READY_V1",
+            qualification["boot_marker_schema"],
+        )
+        self.assertEqual(
+            "VERAOS_PERSISTENCE_READY_V1",
+            qualification["persistence_marker_schema"],
+        )
+        self.assertTrue(qualification["restart_persistence_required"])
+        self.assertTrue(qualification["vm_before_bare_metal"])
+        self.assertFalse(
+            qualification["disk_partitioning_before_vm_qualification"]
+        )
+
+    def test_browser_is_required_product_capability_not_boot_dependency(self) -> None:
+        browser = self.contract["browser"]
+        self.assertTrue(browser["first_class_capability_required"])
+        self.assertFalse(browser["required_for_core_boot"])
+        self.assertEqual("WPE_WEBKIT", browser["initial_engine"])
+        self.assertEqual("COG", browser["initial_shell"])
+
+    def test_nixos_cannot_be_reintroduced_as_base_identity(self) -> None:
+        bad = json.loads(json.dumps(self.contract))
+        bad["product"]["base_identity"] = "NIXOS"
+        with self.assertRaisesRegex(BootContractError, "Vera must be"):
+            validate_boot_contract(bad)
+
+    def test_pid1_ready_marker_binds_portfolio_and_authority(self) -> None:
+        state = prepare_boot_state(
+            self.contract,
+            self.composition,
+            self.capability_map,
+            self.implementation_plan,
+            pid=1,
+        )
+        self.assertEqual(90, state.portfolio_total)
+        self.assertEqual(85, state.portfolio_integrated)
+        self.assertEqual(5, state.portfolio_excluded)
+        self.assertTrue(state.portfolio_implementation_plan_validated)
+        marker = boot_marker(state)
+        self.assertIn("pid=1", marker)
+        self.assertIn("base=VERA", marker)
+        self.assertIn("portfolio_plan_validated=true", marker)
+        self.assertIn("cognition_required=false", marker)
+        self.assertIn("browser_first_class=true", marker)
+        self.assertIn("ambient_protected_effect_authority=false", marker)
+
+    def test_pid1_source_can_be_qualified_without_becoming_host_pid1(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            temp_path = Path(temp)
+            contract = temp_path / "boot.json"
+            composition = temp_path / "composition.json"
+            capability_map = temp_path / "capability-map.json"
+            implementation_plan = temp_path / "implementation-plan.json"
+            run_root = temp_path / "run"
+            lifecycle_root = temp_path / "lifecycle"
+            contract.write_text(json.dumps(self.contract), encoding="utf-8")
+            composition.write_text(json.dumps(self.composition), encoding="utf-8")
+            capability_map.write_text(json.dumps(self.capability_map), encoding="utf-8")
+            implementation_plan.write_text(json.dumps(self.implementation_plan), encoding="utf-8")
+            result = pid1_main([
+                "--allow-non-pid1",
+                "--boot-contract", str(contract),
+                "--composition", str(composition),
+                "--capability-map", str(capability_map),
+                "--implementation-plan", str(implementation_plan),
+                "--run-root", str(run_root),
+                "--lifecycle-root", str(lifecycle_root),
+            ])
+            self.assertEqual(0, result)
+            state = json.loads((run_root / "boot-state.json").read_text(encoding="utf-8"))
+            self.assertEqual("VERA", state["base_identity"])
+            self.assertTrue(state["portfolio_implementation_plan_validated"])
+            self.assertEqual(90, state["portfolio_total"])
+            lifecycle = json.loads(
+                (lifecycle_root / STATE_FILENAME).read_text(encoding="utf-8")
+            )
+            self.assertEqual(1, lifecycle["boot_ordinal"])
+            self.assertFalse(lifecycle["canonical_memory"])
+            self.assertFalse(lifecycle["supabase_replacement"])
+
+
+if __name__ == "__main__":
+    unittest.main()

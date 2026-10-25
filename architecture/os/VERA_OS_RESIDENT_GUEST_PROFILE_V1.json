@@ -1,0 +1,46 @@
+{
+  "schema": "VERA_OS_RESIDENT_GUEST_PROFILE_V1",
+  "scope": "OPT_IN_BUILDROOT_RESIDENT_GUEST_NOT_PRIMARY_OS_HOST",
+  "status": "SOURCE_PROFILE_ONLY_NOT_PACKED_OR_BOOTED",
+  "builder": {
+    "name": "Buildroot",
+    "version": "2025.02.18",
+    "peeled_git_commit": "d030e36bbc9669230c015be971b14b6e062cfdde",
+    "annotated_tag_sha": "b611e07ef088c70c1e21f77c30872bce97a1f1c2",
+    "source_defconfig": "buildroot/configs/veraos_x86_64_resident_browser_defconfig"
+  },
+  "target_python": {
+    "version": "3.12.14",
+    "abi": "python3.12",
+    "guest_imports_verified": false
+  },
+  "selected_stage": {
+    "schema": "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1",
+    "receipt_sha256": "6f0031c1fcbaed41e4e3f6947e90a92ed5656ac3e09329de7d8e0b0f8417eca5",
+    "file_count": 431,
+    "component_heads": {
+      "thebrazenbeard/vera-mono": "89ba1d18da78e7e38f015cf8d8ef4f528aae9df8",
+      "thebrazenbeard/portal": "36fa04da4e5eb383fecf463c72a43b94ca47d7e5",
+      "thebrazenbeard/pre-active": "1f23a809d7274df506e03e2d9052525538c3bcf6",
+      "thebrazenbeard/volition": "dbc628d376515a0a523b1eecdf62129cca5d6b08"
+    }
+  },
+  "historical_boot_contract": {
+    "schema": "VERA_OS_BOOT_CONTRACT_V1",
+    "builder_version": "2024.02.4",
+    "builder_commit": "e0a2687421a4f93e65aa00a30bcb0b4817f7a195",
+    "scope": "HISTORICAL_BASELINE_ONLY"
+  },
+  "product_primary_host": {
+    "nixos": "CANDIDATE_UNRESOLVED",
+    "guest_profile_does_not_choose_host": true
+  },
+  "proof": {
+    "actual_buildroot_output_image_sha256": null,
+    "actual_buildroot_output_bytes": null,
+    "selected_final_image": false,
+    "booted_guest": false,
+    "qualified_vera_runtime_consumed": false,
+    "external_effect_authority": false
+  }
+}

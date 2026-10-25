@@ -1,0 +1,26 @@
+{
+  "buildroot_archive_sha256": "32e0115b41fc3a3659f13ed64b14843a98b0ccc0ac4b9edc50f918f952369419",
+  "buildroot_source_commit": "d030e36bbc9669230c015be971b14b6e062cfdde",
+  "effective_config_sha256": "19f54f106aa682650d7230a1087689ef303ffd938720a21893f41bf6afbac9bd",
+  "external_file_git_blobs_verified": 10,
+  "external_path_members_verified": {
+    "BR2_GLOBAL_PATCH_DIR": "board/veraos/patches",
+    "BR2_ROOTFS_OVERLAY": "board/veraos/x86_64/rootfs-overlay",
+    "BR2_ROOTFS_POST_BUILD_SCRIPT": "board/veraos/x86_64/post-build.sh"
+  },
+  "image_built": false,
+  "model_provider_admitted": false,
+  "normal_cog_graphical_boot_observed": false,
+  "protected_effect_authority": false,
+  "requested_symbols_retained": 51,
+  "required_selected_symbols": 19,
+  "rootfs_or_image_built": false,
+  "schema": "VERAOS_PINNED_EFFECTIVE_KCONFIG_PROBE_V1",
+  "selected_defconfig_git_blob_sha1": "227ec1a766ce0a84b0c5af35249358600b46ee7d",
+  "source_head": "d10d2b95249c73435f2d73e0c9a01ae100ab40de",
+  "status": "PINNED_KCONFIG_RESOLVED_SOURCE_ONLY",
+  "target_elf_closure_executed": false,
+  "target_python_import_executed": false,
+  "target_toolchain_built": false,
+  "two_cold_boots_observed": false
+}

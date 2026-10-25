@@ -1,0 +1,142 @@
+from __future__ import annotations
+
+from pathlib import Path
+import unittest
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class VmContractTests(unittest.TestCase):
+    def test_buildroot_source_is_exactly_pinned(self) -> None:
+        lines = (ROOT / "buildroot" / "BUILDROOT_VERSION").read_text(
+            encoding="utf-8"
+        ).splitlines()
+        self.assertEqual("2024.02.4", lines[0])
+        self.assertEqual(
+            "e0a2687421a4f93e65aa00a30bcb0b4817f7a195",
+            lines[1],
+        )
+
+    def test_buildroot_core_image_uses_vera_pid1_without_browser_stack(self) -> None:
+        text = (
+            ROOT / "buildroot" / "configs" / "veraos_x86_64_defconfig"
+        ).read_text(encoding="utf-8")
+        self.assertIn("BR2_INIT_NONE=y", text)
+        self.assertIn('BR2_PRIMARY_SITE="https://sources.buildroot.net"', text)
+        self.assertIn("BR2_PACKAGE_PYTHON3=y", text)
+        self.assertNotIn("BR2_TOOLCHAIN_BUILDROOT_CXX=y", text)
+        self.assertNotIn("BR2_PACKAGE_WPEWEBKIT=y", text)
+        self.assertNotIn("BR2_PACKAGE_COG=y", text)
+        self.assertNotIn("BR2_PACKAGE_HOST_QEMU=y", text)
+        self.assertIn('BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.6.69"', text)
+
+    def test_buildroot_browser_profile_packages_wpe_and_cog(self) -> None:
+        core_text = (
+            ROOT / "buildroot" / "configs" / "veraos_x86_64_defconfig"
+        ).read_text(encoding="utf-8")
+        text = (
+            ROOT / "buildroot" / "configs" / "veraos_x86_64_browser_defconfig"
+        ).read_text(encoding="utf-8")
+        self.assertIn('BR2_PRIMARY_SITE="https://sources.buildroot.net"', text)
+        self.assertIn("BR2_TOOLCHAIN_BUILDROOT_CXX=y", text)
+        self.assertIn("BR2_PACKAGE_WPEWEBKIT=y", text)
+        self.assertIn("BR2_PACKAGE_WPEWEBKIT_SANDBOX=y", text)
+        self.assertIn("BR2_PACKAGE_WPEWEBKIT_WEBDRIVER=y", text)
+        self.assertIn("BR2_PACKAGE_COG=y", text)
+        self.assertIn("BR2_PACKAGE_COG_PLATFORM_DRM=y", text)
+        self.assertNotIn("BR2_PACKAGE_HOST_QEMU=y", text)
+        core_settings = {
+            line for line in core_text.splitlines()
+            if line and not line.startswith("#")
+        }
+        browser_settings = {
+            line for line in text.splitlines()
+            if line and not line.startswith("#")
+        }
+        self.assertTrue(core_settings <= browser_settings)
+
+    def test_rootfs_overlay_installs_vera_as_pid1(self) -> None:
+        text = (
+            ROOT
+            / "buildroot"
+            / "board"
+            / "veraos"
+            / "x86_64"
+            / "rootfs-overlay"
+            / "sbin"
+            / "vera-init"
+        ).read_text(encoding="utf-8")
+        self.assertTrue(text.startswith("#!/usr/bin/python3"))
+        self.assertIn("from veraos.pid1 import main", text)
+
+    def test_vm_build_and_qualification_no_longer_depend_on_nix(self) -> None:
+        build = (ROOT / "tools" / "vm" / "Build-VeraOSVm.ps1").read_text(
+            encoding="utf-8"
+        )
+        test = (ROOT / "tools" / "vm" / "Test-VeraOSVm.ps1").read_text(
+            encoding="utf-8"
+        )
+        combined = build + test
+        self.assertIn("Buildroot", build)
+        self.assertIn("VERA_OS_BUILDROOT_BUILD_RESULT_V1", build)
+        self.assertIn("Select-Object -First 1", build)
+        self.assertNotIn(").Trim()", build)
+        self.assertIn('$script = $script -replace "`r`n", "`n"', build)
+        self.assertIn('veraos-buildroot-build.sh', build)
+        self.assertIn('[System.IO.File]::WriteAllText(', build)
+        self.assertNotIn('"-lc", $script', build)
+        self.assertIn('BR2_JLEVEL="$VERAOS_JOBS"', build)
+        self.assertIn('[ValidateSet("CORE_BOOT", "BROWSER", "RESIDENT_BROWSER")]', build)
+        self.assertIn('VERAOS_DEFCONFIG=$defconfig', build)
+        self.assertIn('SourceHead = $sourceHead', build)
+        self.assertIn('SourceTreeClean = $true', build)
+        self.assertIn('veraos-build-result.json', build)
+        self.assertIn('BuildProfile = $Profile', build)
+        self.assertIn('Defconfig = $defconfig', build)
+        self.assertIn('BrowserPackaged = $browserPackaged', build)
+        self.assertIn("init=/sbin/vera-init", test)
+        self.assertIn('$quotedAppend = \'"\' + $append + \'"\'', test)
+        self.assertIn('"-append", $quotedAppend', test)
+        self.assertNotIn('"-append", $append', test)
+        self.assertNotIn('"-snapshot"', test)
+        self.assertIn("qemu-img", test)
+        self.assertIn("veraos-qualification-overlay.qcow2", test)
+        self.assertIn("Invoke-VeraBootPass", test)
+        self.assertIn("VERA_OS_VM_QUALIFICATION_V3", test)
+        self.assertIn("restart_persistence_qualified = $true", test)
+        self.assertIn("restart_boot_passes = 2", test)
+        self.assertIn("canonical_memory_qualified = $false", test)
+        self.assertIn("supabase_replacement_qualified = $false", test)
+        self.assertIn('Missing VeraOS build receipt', test)
+        self.assertIn('image build source and current qualification-tooling head are not cross-bound', test)
+        self.assertIn('build_receipt_sha256 = $buildReceiptSha256', test)
+        self.assertIn('source_head = $imageSource', test)
+        self.assertIn('qualification_tool_head = $currentHead', test)
+        self.assertIn('build_profile = $buildProfile', test)
+        self.assertIn('browser_packaged = $browserPackaged', test)
+        self.assertIn('CORE_BOOT build receipt is internally inconsistent', test)
+        self.assertIn('BROWSER build receipt is internally inconsistent', test)
+        self.assertIn('docker ps -aq --filter "name=^/$name$"', test)
+        self.assertIn('docker ps -q --filter "name=^/$name$"', test)
+        self.assertIn("VERAOS_BOOT_READY_V1", test)
+        self.assertIn("VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json", test)
+        self.assertIn("portfolio_plan_validated=true", test)
+        self.assertIn("portfolio_implementation_plan_validated = $true", test)
+        self.assertIn("VERAOS_PERSISTENCE_READY_V1", test)
+        self.assertIn("boot_ordinal=2 previous_boot_ordinal=1", test)
+        self.assertIn("lifecycle_persistence_qualified = $true", test)
+        self.assertIn('if ($existingContainer)', test)
+        self.assertIn('if ($runningContainer)', test)
+        self.assertNotIn('docker stop -t 1 $name *> $null', test)
+        self.assertNotIn("flake", combined.lower())
+        self.assertNotIn("nix ", combined.lower())
+
+    def test_nix_primary_scaffold_is_absent(self) -> None:
+        self.assertFalse((ROOT / "flake.nix").exists())
+        self.assertFalse((ROOT / "flake.lock").exists())
+        self.assertFalse((ROOT / "nixos").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()

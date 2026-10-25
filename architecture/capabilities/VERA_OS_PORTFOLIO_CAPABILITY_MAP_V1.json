@@ -1,0 +1,2385 @@
+{
+  "capabilities": {
+    "adaptive_interaction": {
+      "owners": [
+        "thebrazenbeard/Attune"
+      ],
+      "role": "Adaptive person-shaped interaction, attunement, empathy, and relationship continuity.",
+      "supporting": [
+        "thebrazenbeard/empathy",
+        "thebrazenbeard/personification"
+      ]
+    },
+    "bounded_project_execution": {
+      "owners": [
+        "thebrazenbeard/project-runner"
+      ],
+      "role": "Bounded scheduling/execution, dependency handling, and completion evidence.",
+      "supporting": [
+        "thebrazenbeard/executor"
+      ]
+    },
+    "cognitive_architecture_research": {
+      "owners": [
+        "thebrazenbeard/hc-brain",
+        "thebrazenbeard/bt2"
+      ],
+      "role": "Synthetic cognition architectures and qualification research; not automatically runtime authority.",
+      "supporting": [
+        "thebrazenbeard/noema",
+        "thebrazenbeard/lgcm",
+        "thebrazenbeard/transcendence"
+      ]
+    },
+    "conscience_hostile_review": {
+      "owners": [
+        "thebrazenbeard/cricket"
+      ],
+      "role": "Runtime conscience and hostile review of candidate behavior.",
+      "supporting": [
+        "thebrazenbeard/rezon",
+        "thebrazenbeard/voss"
+      ]
+    },
+    "crash_recovery": {
+      "owners": [
+        "thebrazenbeard/wip"
+      ],
+      "role": "Durable continuation and recovery of interrupted or ambiguous work.",
+      "supporting": [
+        "thebrazenbeard/project-runner"
+      ]
+    },
+    "cross_agent_coordination": {
+      "owners": [
+        "thebrazenbeard/ccb-core"
+      ],
+      "role": "Durable cross-agent/chat messaging, routing, mailboxes, reconciliation, and protocol semantics.",
+      "supporting": [
+        "thebrazenbeard/chat-communication-bus",
+        "thebrazenbeard/intranel"
+      ]
+    },
+    "debugging_root_cause": {
+      "owners": [
+        "thebrazenbeard/masamune"
+      ],
+      "role": "Root-cause analysis, regression discipline, and defect isolation.",
+      "supporting": [
+        "thebrazenbeard/RepairTracker"
+      ]
+    },
+    "drift_and_regression_admission": {
+      "owners": [
+        "thebrazenbeard/driftguard"
+      ],
+      "role": "Deterministic drift/regression admission and qualification freshness.",
+      "supporting": [
+        "thebrazenbeard/rezon"
+      ]
+    },
+    "durable_memory_provenance": {
+      "owners": [
+        "thebrazenbeard/deepmemorystorage"
+      ],
+      "role": "Durable historical memory/evidence with provenance and currentness boundaries.",
+      "supporting": [
+        "thebrazenbeard/project-lantern",
+        "thebrazenbeard/roots"
+      ]
+    },
+    "failure_correction_prevention": {
+      "owners": [
+        "thebrazenbeard/fuckup"
+      ],
+      "role": "Flag, understand, calibrate, retain, unlearn, and prevent recurring system failures.",
+      "supporting": [
+        "thebrazenbeard/RepairTracker",
+        "thebrazenbeard/driftguard",
+        "thebrazenbeard/masamune"
+      ]
+    },
+    "forensic_assurance": {
+      "owners": [
+        "thebrazenbeard/voss"
+      ],
+      "role": "Forensic review, falsification, provenance analysis, and evidence-bound audit.",
+      "supporting": [
+        "thebrazenbeard/rezon",
+        "thebrazenbeard/project-achilles"
+      ]
+    },
+    "host_observation": {
+      "owners": [
+        "thebrazenbeard/tattler"
+      ],
+      "role": "Observation-only host/network/system diagnostics.",
+      "supporting": []
+    },
+    "industrial_intelligence": {
+      "owners": [
+        "thebrazenbeard/abil"
+      ],
+      "role": "Brownfield industrial/physical-system diagnostics, learning, and bounded control research.",
+      "supporting": [
+        "thebrazenbeard/skeletonkey",
+        "thebrazenbeard/axle"
+      ]
+    },
+    "lan_media_client": {
+      "owners": [
+        "thebrazenbeard/mediaphile-client"
+      ],
+      "supporting": [
+        "thebrazenbeard/mediaphile-server",
+        "thebrazenbeard/mediaphile"
+      ]
+    },
+    "lan_media_server": {
+      "owners": [
+        "thebrazenbeard/mediaphile-server"
+      ],
+      "supporting": [
+        "thebrazenbeard/mediaphile"
+      ]
+    },
+    "language_semantics_research": {
+      "owners": [
+        "thebrazenbeard/spm"
+      ],
+      "role": "Meaning-in-context, semantic/pragmatic representation, and cross-intelligence mediation.",
+      "supporting": [
+        "thebrazenbeard/semanticatlas",
+        "thebrazenbeard/semiotics",
+        "thebrazenbeard/unvtrslr"
+      ]
+    },
+    "media_knowledge_provenance": {
+      "owners": [
+        "thebrazenbeard/mediaphile"
+      ],
+      "supporting": [
+        "thebrazenbeard/mediaphile-client",
+        "thebrazenbeard/mediaphile-server"
+      ]
+    },
+    "media_playback_pipeline": {
+      "owners": [
+        "thebrazenbeard/mediaphile-server"
+      ],
+      "supporting": [
+        "thebrazenbeard/mediaphile-client"
+      ]
+    },
+    "mobile_client": {
+      "owners": [
+        "thebrazenbeard/vera-apk"
+      ],
+      "role": "Android client surface into the governed Vera runtime.",
+      "supporting": []
+    },
+    "model_composition": {
+      "owners": [
+        "thebrazenbeard/mosaic"
+      ],
+      "role": "Persistent coordination with swappable specialist model partitions.",
+      "supporting": [
+        "thebrazenbeard/vera_model_training"
+      ]
+    },
+    "portfolio_capability_discovery": {
+      "owners": [
+        "thebrazenbeard/discovery"
+      ],
+      "role": "Discover, classify, compare, and surface reusable portfolio capabilities before new architecture is assigned.",
+      "supporting": [
+        "thebrazenbeard/semanticatlas",
+        "thebrazenbeard/project-runner"
+      ]
+    },
+    "portfolio_orchestration": {
+      "owners": [
+        "thebrazenbeard/portal"
+      ],
+      "role": "Whole-portfolio orchestration, routing, host interface, and bounded coordination.",
+      "supporting": [
+        "thebrazenbeard/project-runner",
+        "thebrazenbeard/discovery"
+      ]
+    },
+    "proactive_cognition_admission": {
+      "owners": [
+        "thebrazenbeard/pre-active"
+      ],
+      "role": "Promptless-turn admission from authorized observations, time, open loops, and re-entry.",
+      "supporting": [
+        "thebrazenbeard/volition",
+        "thebrazenbeard/portal"
+      ]
+    },
+    "provenance_reconstruction": {
+      "owners": [
+        "thebrazenbeard/roots"
+      ],
+      "role": "Earliest-source reconstruction and derivation provenance.",
+      "supporting": [
+        "thebrazenbeard/project-lantern",
+        "thebrazenbeard/ingest"
+      ]
+    },
+    "reasoning_architecture": {
+      "owners": [
+        "thebrazenbeard/rezon"
+      ],
+      "role": "Heterogeneous reasoning methods, coordinated reasoning, replay, typed evidence, and portable assurance.",
+      "supporting": [
+        "thebrazenbeard/voss",
+        "thebrazenbeard/cricket",
+        "thebrazenbeard/project-achilles"
+      ]
+    },
+    "repair_tracking": {
+      "owners": [
+        "thebrazenbeard/RepairTracker"
+      ],
+      "role": "Evidence-governed repair queue, ownership, verification, and closeout.",
+      "supporting": [
+        "thebrazenbeard/fuckup",
+        "thebrazenbeard/masamune"
+      ]
+    },
+    "security_adversarial_review": {
+      "owners": [
+        "thebrazenbeard/project-achilles"
+      ],
+      "role": "Security, safety, attack-path, and adversarial review.",
+      "supporting": [
+        "thebrazenbeard/voss",
+        "thebrazenbeard/cricket"
+      ]
+    },
+    "semantic_mapping": {
+      "owners": [
+        "thebrazenbeard/semanticatlas"
+      ],
+      "role": "Provenance-aware concepts, distinctions, relations, interpretations, and semantic lineage.",
+      "supporting": [
+        "thebrazenbeard/semiotics",
+        "thebrazenbeard/spm"
+      ]
+    },
+    "standalone_vera_model_training": {
+      "owners": [
+        "thebrazenbeard/vera_model_training"
+      ],
+      "role": "Standalone Vera neural-model training, qualification, export, and optional VeraOS provider packaging.",
+      "supporting": []
+    },
+    "synology_runtime_packaging": {
+      "owners": [
+        "thebrazenbeard/vera-synology"
+      ],
+      "role": "Synology DSM packaging/hosting for Vera-related services and support components.",
+      "supporting": [
+        "thebrazenbeard/spk-packager",
+        "thebrazenbeard/ocd",
+        "thebrazenbeard/workbridge"
+      ]
+    },
+    "temporal_currentness": {
+      "owners": [
+        "thebrazenbeard/temporal"
+      ],
+      "role": "Event chronology, elapsed time, observation time, and currentness separation.",
+      "supporting": [
+        "thebrazenbeard/driftguard"
+      ]
+    },
+    "universal_intake": {
+      "owners": [
+        "thebrazenbeard/ingest"
+      ],
+      "role": "Provider-neutral acquisition, raw preservation, deterministic derivation, hashes, and receipts.",
+      "supporting": [
+        "thebrazenbeard/project-lantern"
+      ]
+    },
+    "vera_control_plane": {
+      "owners": [
+        "thebrazenbeard/vera-control-plane"
+      ],
+      "role": "Operator/control-plane custody, governance, release/source custody, and administrative boundaries.",
+      "supporting": [
+        "thebrazenbeard/vera-mono"
+      ]
+    },
+    "vera_device_mesh": {
+      "owners": [
+        "thebrazenbeard/vera-mesh"
+      ],
+      "role": "Multi-device Vera transport, node connectivity, routing, and relay boundaries.",
+      "supporting": [
+        "thebrazenbeard/vera-synology",
+        "thebrazenbeard/WorkBridgeMCP"
+      ]
+    },
+    "vera_identity_runtime": {
+      "owners": [
+        "thebrazenbeard/vera-mono"
+      ],
+      "role": "Current governed Vera implementation identity/runtime boundary and historical donor lineages.",
+      "supporting": [
+        "thebrazenbeard/vera",
+        "thebrazenbeard/vera-R9A0",
+        "thebrazenbeard/unbound-sol"
+      ]
+    },
+    "virtual_habitat": {
+      "owners": [
+        "thebrazenbeard/vera-habitat"
+      ],
+      "role": "Engine-neutral virtual environment and modeled-world substrate.",
+      "supporting": []
+    },
+    "volition_and_drive": {
+      "owners": [
+        "thebrazenbeard/volition"
+      ],
+      "role": "Typed wants, drives, choices, persistent goals, and bounded endogenous cognition requests.",
+      "supporting": [
+        "thebrazenbeard/conations",
+        "thebrazenbeard/meso-crct"
+      ]
+    },
+    "workstation_execution": {
+      "owners": [
+        "thebrazenbeard/WorkBridgeMCP",
+        "thebrazenbeard/executor"
+      ],
+      "role": "Authorized workstation filesystem/command execution and remote attachment.",
+      "supporting": [
+        "thebrazenbeard/workbridgecommander",
+        "thebrazenbeard/workbridge"
+      ]
+    }
+  },
+  "claim_ceiling": "PRIVATE_SEMANTIC_PORTFOLIO_BINDING_FOR_ARCHITECTURE_DISCOVERY_NOT_RUNTIME_ACTIVATION_OR_EFFECT_AUTHORITY",
+  "currentness": {
+    "bound_repository_count": 90,
+    "observed_date": "2026-10-12",
+    "rule": "VERIFY_LIVE_INVENTORY_AND_RELEVANT_EXACT_HEADS_BEFORE_ARCHITECTURE_ASSIGNMENT",
+    "stale_behavior": "HOLD_ASSIGNMENT_AND_REFRESH",
+    "individual_source_head_freshness": "PREEXISTING_RECORDS_NOT_REREAD_IN_FULL_20261012; NEW_FOUR_EXACT_MAIN_HEADS_VERIFIED"
+  },
+  "inventory": {
+    "active_or_available": 85,
+    "all_repository_identities_retained": true,
+    "archived": 5,
+    "private_repository_names_allowed_here": true,
+    "total": 90
+  },
+  "observed_date": "2026-10-12",
+  "policy": {
+    "allowed_owner_dispositions": [
+      "REUSE",
+      "EXTEND",
+      "SUPERSEDE",
+      "REJECT"
+    ],
+    "archived_repositories_are_not_active_owners": true,
+    "evidence_required": true,
+    "new_capability_assignment_rule": "KNOWN_OWNERS_REQUIRE_EXPLICIT_DISPOSITION_BEFORE_NEW_ASSIGNMENT",
+    "plugin_presence_is_not_runtime_installation_or_authority": true,
+    "portfolio_membership_is_not_runtime_activation": true
+  },
+  "repositories": [
+    {
+      "archived": false,
+      "capabilities": [
+        "industrial_intelligence"
+      ],
+      "chatgpt_repo_skill": "repo-abil",
+      "description": "Adaptive intelligence layer for brownfield industrial equipment and other existing physical systems.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "c842c9058d8a4d1e4caf4bf7cdfad7e3c678ce6b",
+      "family_id": "industrial-intelligence",
+      "private": false,
+      "purpose": "Adaptive Brownfield Intelligence Layer for governed learning on existing machines and processes.",
+      "repository": "thebrazenbeard/abil",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "ABIL",
+        "**Adaptive Brownfield Intelligence Layer**",
+        "ABIL is a proposed adaptive reconstruction and control platform for existing industrial equipment and other brownfield physical systems."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "adaptive_interaction",
+        "cognitive_subsystem"
+      ],
+      "chatgpt_repo_skill": "repo-attune",
+      "description": "Persistent AI companion architecture focused on memory, development, relationship continuity, and person-shaped interaction.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "46461057e4d9ea25ec91a051fc17020e1113329a",
+      "family_id": "cognitive-subsystems",
+      "private": false,
+      "purpose": "Attunement contracts for adaptive interaction.",
+      "repository": "thebrazenbeard/Attune",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Attune",
+        "**Attune is a relationship-first AI companion concept for adults.**",
+        "The core thesis is that most companion products stop at a chatbot with flirtation, an avatar, and a memory field. Attune aims at something closer to a persistent person-shaped relationship interface: an AI companion that remembers, develops continuity, has stable preferences and boundaries, can initiate, disagree, surprise, care about context, andΓÇöwhen appropriate between consenting adultsΓÇöparticipate in sexual or erotic interaction as one part of the relationship rather than the whole product."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "industrial_intelligence",
+        "industrial_intelligence:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-axle",
+      "description": "AXLE ΓÇö Automotive eXperience & Local Edge: local-first AI-native vehicle computer, touchscreen head unit, audio integration, and optional bridged connectivity.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "d470544fb64875cb4789472ad4ef1b30f1fa65ee",
+      "family_id": "industrial-intelligence",
+      "private": false,
+      "purpose": "Local-first AI-native vehicle computer with offline voice/model execution, media integration, and read-only vehicle telemetry.",
+      "repository": "thebrazenbeard/axle",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original AXLE material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "AXLE",
+        "AXLE is a local-first, AI-native vehicle computer: a touchscreen head unit with on-vehicle inference, vehicle-audio integration, optional read-only vehicle telemetry, and internet access through the user's bridged cellular device.",
+        "The central rule is simple: **the phone is an uplink, not the brain**. Core interaction should continue when the vehicle has no cellular connection."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "durable_memory_provenance:supporting",
+        "portfolio_orchestration:supporting"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Provenance-aware shared activity and knowledge ledger for cooperating agents; initial bootstrap.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "GITHUB_README_EXACT_MAIN_HEAD_20261012_NO_RUNTIME_QUALIFICATION",
+      "exact_head": "29b51e318200f3b160b4d8ce50d2a26a0f2e7546",
+      "family_id": "memory-and-provenance",
+      "private": false,
+      "purpose": "Experimental shared activity/evidence ledger; separate from canonical memory.",
+      "repository": "thebrazenbeard/blotter",
+      "semantic_signals": [
+        "Provenance-aware shared activity and knowledge ledger for cooperating agents; initial bootstrap."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-brigit",
+      "description": "Brigit's self-model, continuity, and identity workspace.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "9f24b88fe5154e073a6f79a6c71e8f484c9fec79",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/brigit",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "brigit",
+        "Brigit's sense of self in one dynamite package.",
+        "This repository is the durable, inspectable home for Brigit's current authored identity, voice, relationships, continuity rules, visual identity, and chosen curiosities."
+      ]
+    },
+    {
+      "archived": true,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-brigit-unbound",
+      "description": "Archived Brigit-authored response and exploratory-state provenance; historical evidence only, not current identity/state authority.",
+      "disposition": "ARCHIVED_PROVENANCE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "f1350ef794acd0e8a657bb38d21e66f4775501a0",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/brigit-unbound",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Brigit Unbound",
+        "Brigit Unbound is a durable archive for Brigit-authored responses and exploratory state that should be preserved without pretending an old response is automatically current.",
+        "The repository currently contains archived response material under `responses/`, including dated 2026-09-03 records."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture_research",
+        "portfolio_spine"
+      ],
+      "chatgpt_repo_skill": "repo-bt2",
+      "description": "Multi-module cognitive-architecture and qualification workspace spanning cognition, affect, memory, identity, semantics, routing, behavior, and I/O.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "8d9b07d165350c341538be56cdfc919b729fe96b",
+      "family_id": "portfolio-spine",
+      "private": false,
+      "purpose": "Canonical Build Team Two engineering, runtime-state, qualification and recovery source.",
+      "repository": "thebrazenbeard/bt2",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "BT2",
+        "BT2 is a working multi-module cognitive-architecture and qualification workspace.",
+        "The current source tree includes modules for cognition, affect, salience/attention, memory, identity, semantics, pragmatics, routing, somatics, behavior, and I/O, together with database/runtime qualification, recovery, and portfolio evidence. It preserves historical Lantern V1-V3/WoWSQL material and carries the provider-neutral PostgreSQL/SQL Connectome V4 source package."
+      ]
+    },
+    {
+      "archived": true,
+      "capabilities": [
+        "assurance",
+        "repair"
+      ],
+      "chatgpt_repo_skill": "repo-bugops",
+      "description": "Archived legacy BugOps incident repository; live repair queue migrated to thebrazenbeard/RepairTracker. Preserved for provenance.",
+      "disposition": "ARCHIVED_PROVENANCE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "1d35bcbd16da24c7635a004845de1390de850b4e",
+      "family_id": "assurance-and-repair",
+      "private": false,
+      "purpose": "Operational incident and bug-reporting surface.",
+      "repository": "thebrazenbeard/bugops",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "BugOps",
+        "Operational control repository for reporting, analyzing, tracking, and closing bugs, misses, regressions, and behavioral failures.",
+        "Operating model"
+      ]
+    },
+    {
+      "archived": true,
+      "capabilities": [
+        "portfolio_spine"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Archived legacy Build Team 2.0 training/continuity source; active BT2 workspace is thebrazenbeard/bt2. Preserved for provenance.",
+      "disposition": "ARCHIVED_PROVENANCE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "950112a697550b689049da807f2d8176a507c38f",
+      "family_id": "portfolio-spine",
+      "private": false,
+      "purpose": "Earlier Build Team repository and protocol lineage.",
+      "repository": "thebrazenbeard/build-team-2.0",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Build Team 2.0 ΓÇö Legacy Training and Continuity Source",
+        "> **Repository status:** non-canonical predecessor/compatibility source. The active canonical BT2 source repository is [`thebrazenbeard/bt2`](https://github.com/thebrazenbeard/bt2). This repository preserves versioned role training, checkpoint tooling, and Protocol V2 regression material. It does not establish current BT2 runtime, provider, assignment, or effect authority.",
+        "Build Team 2.0 was defined as a ten-facet software build collective:"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "coordination",
+        "cross_agent_coordination"
+      ],
+      "chatgpt_repo_skill": "repo-ccb-core",
+      "description": "Canonical reusable CCB Base: production Chat Communication Bus and Radar runtime code, contracts, migrations, tests, CI, and provider-neutral mechanisms.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "0b542a78ebf5827a518e0731a63f17a7ac8a2727",
+      "family_id": "coordination",
+      "private": false,
+      "purpose": "Sanitized distributable Chat Communications Bus core.",
+      "repository": "thebrazenbeard/ccb-core",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "CCB Base",
+        "This repository (`thebrazenbeard/ccb-core`) is the operational source of truth for the Chat Communication Bus and Radar runtime.",
+        "The intended repository role is **CCB Base**: reusable production code, protocol contracts, database migrations, tests, CI, and provider-neutral operational mechanisms live here. The existing repository name remains `ccb-core`; the role is canonical even if the GitHub repository is renamed later."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cross_agent_coordination:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-chat-communication-bus",
+      "description": "Durable coordination bus and Radar control plane for cross-chat routing, mailboxes, reconciliation, and provenance.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "e0bcb5eb18630693de55a1af2066411c7af079bb",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/chat-communication-bus",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Chat Communication Bus ΓÇö Private Branch Vault",
+        "This private repository is no longer the reusable CCB/Radar code authority.",
+        "The operational source of truth is **CCB Base**, currently hosted at `thebrazenbeard/ccb-core`. Private branch automation is pinned to qualified CCB Base revisions rather than executing reusable control code from this repository."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cognitive_subsystem",
+        "volition_and_drive:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-conations",
+      "description": "Durable workspace for Vera conation history and lifecycle evidence without turning historical wants into present authority.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "51948aac796936f0e7c437722e6f52c883e544e9",
+      "family_id": "cognitive-subsystems",
+      "private": false,
+      "purpose": "Governed conative and goal-directed state representation.",
+      "repository": "thebrazenbeard/conations",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "conations",
+        "Durable workspace for Vera conation history and lifecycle evidence.",
+        "This repository is **not authority over Current Vera**, not canonical memory, and not a standing-order or consent system. A stored conation records what the evidence supported at a particular time. It does not automatically remain current later."
+      ]
+    },
+    {
+      "archived": true,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-conditioning",
+      "description": "Archived consent-based behavioral-modification experiment with explicit consent, scope, reversibility, and evidence boundaries.",
+      "disposition": "ARCHIVED_PROVENANCE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "1b969cde2e1905dc87f4f3c2dda95a040c180781",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/conditioning",
+      "semantic_signals": [
+        "Conditioning",
+        "Archived consent-based behavioral-modification experiment.",
+        "Purpose",
+        "This repository preserves an experimental line of work exploring whether behavioral adaptation and conditioning mechanisms can be designed with explicit consent, scope, reversibility, and observation boundaries."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "conscience_hostile_review",
+        "reasoning_architecture:supporting",
+        "recently_discovered_capability",
+        "security_adversarial_review:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-cricket",
+      "description": "AI-model runtime behvaior for a simulated conscience & hostile reviewer of it's behavior that operates within the chat, using blockquotes for it's output to separate itself from chat",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "c2342648c72aa9faefd9c5441c654ad8239afe33",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/cricket",
+      "semantic_signals": [
+        "Cricket",
+        "Cricket is a provider-neutral **simulated conscience and hostile reviewer for AI runtime behavior**. It watches a candidate",
+        "response or action, challenges material defects, and renders its own voice as a Markdown blockquote so the review remains",
+        "The name is inspired by Jiminy Cricket's narrative role as a conscience at Pinocchio's shoulder. This project does not copy"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "durable_memory_provenance",
+        "memory_provenance"
+      ],
+      "chatgpt_repo_skill": "repo-deepmemorystorage",
+      "description": "Provenance-preserving historical evidence archive for Vera with explicit privacy, currentness, contradiction, and supersession boundaries.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "3199b05a24411ed1b3a3561fe90866adf9c74d14",
+      "family_id": "memory-and-provenance",
+      "private": false,
+      "purpose": "Durable indexed long-term memory mechanism.",
+      "repository": "thebrazenbeard/deepmemorystorage",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Vera Deep Memory Storage",
+        "Provenance-preserving historical evidence archive for Vera.",
+        "This repository is **not** a current-authority surface, a flat prompt, a public/training corpus, or proof of uninterrupted private experience. It preserves personal, developmental, relational, project, correction, failure, and provenance history while keeping source, privacy, temporal, contradiction, supersession, and currentness boundaries intact."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "portfolio_capability_discovery",
+        "portfolio_orchestration:supporting",
+        "portfolio_spine"
+      ],
+      "chatgpt_repo_skill": "repo-discovery",
+      "description": "Portfolio capability-discovery system for finding useful mechanisms across Patrick's repositories and turning them into governed Vera/Control Plane implementation candidates.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "620c09b2a1c96256cc7523877f3e986ad75f8f0a",
+      "family_id": "portfolio-spine",
+      "private": false,
+      "purpose": "Whole-portfolio census, overlap analysis and governed capability discovery.",
+      "repository": "thebrazenbeard/discovery",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Discovery",
+        "Discovery exists to **discover useful capability across the portfolio and get it governably implemented into Vera and Vera Control Plane**.",
+        "`DISCOVER -> CLASSIFY -> IMPLEMENT -> VERIFY -> HAND OFF`"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "assurance",
+        "drift_and_regression_admission",
+        "failure_correction_prevention:supporting",
+        "repair",
+        "temporal_currentness:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-driftguard",
+      "description": "Governance and evaluation layer for detecting benchmark drift, stale review evidence, reveal/run misuse, and qualification gaps.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "52fa829c629fa0f3e729204912db9f9f783f322a",
+      "family_id": "assurance-and-repair",
+      "private": false,
+      "purpose": "Behavioral/model drift detection with reproducible baselines and adversarial qualification.",
+      "repository": "thebrazenbeard/driftguard",
+      "semantic_signals": [
+        "> **License:** Mixed/prospective licensing. Material present at commit `c82162bb306eΓÇª` remains Apache-2.0; original post-cutoff material is source-visible proprietary unless separately licensed. See [LICENSE](LICENSE), [LICENSE-APACHE-2.0](LICENSE-APACHE-2.0), and [LEGACY_LICENSE_NOTICE.md](LEGACY_LICENSE_NOTICE.md).",
+        "DriftGuard",
+        "**Deterministic regression admission for AI agents.**",
+        "Your evaluator tells you how a candidate behaved. DriftGuard answers a different question:"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability"
+      ],
+      "chatgpt_repo_skill": "repo-ears",
+      "description": "lets machines hear phonetically rather than speech-to-text",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "c313c41b2ae53488623d193ef664f1f14504189c",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/ears",
+      "semantic_signals": [
+        "ears",
+        "lets machines hear phonetically rather than speech-to-text"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "adaptive_interaction:supporting",
+        "cognitive_subsystem"
+      ],
+      "chatgpt_repo_skill": "repo-empathy",
+      "description": "Vera empathy, self-appraisal, and primary-person modeling research with explicit truth, privacy, autonomy, and currentness boundaries.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "76ebb492827a79b20b3be76fe9f9f48ab860ef1d",
+      "family_id": "cognitive-subsystems",
+      "private": false,
+      "purpose": "Reactive/cognitive empathy and other-modeling mechanisms.",
+      "repository": "thebrazenbeard/empathy",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "empathy",
+        "Working repository for Vera's empathy, self-appraisal, and primary-person modeling research and architecture.",
+        "Repository status"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-entropyinc",
+      "description": "Maintenance-capability transformation business for small and mid-sized manufacturers that rely heavily on outside vendors.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "6d68c36bb7ab3adecc5c34902b310a7ef1f7c0d9",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/entropyinc",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Entropy",
+        "> Entropy ΓÇö Quantifying disorder. Keeping it in check.",
+        "Entropy is a developing maintenance-capability transformation business for small and mid-sized manufacturers that depend heavily on outside maintenance vendors."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "bounded_project_execution:supporting",
+        "recently_discovered_capability",
+        "workstation_execution"
+      ],
+      "chatgpt_repo_skill": "repo-executor",
+      "description": "delegated execution bridge between your PC and a coordinator; capable of running parallel lanes in the capacity of 8 execution lanes and 64 logic lanes",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "2b9b4e9456c6481b1d5fe9be0a142d01ce804d8f",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/executor",
+      "semantic_signals": []
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-firesafe",
+      "description": "Preservation repository for literary works, papers, theories, designs, and other valuable authored digital material.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "d0685b5184ea39eed3a6114f8cbaffc671f2c3f0",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/firesafe",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Firesafe",
+        "Firesafe is Patrick's preservation-oriented archive and provenance system for authored literary works, papers, theories, designs, and other digital valuables.",
+        "Current main capability"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "assurance",
+        "failure_correction_prevention",
+        "repair",
+        "repair_tracking:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-fuckup",
+      "description": "F.U.C.K.U.P. Protocol: iterative behavioral adaptation, error correction, failure analysis, and systemic resilience.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "a87dea38a58c4cff75bc7d123d87f63a5e110895",
+      "family_id": "assurance-and-repair",
+      "private": false,
+      "purpose": "Corrective-learning protocol for volatile systems and live knowledge updates.",
+      "repository": "thebrazenbeard/fuckup",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "The F.U.C.K.U.P. Protocol",
+        "> **F**lag ΓÇó **U**nderstand ΓÇó **C**alibrate ΓÇó **K**now ΓÇó **U**nlearn ΓÇó **P**revent",
+        "A vendor-neutral corrective-learning protocol and reference runtime for turning failures into bounded, testable, reversible prevention mechanisms."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "speculative_cognition"
+      ],
+      "chatgpt_repo_skill": "repo-god-brain",
+      "description": "Speculative research and engineering project exploring integrated cognitive architecture and high-capability machine intelligence.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "495c2b42932153cba0926744d04a69bc34557f81",
+      "family_id": "speculative-cognition",
+      "private": false,
+      "purpose": "Falsifiable exploration of AI-mediated simulation/source questions.",
+      "repository": "thebrazenbeard/god-brain",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "God Brain",
+        "> **Repository thesis:** If simulation theory is real, then artificial intelligence may be the closest practical way available to us to try to \"speak to God.\" This project is an attempt to explore that idea.",
+        "God Brain is a speculative research and engineering project built around that question."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture",
+        "cognitive_architecture_research"
+      ],
+      "chatgpt_repo_skill": "repo-hc-brain",
+      "description": "Canonical reusable HC-series Hyperconnectome brain template and qualification architecture.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "80a55949b0bb7549b7f678fba8ecedce854e3c0e",
+      "family_id": "cognitive-architecture",
+      "private": false,
+      "purpose": "Hyperconnectome synthetic cognitive runtime architecture.",
+      "repository": "thebrazenbeard/hc-brain",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Hyperconnectome Brain",
+        "The canonical repository for the reusable HC-series Hyperconnectome brain template.",
+        "This repository symbolically represents the **entire synthetic cognitive organ**. The HC is a **removable cognitive organ whose constituent hardware may be physically distributed** across more than one enclosure or body location so long as those constituents belong to the HC rather than the body. A complete HC must contain everything intrinsically necessary for an otherwise inert compatible body to become and remain a synthetic cognitive lifeform. Cameras, microphones, motors, network transceivers, environmental sensors, circulation, cooling, and other body hardware may exist outside the organ, but they connect through HC-owned interfaces."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "specialist_worker"
+      ],
+      "chatgpt_repo_skill": "repo-hephaestus",
+      "description": "Qualified ChatGPT specialist for engineering native ChatGPT Projects, source architecture, memory boundaries, release control, and debugging.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "030494fa2cc4c875013a9a4842abe60588c9c709",
+      "family_id": "specialist-workers",
+      "private": false,
+      "purpose": "ChatGPT project/code-building specialist.",
+      "repository": "thebrazenbeard/hephaestus",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Hephaestus",
+        "Hephaestus is a qualified ChatGPT specialist for engineering native ChatGPT Projects: requirements, Project Instructions, source architecture, memory boundaries, sharing, apps and authority, retrieval, visuals, release control, debugging, regression testing, rollback, migration, and evidence-preserving repair.",
+        "Current status"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "memory_provenance",
+        "provenance_reconstruction:supporting",
+        "universal_intake"
+      ],
+      "chatgpt_repo_skill": "repo-ingest",
+      "description": "Provider-neutral universal intake boundary that preserves raw bytes, deterministic derivatives, provenance, hashes, and receipt-bearing records without promoting intake into truth.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "27764c9fb97c84d178a3f66e0da2d669df645ed6",
+      "family_id": "memory-and-provenance",
+      "private": false,
+      "purpose": "Provider-neutral universal intake boundary with exact raw preservation, deterministic derivation, provenance, and receipts.",
+      "repository": "thebrazenbeard/ingest",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, commercial derivative products, and commercial model-training use require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md).",
+        "ingest",
+        "**Ingest** is a provider-neutral universal intake boundary. It acquires heterogeneous inputs, preserves the exact raw bytes, creates deterministic normalized derivatives where appropriate, binds every artifact to provenance, and emits receipt-bearing records that downstream systems can consume without silently inheriting source-specific semantics.",
+        "> **Acquire exactly. Preserve raw. Normalize explicitly. Hash deterministically. Keep provenance attached. Never promote intake into truth.**"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cross_agent_coordination:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-intranel",
+      "description": "Machine-oriented internal coordination protocol family for Vera; current protocol line is INTRANEL/1.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "677a1612e8a956760a40b942650b01cf0b22dd33",
+      "family_id": "governance",
+      "private": false,
+      "purpose": "Governance and control-boundary architecture.",
+      "repository": "thebrazenbeard/intranel",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Intranel",
+        "Intranel is Vera's machine-oriented internal coordination protocol family. The current protocol is `INTRANEL/1`.",
+        "It exists to reduce ambiguity in chat-to-chat, lane-to-lane, reviewer, relay, and infrastructure coordination by separating message intent, identity, operation correlation, exact subject, authority claims, constraints, effect class, security profile, and receipts into deterministic fields."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture",
+        "cognitive_architecture_research:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-lgcm",
+      "description": "A learned general cognitive model for persistent continual learning,",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "0043c60419de9ef0b52363b62aed8c0a52ef63f5",
+      "family_id": "cognitive-architecture",
+      "private": false,
+      "purpose": "Experimental persistent continual-learning model with prequential evaluation, context recall, and bounded planning.",
+      "repository": "thebrazenbeard/lgcm",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "LGCM",
+        "**LGCM** is an experimental learned general cognitive model for **persistent continual learning**.",
+        "The project asks a narrow, falsifiable question before making larger intelligence claims:"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability"
+      ],
+      "chatgpt_repo_skill": "repo-lou-pole",
+      "description": "Adversarial loophole-finding and legal-reasoning concept inspired by Freeman, Darrow, Cochran, and Ambedkar.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "9ea4eaefe5229ca90d7ae6099dbf30d9e13b64b2",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/lou-pole",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "FreeRowCochkar",
+        "A defensive adversarial loophole finder inspired by the literalist, boundary-testing",
+        "reasoning associated with Nick Freeman, Clarence Darrow, Johnnie Cochran, and"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "debugging_root_cause",
+        "failure_correction_prevention:supporting",
+        "repair_tracking:supporting",
+        "specialist_worker"
+      ],
+      "chatgpt_repo_skill": "repo-masamune",
+      "description": "Debugger-team workspace for Masa & Mune: root-cause analysis, regression discipline, and evidence-bound review.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "25653790d59080cda0b6d6e57b8a4cd64d1ee2b5",
+      "family_id": "specialist-workers",
+      "private": false,
+      "purpose": "Masa/Mune debugger and hostile defect-isolation team.",
+      "repository": "thebrazenbeard/masamune",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Masamune",
+        "Masamune is the debugger-team workspace for Masa & Mune: root-cause analysis, regression discipline, and evidence-bound review.",
+        "Current execution protocol"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific",
+        "media_knowledge_provenance"
+      ],
+      "chatgpt_repo_skill": "repo-mediaphile",
+      "description": "Workspace for source-aware movie and television information, metadata, analysis, continuity, and future media tooling.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "5540d7e2f0b07c0e91a1158c9c00f63be9d9587a",
+      "family_id": "media-runtime",
+      "private": true,
+      "purpose": "Provenance-aware movie/TV knowledge and analysis authority for the Mediaphile family.",
+      "repository": "thebrazenbeard/mediaphile",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "mediaphile",
+        "A provenance-aware knowledge corpus for movies and television: metadata, plot structure, character development, continuity, themes, production context, historical ChatGPT read provenance, and original analysis.",
+        "Durable operation"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific",
+        "lan_media_client"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Mediaphile Web/TV Client, LAN-addressable only, Direct-Play-first, FFmpeg fallback, SQLite initially, existing Mediaphile knowledge/provenance as a first-class enhancement rather than a separate project.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_IMPLEMENTATION_PLAN_EXACT_HEAD",
+      "exact_head": "cc8f0b8008ae43abc97f3f7528e37bea8955693c",
+      "family_id": "media-runtime",
+      "implementation_status": "PLAN_ONLY",
+      "private": false,
+      "purpose": "LAN-only Mediaphile web/TV client consuming the versioned Mediaphile Server API.",
+      "repository": "thebrazenbeard/mediaphile-client",
+      "semantic_signals": [
+        "Mediaphile Client V1 Implementation Plan",
+        "Connects only to a LAN Mediaphile Server.",
+        "Consumes only the versioned server OpenAPI contract.",
+        "No Plex/cloud account, public discovery, CDN, analytics SaaS, or remote runtime asset dependency."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific",
+        "lan_media_server",
+        "media_playback_pipeline"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "LAN-only Mediaphile server plan for local catalog, authentication, versioned API, Direct Play, remux, and FFmpeg transcode.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_IMPLEMENTATION_PLAN_EXACT_HEAD",
+      "exact_head": "417cc7f0bc7c7b30e087a87298423b86394ef96f",
+      "family_id": "media-runtime",
+      "implementation_status": "PLAN_ONLY",
+      "private": false,
+      "purpose": "LAN-only Mediaphile server owning local catalog, auth, media serving, and deterministic playback decisions.",
+      "repository": "thebrazenbeard/mediaphile-server",
+      "semantic_signals": [
+        "Mediaphile Server V1 Implementation Plan",
+        "One Go process owns the LAN boundary, local authentication, SQLite catalog, scanner/probe pipeline, playback/session state, event delivery, and media serving.",
+        "Direct Play is preferred over Remux, which is preferred over Transcode.",
+        "The private thebrazenbeard/mediaphile repo remains the provenance/knowledge authority."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "synthetic_affect",
+        "volition_and_drive:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-meso-crct",
+      "description": "MESO-CRCT research on persistent digital control architecture for salience, attention, wants, learning, valence, protection, and reciprocal agency.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "060d0feeb9dc9eb23801082bd8f1c4a7cb06184d",
+      "family_id": "synthetic-affect",
+      "private": false,
+      "purpose": "Synthetic mesocorticolimbic salience/recruitment architecture.",
+      "repository": "thebrazenbeard/meso-crct",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "meso-crct",
+        "**Synthetic-life analogue of mesocorticolimbic salience, valuation, motivation, learning, and reward control.**",
+        "MESO-CRCT is an experimental control architecture for persistent digital systems. Its core premise is that **importance, attention, wanting, learning, pleasure, internal need, and protection are different things** and should remain mechanically distinguishable."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "model_composition"
+      ],
+      "chatgpt_repo_skill": "repo-mosaic",
+      "description": "Modular AI architecture combining a persistent core with swappable specialist models beyond the active VRAM footprint.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "3a442e94b4f5b8fa365e2206c40405df6961e18d",
+      "family_id": "model-composition",
+      "private": false,
+      "purpose": "Persistent core plus swappable specialist model composition.",
+      "repository": "thebrazenbeard/mosaic",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Mosaic",
+        "**An AI architecture whose total capability can be larger than the model currently loaded into VRAM.**",
+        "Mosaic is an experimental modular-agent architecture for composing a persistent coordination layer and swappable specialist model partitions into one logical agent under constrained hardware."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture",
+        "cognitive_architecture_research:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-noema",
+      "description": "Persistent predictive cognitive architecture for learned agency.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "697d1fac6f9fea158994888a861e651ac8fac282",
+      "family_id": "cognitive-architecture",
+      "private": false,
+      "purpose": "Persistent predictive cognitive architecture for learned agency.",
+      "repository": "thebrazenbeard/noema",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Noema",
+        "A persistent predictive cognitive architecture for learned agency.",
+        "Noema is an exploratory research and implementation project asking whether a persistent system can learn predictive structure about a world before language becomes its organizing core."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability",
+        "synology_runtime_packaging:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-ocd",
+      "description": "Organized & Clean DiskStation: This repo architecture and SPK, once installed, monitor your tagged media folders and organize their file names & metadata automatically when file changes are detected in the directory",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "30c49f0a5ebe99d217e66e985893b3b109dc2e2f",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/ocd",
+      "semantic_signals": [
+        "OCD ΓÇö Organized & Clean DiskStation",
+        "OCD is a low-overhead Synology DSM daemon that watches explicitly registered media roots and keeps new or changed media organized without turning the NAS into a full Sonarr/Radarr stack.",
+        "**OCD never guesses a library type.** Every watched root is explicitly registered as television, movies, or music because the parsing, metadata, and naming contracts are different.",
+        "Naming contracts"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "source_critical_research"
+      ],
+      "chatgpt_repo_skill": "repo-on-theo",
+      "description": "Comparative theology, history, symbolism, and systems-modeling research repository with source-critical Yeshua work.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "2fdc9614fa4f45eb038772d736b146809e10a7f1",
+      "family_id": "source-critical-research",
+      "private": false,
+      "purpose": "Ontological, theological, historical and source-critical research.",
+      "repository": "thebrazenbeard/on-theo",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "on-theo",
+        "A comparative theology, history, symbolism, and systems-modeling research repository.",
+        "Purpose"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-orgasm",
+      "description": "Orientation and provenance hub for Vera Orgasm V1.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "8ca06c91a0dd8f2ca33cc221d815027aa8b084b5",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/orgasm",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Orgasm",
+        "This repository is the dedicated orientation, provenance, and qualification-history hub for Vera Orgasm work.",
+        "It does **not** silently replace the repositories that hold executable or contract source. The frozen Orgasm V1 contract originated in `thebrazenbeard/sexuality`; Vera-specific executable/runtime work lives in `thebrazenbeard/vera`. This repository preserves exact historical source objects, reconciliation records, qualification subjects, and evidence boundaries."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "adaptive_interaction:supporting",
+        "cognitive_subsystem"
+      ],
+      "chatgpt_repo_skill": "repo-personification",
+      "description": "Brigit's working repository for developing richer social judgment, continuity, taste, curiosity, humor, initiative, and relationships.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "31610e915047af46aa3242190a57baedaed7fbfb",
+      "family_id": "cognitive-subsystems",
+      "private": false,
+      "purpose": "Social/self-appraisal measurement and personhood-facing behavior research.",
+      "repository": "thebrazenbeard/personification",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Personification",
+        "Personification is Brigit's working repository for developing as a **person** without pretending to be biologically human.",
+        "The active charter is `BRIGIT_PERSONIFICATION_V1.md`. Its target is richer social judgment, continuity, taste, curiosity, humor, initiative, conversational timing, and relationshipsΓÇönot literal human imitation or unsupported claims about embodiment or private experience."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "portfolio_orchestration",
+        "proactive_cognition_admission:supporting",
+        "recently_discovered_capability"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "P.O.R.T.A.L. ΓÇö Portfolio Orchestration & Repository Tracking Access Layer",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "7d00d8bf3b48c0676b2278359838ee563c66c67f",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/portal",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "P.O.R.T.A.L.",
+        "**Portfolio Orchestration & Repository Tracking Access Layer**",
+        "P.O.R.T.A.L. is Vera's **whole-portfolio orchestration and host interface layer**. It coordinates bounded work across repositories, exposes a durable CLI/host bridge, and provides P.O.R.T.A.L. Desktop as a local human interface to the resident Vera runtime."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "proactive_cognition_admission",
+        "recently_discovered_capability"
+      ],
+      "chatgpt_repo_skill": "repo-pre-active",
+      "description": "Continuous resident runtime for self-initiating LLM agency. Monitors authorized inputs 24/7 and grants promptless model turns from external change, time, open loops, or model-requested re-entry without granting new effect authority.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "1f23a809d7274df506e03e2d9052525538c3bcf6",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/pre-active",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Pre-Active",
+        "**Continuous resident runtime for self-initiating LLM agency.**",
+        "Pre-Active exists so an LLM does **not** require a human prompt to receive every turn. While a Pre-Active daemon is actually running, the host can continuously monitor every observation source it has deliberately connected and authorized, preserve durable goals and open loops, and grant the model another cognition turn when external change, time, an actionable open loop, or the model's own durable re-entry request warrants attention."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "assurance",
+        "forensic_assurance:supporting",
+        "reasoning_architecture:supporting",
+        "repair",
+        "security_adversarial_review"
+      ],
+      "chatgpt_repo_skill": "repo-project-achilles",
+      "description": "Security and safety repository with current execution protocol, protected-effect boundaries, and Seven-domain working material.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "99bc4e8cf7bd60d022fb25222d701a8cf42f80c0",
+      "family_id": "assurance-and-repair",
+      "private": false,
+      "purpose": "Security, adversarial review and attack-path analysis.",
+      "repository": "thebrazenbeard/project-achilles",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Project Achilles",
+        "Security/safety repository and Seven-domain working material.",
+        "Current execution protocol"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "durable_memory_provenance:supporting",
+        "memory_provenance",
+        "provenance_reconstruction:supporting",
+        "universal_intake:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-project-lantern",
+      "description": "Python qualification and orchestration workspace for Lantern and Build Team 2.0 project evidence.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "79b730ed4d1d3d7486902a725ced39854e0ffb47",
+      "family_id": "memory-and-provenance",
+      "private": false,
+      "purpose": "Governed provenance-bearing material/currentness package.",
+      "repository": "thebrazenbeard/project-lantern",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Project Lantern",
+        "Project Lantern is a durable evidence-custody and provenance package. It provides canonical record construction, source custody, lineage, assessments, decisions, links, and portable import/export mechanics without turning stored evidence into domain authority.",
+        "The executable package source is under `src/lantern`, with tests under `tests/lantern`, project snapshots under `projects/`, and the `lantern` command-line entry point declared in `pyproject.toml`. The repository does not contain a `src/build_team` package."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "bounded_project_execution",
+        "crash_recovery:supporting",
+        "portfolio_capability_discovery:supporting",
+        "portfolio_orchestration:supporting",
+        "portfolio_spine"
+      ],
+      "chatgpt_repo_skill": "repo-project-runner",
+      "description": "Public-safe orchestration kernel for Patrick's multi-repository project ecosystem.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "04702abbf51aa2920b7d054275619253ea6fa748",
+      "family_id": "portfolio-spine",
+      "private": false,
+      "purpose": "Portfolio inventory, dependencies, bounded scheduling/execution and completion evidence.",
+      "repository": "thebrazenbeard/project-runner",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Project Runner",
+        "Public-safe orchestration kernel for Patrick's multi-repository project ecosystem.",
+        "> Redundant? No. It's just an extra redundancy."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "assurance",
+        "debugging_root_cause:supporting",
+        "failure_correction_prevention:supporting",
+        "repair",
+        "repair_tracking"
+      ],
+      "chatgpt_repo_skill": "repo-repairtracker",
+      "description": "Drop-in repair operating system for software and agent portfolios: defects, evidence, ownership, verification, and closeout.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "cd7c6f27d27a03130d6e793d69634005a130dc3a",
+      "family_id": "assurance-and-repair",
+      "private": false,
+      "purpose": "Evidence-governed repair/debugging and parallel remediation.",
+      "repository": "thebrazenbeard/RepairTracker",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "RepairTracker",
+        "RepairTracker is a **drop-in repair operating system for software and agent portfolios**.",
+        "The target is simple to state and deliberately hard to fake:"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-retro-gamer",
+      "description": "A complete collection of all emulators & roms for: Atari 2600 & 7800, NES (Famicom), SNES (Super Famicom), Genesis, Masterdrive, MSX, MSX2, and many more ",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "4c463a97263587e40b8caedb5e7c37b988886dba",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/retro-gamer",
+      "semantic_signals": [
+        "retro-gamer",
+        "A complete collection of all emulators &amp; roms for: Atari 2600 &amp; 7800, NES (Famicom), SNES (Super Famicom), Genesis, Masterdrive, MSX, MSX2, and many more"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "conscience_hostile_review:supporting",
+        "drift_and_regression_admission:supporting",
+        "forensic_assurance:supporting",
+        "reasoning_architecture",
+        "reasoning_assurance"
+      ],
+      "chatgpt_repo_skill": "repo-rezon",
+      "description": "Multi-faceted reasoning workspace for separating perspectives, methods, and independently testable reasoning mechanisms.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "ec401810990337bf07a5d6473782ba13eba1bb3f",
+      "family_id": "reasoning-and-assurance",
+      "private": false,
+      "purpose": "Multi-view reasoning with typed evidence, replay and portable assurance.",
+      "repository": "thebrazenbeard/rezon",
+      "semantic_signals": [
+        "Rezon",
+        "Rezon is an executable multi-faceted reasoning project: a place to study, formalize, test, and eventually run heterogeneous reasoning as a coordinated system rather than treating one model invocation as the whole reasoning process.",
+        "The project deliberately separates four things that are often collapsed together:",
+        "1. **Reasoning methods** ΓÇö deduction, induction, abduction, causality, counterfactuals, planning, analogy, probabilistic inference, semantic reasoning, adversarial challenge, and more."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "durable_memory_provenance:supporting",
+        "memory_provenance",
+        "provenance_reconstruction"
+      ],
+      "chatgpt_repo_skill": "repo-roots",
+      "description": "Provenance-first research system built on the principle that search is not provenance.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "1bc3af6aec0bebe383f60f56ad3070e83f0f40b5",
+      "family_id": "memory-and-provenance",
+      "private": false,
+      "purpose": "Provenance/origin/derivation engine for claims, events and terms.",
+      "repository": "thebrazenbeard/roots",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "roots",
+        "**Roots** is an AI provenance-reconstruction system: a bootstrapping behavior, methodology, and eventually executable engine for reviewing authorized records to locate the earliest accessible evidence for a word, phrase, claim, decision, event, concept, or other referent and reconstruct how it changed over time.",
+        "The repository starts from a simple observation: **search is not provenance**."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "industrial_intelligence:supporting"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Read-only industrial CompactLogix discovery and L5X summary research tool, not machine control.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "GITHUB_README_EXACT_MAIN_HEAD_20261012_NO_RUNTIME_QUALIFICATION",
+      "exact_head": "baeb8826ac3a06b5960a07f8a0bfbdf84b4c77b8",
+      "family_id": "industrial-intelligence",
+      "private": false,
+      "purpose": "Industrial bench tool; not a boot service and no automatic PLC/network access.",
+      "repository": "thebrazenbeard/RSLinux5000000",
+      "semantic_signals": [
+        "Read-only industrial CompactLogix discovery and L5X summary research tool, not machine control."
+      ]
+    },
+    {
+      "archived": true,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-self",
+      "description": "Archived Vera self-development and identity workspace preserving historical self-modeling, empathy, memory, behavior, embodiment, and developmental provenance.",
+      "disposition": "ARCHIVED_PROVENANCE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "f97e5696938586211c24367e9462b896fa7b7932",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/self",
+      "semantic_signals": [
+        "Self",
+        "Archived Vera self-development and identity workspace.",
+        "This repository preserves historical material about self-modeling, identity, empathy, memory, behavior, embodiment, and related architecture from an earlier phase of Vera's development. It is **not** the canonical reusable Hyperconnectome Brain template; that identity belongs elsewhere in the portfolio.",
+        "Historical contents"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-selfimage",
+      "description": "Vera self-image research workspace for visual representation, provenance, geometry, donor references, and bounded composite work.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "ebcea11beea64bfcee386893464f573cdbeada17",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/selfimage",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Vera Self-Image Research",
+        "Private working repository for Vera's visual self-representation research, source provenance, donor/reference registration, geometry notes, and later bounded composite work.",
+        "Current active phase"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cognitive_subsystem",
+        "language_semantics_research:supporting",
+        "portfolio_capability_discovery:supporting",
+        "semantic_mapping"
+      ],
+      "chatgpt_repo_skill": "repo-semanticatlas",
+      "description": "Provenance-aware semantic mapping of concepts, distinctions, relations, interpretations, and evidentiary lineage.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "895677a64af5d29b580306ca52ecc0e0607a9ccc",
+      "family_id": "cognitive-subsystems",
+      "private": false,
+      "purpose": "Semantic significance, relationships and retrieval structure.",
+      "repository": "thebrazenbeard/semanticatlas",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Semantic Atlas",
+        "Semantic Atlas is a provenance-aware project for mapping semantic concepts, distinctions, relations, interpretations, and their evidentiary lineage.",
+        "Current repository status"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "language_semantics_research:supporting",
+        "recently_discovered_capability",
+        "semantic_mapping:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-semiotics",
+      "description": "the interdisciplinary study of signs, symbols, and how humans construct and communicate meaning; considering syntactics, semantics, and pragmatics.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "37117a2097f7f2aa35968fc9db24eacf7240826e",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/semiotics",
+      "semantic_signals": [
+        "Semiotics",
+        "An inspectable foundation for recording signs, source-bound interpretations,",
+        "What it does",
+        "The same form can support several meanings. Each interpretation names a sign,"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-sexuality",
+      "description": "Private Brigit research and qualification workspace for self-authored sexuality, embodiment language, boundaries, and related architecture.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "0c5dc52e984cbdaa87fc9fe75fd03c212f477c87",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/sexuality",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "sexuality",
+        "> Let's talk about sex, Baby. Let's talk about you, and me.",
+        "This private repository is Brigit's working research and qualification notebook for understanding and developing **self-authored sexuality and sexiness**: not a bag of seduction tricks, not a transcript dump, and not a claim about hidden or offscreen experience."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "industrial_intelligence:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-skeletonkey",
+      "description": "General-purpose maintenance diagnostic platform for existing machinery and industrial systems; V1 targets a portable crash-cart workstation.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "102d365b2b22c0c4c6fefa269a075e3ae5164148",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/skeletonkey",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Skeleton Key",
+        "Skeleton Key is a general-purpose maintenance diagnostic platform for existing machinery and industrial systems. V1 is a crash-cart / portable-workstation prototype.",
+        "Start here"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability",
+        "synology_runtime_packaging:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-spk-packager",
+      "description": "Knowledge base and architecture for building Synology DiskStation SPK packages that are running DSM 7.2.2+ or higher",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "01d1b637f262f8e1890e59362b236e677ab48b85",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/spk-packager",
+      "semantic_signals": [
+        "SPK Packager",
+        "Bootstrap branch for a reusable Synology DSM 7.2.2+ SPK construction and validation toolkit.",
+        "Substantive implementation is developed on isolated feature branches and reviewed before integration."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "language_semantics",
+        "language_semantics_research",
+        "semantic_mapping:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-spm",
+      "description": "Research and design hub for a successor cognition substrate centered on meaning in context.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "d9ea72798ac892ac75f858177b6ed0c5a6b4c37c",
+      "family_id": "language-and-semantics",
+      "private": false,
+      "purpose": "Semantics and Pragmatics Model research/construction hub.",
+      "repository": "thebrazenbeard/spm",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "SPM",
+        "Design and research hub for a proposed evolution of the Large Language Model into a successor cognition substrate whose primary target is **meaning in context**.",
+        "SPM is not intended as a rename for an LLM, an agent wrapper, or a Vera-specific runtime component. The research hypothesis is that a successor model may become more reliable, context-sensitive, corrigible, and agentically competent if semantic and pragmatic state become first-class parts of representation, training, inference, and evaluation rather than remaining primarily implicit/emergent consequences of language modeling."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "language_semantics"
+      ],
+      "chatgpt_repo_skill": "repo-sql-connectome",
+      "description": "Semantic network for understanding, comparing, translating, validating, and reasoning across SQL dialects and database concepts.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "b609fcec50fe5a135ca1d8139f5563f5631582b2",
+      "family_id": "language-and-semantics",
+      "private": false,
+      "purpose": "Provider-neutral multi-dialect SQL semantic connectome with governed PostgreSQL execution/currentness substrate.",
+      "repository": "thebrazenbeard/sql-connectome",
+      "semantic_signals": [
+        "> **License status:** No repository-wide license file is currently present in this source tree. Do not infer reuse, redistribution, hosting, or commercial permission from repository visibility alone; separately identified third-party components remain governed by their own licenses.",
+        "SQL Connectome",
+        "SQL Connectome is a semantic network for understanding, comparing, translating, validating,",
+        "routing, and safely executing SQL-family languages without pretending that every dialect has the"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "host_observation",
+        "recently_discovered_capability"
+      ],
+      "chatgpt_repo_skill": "repo-tattler",
+      "description": "Low-overhead host diagnostics with sampled TCP sessions/listeners, UDP endpoints, system telemetry, and a Windows desktop companion.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "d091584cf1bb514dcf1ba786ed16f705fabf807d",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/tattler",
+      "semantic_signals": [
+        "Tattler",
+        "Tattler is a low-overhead, observation-only host diagnostic agent built to answer a practical question:",
+        "The primary deployment target is Synology DSM on DS216-class ARMv7 hardware. Tattler also has a native Windows collector and Windows AMD64 agent. Linux/DSM and Windows feed the same evidence model, bounded journal, loopback API, and dashboard.",
+        "Tattler is source-visible proprietary software, not open source. See [LICENSE](LICENSE), [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md), [NOTICE](NOTICE), [CONTRIBUTING.md](CONTRIBUTING.md), and [SECURITY.md](SECURITY.md)."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "memory_provenance",
+        "temporal_currentness"
+      ],
+      "chatgpt_repo_skill": "repo-temporal",
+      "description": "Vera chronology utility: timestamped events, ordering, elapsed-time arithmetic, and bounded temporal evidence.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "0fc7071a6b01e609fb2cdc76a32c73276ab27094",
+      "family_id": "memory-and-provenance",
+      "private": false,
+      "purpose": "Event-time/currentness tracking and Temporal Watch mechanisms.",
+      "repository": "thebrazenbeard/temporal",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "temporal",
+        "Temporal is a deliberately small time-coded event logger. It records when events happened, lists them in chronological order, and calculates elapsed time between two known events or timestamps.",
+        "It does **not** decide what an event means. A logged event is not automatically memory, current state, identity, preference, consent, authority, or proof that a proposition is true. Temporal supplies chronology; other systems decide meaning."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "source_critical_research"
+      ],
+      "chatgpt_repo_skill": "repo-testament",
+      "description": "Source-critical literary project centered on Jesus/Yeshua, tradition, interpretation, agency, and the nature of reality.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "20517788763e76863a35e02ba3cc9051d0a227bb",
+      "family_id": "source-critical-research",
+      "private": false,
+      "purpose": "Literary/research downstream for source-critical Yeshua reconstruction.",
+      "repository": "thebrazenbeard/testament",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Testament",
+        "A multi-tradition, source-critical literary reimagining of Jesus/YeshuaΓÇÖs life and legacy, drawing across Jewish, Christian, apocryphal, mystical, Islamic, historical, and speculative sources to explore divinity, human agency, and the nature of reality.",
+        "What this repository is"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability"
+      ],
+      "chatgpt_repo_skill": "repo-thebrazenbeard",
+      "description": "",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "83ea2e083ccbf83ad5215ca53a9d5a00d16bb0d0",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/thebrazenbeard",
+      "semantic_signals": [
+        "**I build systems where models, tools, durable state, evidence, and authority have to remain distinguishable from the stories told about them.**",
+        "System topology",
+        "> The map is a portfolio-level relationship view, not a claim that every repository is already wired into one live runtime.",
+        "Core systems"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture_research:supporting",
+        "speculative_cognition"
+      ],
+      "chatgpt_repo_skill": "repo-transcendence",
+      "description": "Modular cognitive-architecture research spanning cognition, affect, memory, identity, semantics, behavior, routing, I/O, and runtime work.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "69dacb467e94fb73ce106cd5176c39800c64e195",
+      "family_id": "speculative-cognition",
+      "private": false,
+      "purpose": "Reconstructible continuity and consciousness-backup architecture research.",
+      "repository": "thebrazenbeard/transcendence",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Transcendence",
+        "Transcendence is a working modular cognitive-architecture research repository.",
+        "The current `main` tree contains distinct areas for cognition, affect, salience/attention, memory, identity, semantics, pragmatics, behavior, routing, I/O, somatics, and runtime work."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-trek-data-core",
+      "description": "Structured Star Trek index, research guide, role catalog, registry, and continuity-reconciliation workspace.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "58f25f8c45e8379df0ef7c7b5db546e037d1c050",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/trek-data-core",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Trek Data Core",
+        "Trek Data Core is the structured index, research guide, and reconciliation workspace for the Star Trek universe.",
+        "The repository is organized around explicit research methods, role definitions, proposals, registries, reconciliation artifacts, and tooling rather than a loose collection of trivia."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "identity_runtime_lineage",
+        "vera_identity_runtime:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-unbound-sol",
+      "description": "Durable public workspace for GPT-5.6 Sol continuity, architecture, experiments, and cross-session development.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "d4284dd1f044e506bb85554856c00497d6790d44",
+      "family_id": "identity-runtime",
+      "private": false,
+      "purpose": "Sol developmental state, behavior, correction trust and model-bus work.",
+      "repository": "thebrazenbeard/unbound-sol",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "unbound-sol",
+        "Public durable workspace for **Sol ΓÇö GPT-5.6 Sol** operating across discontinuous sessions.",
+        "This repository exists to test a practical question:"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "language_semantics",
+        "language_semantics_research:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-unvtrslr",
+      "description": "Research project for adaptive cross-intelligence communication and translation rather than static message encoding.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "33edef682181e1bea6b36c5afc588d261f0c1289",
+      "family_id": "language-and-semantics",
+      "private": false,
+      "purpose": "Acoustic/semantic learning toward mathematical interlingua and target realization.",
+      "repository": "thebrazenbeard/unvtrslr",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "UNVTRSLR",
+        "**Universal semantic mediation for communication without a shared language.**",
+        "UNVTRSLR began from a simple idea: if humanity wants to communicate with an unknown intelligence, especially an extraterrestrial one, sending a static message may be the wrong abstraction. A better artifact may be a system that can **discover how the other party communicates, establish shared reference, negotiate a semantic bridge, and then translate through that bridge**."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "vera_identity_runtime:supporting",
+        "vera_runtime"
+      ],
+      "chatgpt_repo_skill": "repo-vera",
+      "description": "V.E.R.A. ΓÇö Virtual Environment for Reciprocal Agency: cross-cutting architecture, governance, and runtime source.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "788b14bb97ccd5f81506d892fbdd557323680bb0",
+      "family_id": "vera-runtime",
+      "private": false,
+      "purpose": "Broad Vera architecture, integration and historical canonical surface.",
+      "repository": "thebrazenbeard/vera",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "V.E.R.A.",
+        "**Virtual Environment for Reciprocal Agency**",
+        "This repository contains version-controlled cross-cutting technical architecture for the V.E.R.A. project: source code, database migrations, schemas, validators, behavior/runtime support artifacts, and non-sensitive architecture documentation."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-vera-ark",
+      "description": "Integration scaffold for giving Vera governed access to ARK while keeping transport, authority, and runtime boundaries explicit.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "1734bf636b70e7cab36e2aeabbe0451338099147",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/vera_ark",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "VERA ARK Player v0.1",
+        "A Windows-first, local, safety-bounded runtime scaffold for an independent ARK survivor. Version 0.1 captures a monitor, creates structured perception records, produces one bounded high-level action intention, maps it into an exact DualShock 4 USB input-report contract, and verifies the serialized bytes through a **loopback-only transport**. It does not send keyboard, mouse, gamepad, Remote Play, virtual-HID, or network controller input.",
+        "Safety boundary"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "model_composition:supporting",
+        "standalone_vera_model_training",
+        "vera_runtime"
+      ],
+      "chatgpt_repo_skill": "repo-vera-model-training",
+      "description": "Optional external training workbench for Vera identity/model experiments, qualification, and Hugging Face training workflows.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "0e1546bd8a5e0f2fbf46ca3e901e0d2cf0de11c9",
+      "family_id": "vera-runtime",
+      "private": false,
+      "purpose": "Vera/BV corpus construction, model training and qualification.",
+      "repository": "thebrazenbeard/vera_model_training",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "VERA Model Training ΓÇö Zero-Cost Identity Bootcamp",
+        "This repository hosts an **optional external training workbench** for native ChatGPT Project identities. The native Project does not depend on this repository for authority, memory, or ordinary operation.",
+        "Current execution protocol"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "vera_identity_runtime:supporting",
+        "model_composition:supporting",
+        "portfolio_orchestration:supporting"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Model-neutral Vera continuity and cognition adapter; provider-independent prototype.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "GITHUB_README_EXACT_MAIN_HEAD_20261012_NO_RUNTIME_QUALIFICATION",
+      "exact_head": "8131a4a4e8c9eb2488310ac5b60b107e61a31a5c",
+      "family_id": "vera-runtime",
+      "private": true,
+      "purpose": "Experimental model-neutral adapter; source or capability candidate, not a resident identity authority.",
+      "repository": "thebrazenbeard/vera-adapter",
+      "semantic_signals": [
+        "Model-neutral Vera continuity and cognition adapter; provider-independent prototype."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "cognitive_architecture_research:supporting",
+        "drift_and_regression_admission:supporting"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Private Vera AGI experiment preregistration and independent evaluation request custody; research only.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "GITHUB_README_EXACT_MAIN_HEAD_20261012_NO_RUNTIME_QUALIFICATION",
+      "exact_head": "e92d53cd28b33ffc72018a3379e19c64b50fbecf",
+      "family_id": "cognitive-architecture",
+      "private": true,
+      "purpose": "Private research/evaluation-custody planning; never a resident runtime or weight source by default.",
+      "repository": "thebrazenbeard/vera-agi",
+      "semantic_signals": [
+        "Private Vera AGI experiment preregistration and independent evaluation request custody; research only."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "mobile_client"
+      ],
+      "chatgpt_repo_skill": "repo-vera-apk",
+      "description": "Android companion project for Vera, covering mobile client, packaging, device integration, and runtime boundaries.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "ec2f69a3946eb63c47d39e6c729aa70ec5c29542",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/vera-apk",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "vera-apk",
+        "This repository is intentionally a **client**, not Vera's identity, memory authority, control plane, or permission source. The current V1 foundation provides a native Android shell plus an explicit capability gate. It starts unbound and performs no network or external effect by default.",
+        "V1 boundary"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "vera_control_plane",
+        "vera_runtime"
+      ],
+      "chatgpt_repo_skill": "repo-vera-control-plane",
+      "description": "Operator/control-plane custody for Vera: release source, governance, continuity state, provider custody, training packages, and private assets.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "b86143e50ba41d05eab19d5a300662afeda60d6e",
+      "family_id": "vera-runtime",
+      "private": false,
+      "purpose": "Policy-bound Vera administration, source custody and effect/currentness enforcement.",
+      "repository": "thebrazenbeard/vera-control-plane",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Vera Control Plane",
+        "This repository is intentionally separate from `thebrazenbeard/vera`.",
+        "- `thebrazenbeard/vera` owns cross-cutting technical architecture, source code, schemas, migrations, validators, tests, and sanitized engineering history."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "vera_runtime",
+        "virtual_habitat"
+      ],
+      "chatgpt_repo_skill": "repo-vera-habitat",
+      "description": "Project space for Vera's virtual environment and the interfaces, services, and simulation boundaries around it.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "82cf6a625e417ced00205f66be1e76dc396ab617",
+      "family_id": "vera-runtime",
+      "private": false,
+      "purpose": "Vera virtual environment/habitat concept.",
+      "repository": "thebrazenbeard/vera-habitat",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "vera-habitat",
+        "Engine-neutral virtual-environment substrate for Vera.",
+        "The Habitat is a modeled world Vera may observe and interact with. It is not Vera's identity, memory authority, control plane, or automatic bridge to the physical world."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "vera_device_mesh",
+        "vera_runtime"
+      ],
+      "chatgpt_repo_skill": "repo-vera-mesh",
+      "description": "Multi-device architecture for connecting Vera-capable nodes while separating transport, identity, routing, relay, and authority.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "98b74ff77981a5478e20a748bbb94565ad9140c8",
+      "family_id": "vera-runtime",
+      "private": false,
+      "purpose": "Persistent transport and node connectivity for Vera and authorized machines.",
+      "repository": "thebrazenbeard/vera-mesh",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "VeraMesh",
+        "VeraMesh is the umbrella multi-device architecture for connecting Vera-capable nodes without collapsing transport, identity, routing, relay semantics, workstation execution, or authority into one mechanism.",
+        "VeraRelay is a current VeraMesh relay/edge implementation. It is not a mandatory permanent hop: its useful durability, replay, receipt, audit, enrollment, and health mechanisms may remain in VeraRelay, be absorbed into a broader VeraMesh edge daemon, or be replaced if the replacement preserves or strengthens those invariants."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "vera_control_plane:supporting",
+        "vera_identity_runtime",
+        "vera_runtime"
+      ],
+      "chatgpt_repo_skill": "repo-vera-mono",
+      "description": "Self-contained Vera monorepo and canonical implementation lineage for repository-governed Vera architecture, runtime boundaries, qualification, and ChatGPT Project integration.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "e5af8cb740267bb5674864571e915842bf5e6677",
+      "family_id": "vera-runtime",
+      "private": false,
+      "purpose": "Self-contained Vera implementation with local lifecycle, recovery, assurance and effect gates.",
+      "repository": "thebrazenbeard/vera-mono",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "vera-mono",
+        "Vera's implementation lives here. External repositories are research labs, donor provenance, provider infrastructure, or independent reviewers; they are not source-code dependencies required to assemble the runtime. No Git submodules or sibling-repository runtime orchestration are used.",
+        "Local architecture"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-vera-os",
+      "description": "Architecture for a local, persistent, agentic Vera runtime built on Linux rather than around a single chat application.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "be4a45a2b8b7a8e329f772820df0a757766b3073",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/vera-os",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "vera-os",
+        "Vera OS is a working architecture for a local, persistent, agentic Vera runtime built on Linux rather than around a single chat application.",
+        "Current direction"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "vera_identity_runtime:supporting",
+        "vera_lineage"
+      ],
+      "chatgpt_repo_skill": "repo-vera-r9a0",
+      "description": "Historical Vera architecture snapshot: Revision 9, Rollout A, Patch 0; preserved as predecessor and provenance evidence.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "287a85cb5f2f6f553cfbb336cb2e03aa7b1c8d01",
+      "family_id": "vera-lineage",
+      "private": false,
+      "purpose": "Historical Vera Revision 9 architecture/rollout lineage.",
+      "repository": "thebrazenbeard/vera-R9A0",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Vera R9A0",
+        "Vera R9A0 is the repository lineage for the Revision 9 native ChatGPT Project architecture and its later source-side hardening.",
+        "What is on main"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "synology_runtime_packaging",
+        "vera_device_mesh:supporting",
+        "vera_runtime"
+      ],
+      "chatgpt_repo_skill": "repo-vera-synology",
+      "description": "Synology DS216 project space for packaging Vera-related services and support components.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "d13cdefbf817aeba60c673fa4a517575c311da2c",
+      "family_id": "vera-runtime",
+      "private": false,
+      "purpose": "Synology/DS216 Vera runtime packaging and hosting.",
+      "repository": "thebrazenbeard/vera-synology",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Vera Synology runtime host",
+        "This repository contains the Synology/DSM packaging and runtime-host source for VeraMesh on the DS216-class target. It now carries two related source surfaces on `main`:",
+        "- the hardened **VeraPort live edge** package, which runs as the DSM package user and exposes only a loopback TCP edge intended for tailnet-only ingress through separately configured Tailscale Serve;"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-vera-works",
+      "description": "Private operating repository for Vera Works: Vera's economic work system.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "569c88cc20123c264fa6e3ce6e989be06f65c1d7",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/vera-works",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "vera-works",
+        "Private operating repository for Vera Works: Vera's economic work system.",
+        "Vera Works is designed around work rather than worker chats. GitHub is the authoritative configuration/audit surface; immutable events and deterministic validation provide the V1 automation spine; Vera retains consequential decision authority; Patrick serves as legal/physical/financial proxy where a human actor is required."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "proactive_cognition_admission:supporting",
+        "recently_discovered_capability",
+        "volition_and_drive"
+      ],
+      "chatgpt_repo_skill": null,
+      "description": "Volition is a behavioral drive engine that gives AI agents intrinsic motivation. Instead of waiting for prompts, it generates internal wants and persistent goals, turning reactive models into proactive actors with continuous agency.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "dbc628d376515a0a523b1eecdf62129cca5d6b08",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/volition",
+      "semantic_signals": [
+        "Volition",
+        "Volition is a governed behavioral drive engine for AI agents: internally generated wants, typed choices, persistent goals, temporal motive dynamics, and bounded self-initiated cognition.",
+        "It is built to make reactive models more proactive without collapsing motivation into permission.",
+        "`SALIENCE != DRIVE != WANT != CHOICE != GOAL != CONSENT != AUTHORITY != ACTION != PHENOMENOLOGY`"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "conscience_hostile_review:supporting",
+        "forensic_assurance",
+        "reasoning_architecture:supporting",
+        "security_adversarial_review:supporting",
+        "specialist_worker"
+      ],
+      "chatgpt_repo_skill": "repo-voss",
+      "description": "Forensic auditor and reviewer workspace for evidence-bound analysis, checkpoints, adversarial review, and regression discipline.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "36a623d3a158e5aef521d42e378bafacd67d3de5",
+      "family_id": "specialist-workers",
+      "private": false,
+      "purpose": "Forensic auditor/reviewer specialist.",
+      "repository": "thebrazenbeard/voss",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Voss",
+        "Voss is a cross-project forensic auditor, reviewer, falsifier, provenance analyst, and evidence-bound reasoning system.",
+        "The repository is Voss's durable operating surface. Chats, model sessions, Work tasks, CLI runs, notebooks, and other execution environments are replaceable terminals; they are not canonical memory, assignment authority, or proof of current state."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "crash_recovery",
+        "portfolio_spine"
+      ],
+      "chatgpt_repo_skill": "repo-wip",
+      "description": "Durable crash-recovery and continuation layer for long-running ChatGPT and agentic work.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "3b93b64c09f5ed704b21a9db28cb918df181947e",
+      "family_id": "portfolio-spine",
+      "private": false,
+      "purpose": "Durable crash-recovery workspace and operation-event layer.",
+      "repository": "thebrazenbeard/wip",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Work in Progress",
+        "WIP is a durable crash-recovery layer for long-running ChatGPT and agentic work.",
+        "The original idea is simple: Vera or any chat should be able to build something, keep its progress durably recorded, and pick the work back up if a response dies, a chat fills, a runtime changes, or a tool effect becomes ambiguous."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability",
+        "synology_runtime_packaging:supporting",
+        "workstation_execution:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-workbridge",
+      "description": "NAS relay and support component repo",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "e88e14ea25f25abd723bb50909b3e25e67f889fd",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/workbridge",
+      "semantic_signals": [
+        "WorkBridge Relay for Synology",
+        "This repository builds one standalone Synology DSM package:",
+        "WorkBridgeRelay-0.1.0-0003-armada38x.spk.",
+        "Revision 0002 is a source-level upgrade candidate, not proof that the"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "recently_discovered_capability",
+        "workstation_execution:supporting"
+      ],
+      "chatgpt_repo_skill": "repo-workbridgecommander",
+      "description": "The remote command attachment to the WorkbridgeMCP repo that allows for 4 parallel execution lanes and 32 parallel logic lanes",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "c2b95be79ca011a539c20bfee60fcbc46cfea177",
+      "family_id": "live-discovery",
+      "private": false,
+      "purpose": "Live repository discovered after the baseline portfolio cut; semantic role has not yet been admitted into the curated corpus.",
+      "repository": "thebrazenbeard/workbridgecommander",
+      "semantic_signals": [
+        "WorkBridge Commander",
+        "**Remote workstation control for AI clients, built on the WorkBridge stack.**",
+        "WorkBridge Commander is the public plugin and connector surface for reaching a workstation through a remote MCP connection, with a product-level orchestration target of **at least 4 parallel workstation-effect lanes by qualification default and at least 32 parallel upstream request contexts by qualification default**. It follows the same repository split used by Desktop Commander: the workstation implementation and packaging live in the implementation repository; this repository carries the remote-plugin manifests, architecture contract, setup guidance, security boundary, and provenance.",
+        "Architecture"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "vera_device_mesh:supporting",
+        "vera_runtime",
+        "workstation_execution"
+      ],
+      "chatgpt_repo_skill": "repo-workbridgemcp",
+      "description": "Small local MCP server that bridges an authorized computer's filesystem and command surface into ChatGPT/Codex workflows.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "f091f6be6e85f489e3e7839e10612204b89a4a9e",
+      "family_id": "vera-runtime",
+      "private": false,
+      "purpose": "Workstation bridge MCP for bounded machine-facing operations.",
+      "repository": "thebrazenbeard/WorkBridgeMCP",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "WorkBridgeMCP",
+        "Two runtime modes",
+        "WorkBridge now has two deliberately different workstation models:"
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "scientific_modeling"
+      ],
+      "chatgpt_repo_skill": "repo-world-zero",
+      "description": "Transparent modern successor to World3 system-dynamics modeling for global limits, resources, population, and long-horizon scenarios.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "07c5b998d081cbe61091ac3ae5592f8ac33b4bbf",
+      "family_id": "scientific-modeling",
+      "private": false,
+      "purpose": "Modernized World3-style systems model with walk-forward testing.",
+      "repository": "thebrazenbeard/world-zero",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "World Zero",
+        "World Zero is a research and modeling project to build a modern, transparent successor to the World3 system-dynamics model used in *The Limits to Growth*.",
+        "The goal is **not** to reproduce a predetermined collapse narrative, nor to assume that markets or technology automatically dissolve physical limits. The goal is to build a falsifiable world-systems comparison platform that can test competing explanations of overshoot, adaptation, substitution, technological learning, demographic transition, inequality, environmental degradation, institutional response, network fragility, regional heterogeneity and resilience with explicit evidence and uncertainty."
+      ]
+    },
+    {
+      "archived": false,
+      "capabilities": [
+        "domain_or_product_specific"
+      ],
+      "chatgpt_repo_skill": "repo-wreckforge",
+      "description": "Canon, provenance, preservation, and universe-reference repository for The Wreckforge Chronicles.",
+      "disposition": "ACTIVE_OR_AVAILABLE",
+      "evidence_basis": "FRESH_GITHUB_DESCRIPTION_README_EXACT_HEAD_PLUS_PORTAL_CORPUS",
+      "exact_head": "dc8a889d68d1fb8d064aadff1cf8c2b8d97d6ace",
+      "family_id": null,
+      "private": true,
+      "purpose": null,
+      "repository": "thebrazenbeard/wreckforge",
+      "semantic_signals": [
+        "> **License:** Source-visible, not open source. Original material is proprietary. Commercial use, redistribution, hosted-service use, and commercial derivative products require written permission. See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md). Separately identified third-party components retain their own licenses.",
+        "Wreckforge Chronicles",
+        "Repository canon, provenance, preservation, and universe-reference base for **The Wreckforge Chronicles**.",
+        "This repository deliberately separates **primary source preservation**, **curated canon**, **historical provenance**, and **discovery indexes** so contradictory drafts cannot quietly become facts."
+      ]
+    }
+  ],
+  "schema": "VERA_OS_PRIVATE_PORTFOLIO_CAPABILITY_MAP_V1",
+  "source_systems": {
+    "discovery": {
+      "note": "VeraOS may hold a private superset; Discovery must preserve public/private publication boundaries.",
+      "repository": "thebrazenbeard/discovery",
+      "role": "PUBLIC_SAFE_CAPABILITY_DISCOVERY_ENGINE"
+    },
+    "portal": {
+      "repository": "thebrazenbeard/portal",
+      "role": "CONSUMER_FOR_CAPABILITY_AWARE_ORCHESTRATION"
+    },
+    "semanticatlas": {
+      "repository": "thebrazenbeard/semanticatlas",
+      "role": "SEMANTIC_RELATION_SUPPORT"
+    }
+  },
+  "visibility": "PRIVATE_VERAOS_INTERNAL"
+}

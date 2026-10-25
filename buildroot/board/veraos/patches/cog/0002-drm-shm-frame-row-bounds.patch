@@ -1,0 +1,80 @@
+From: VeraOS build qualification <veraos@local.invalid>
+Subject: [PATCH] drm: reject invalid SHM-to-GBM frame dimensions before copying
+
+A guest Cog 0.18.4 WPE Wayland SHM frame fault was captured at
+libcogplatform-drm.so:drm_copy_shm_buffer_into_bo+0x104 while reading a
+source byte. Require valid source and destination bounds and copy only
+a validated row length, never blindly traversing source width/height.
+
+This is a bounds-hardening candidate, not proof of valid shared-memory
+backing or working DRM rendering.
+
+--- a/platform/drm/cog-drm-modeset-renderer.c
++++ b/platform/drm/cog-drm-modeset-renderer.c
+@@ -285,33 +285,51 @@
+ {
+     int32_t width = wl_shm_buffer_get_width(shm_buffer);
+     int32_t height = wl_shm_buffer_get_height(shm_buffer);
+     int32_t stride = wl_shm_buffer_get_stride(shm_buffer);
++    uint32_t bo_width = gbm_bo_get_width(bo);
++    uint32_t bo_height = gbm_bo_get_height(bo);
++
++    /*
++     * Validate both source and target dimensions before copying. A mismatched
++     * buffer cannot justify reading or writing beyond either mapped row.
++     */
++    if (width <= 0 || height <= 0 || width > G_MAXINT32 / 4 ||
++        stride < width * 4 || (uint32_t) width > bo_width ||
++        (uint32_t) height > bo_height) {
++        g_warning("drop invalid SHM frame: impossible size or stride");
++        return;
++    }
+ 
+     uint32_t bo_stride = 0;
+-    void    *map_data = NULL;
++    void *map_data = NULL;
+     gbm_bo_map(bo, 0, 0, width, height, GBM_BO_TRANSFER_WRITE, &bo_stride, &map_data);
+     if (!map_data)
+         return;
+ 
++    if (bo_stride < width * 4) {
++        g_warning("drop invalid SHM frame: GBM stride too small");
++        gbm_bo_unmap(bo, map_data);
++        return;
++    }
++
+     wl_shm_buffer_begin_access(shm_buffer);
+ 
+     uint8_t *src = wl_shm_buffer_get_data(shm_buffer);
+     uint8_t *dst = map_data;
+-
+-    uint32_t bo_width = gbm_bo_get_width(bo);
+-    uint32_t bo_height = gbm_bo_get_height(bo);
+-    if (!(width == bo_width && height == bo_height && stride == bo_stride)) {
+-        for (uint32_t y = 0; y < height; ++y) {
+-            for (uint32_t x = 0; x < width; ++x) {
+-                dst[bo_stride * y + 4 * x + 0] = src[stride * y + 4 * x + 0];
+-                dst[bo_stride * y + 4 * x + 1] = src[stride * y + 4 * x + 1];
+-                dst[bo_stride * y + 4 * x + 2] = src[stride * y + 4 * x + 2];
+-                dst[bo_stride * y + 4 * x + 3] = src[stride * y + 4 * x + 3];
+-            }
+-        }
+-    } else
+-        memcpy(dst, src, stride * height);
++    if (!src) {
++        g_warning("drop invalid SHM frame: no mapped source");
++        wl_shm_buffer_end_access(shm_buffer);
++        gbm_bo_unmap(bo, map_data);
++        return;
++    }
++
++    const size_t row_bytes = (size_t) width * 4;
++    for (uint32_t y = 0; y < (uint32_t) height; ++y) {
++        memcpy(dst + (size_t)bo_stride * y,
++               src + (size_t)stride * y,
++               row_bytes);
++    }
+ 
+     wl_shm_buffer_end_access(shm_buffer);
+     gbm_bo_unmap(bo, map_data);
+ }

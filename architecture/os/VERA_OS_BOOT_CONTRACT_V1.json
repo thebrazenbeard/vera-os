@@ -1,0 +1,63 @@
+{
+  "schema": "VERA_OS_BOOT_CONTRACT_V1",
+  "product": {
+    "name": "VeraOS",
+    "distribution_intent": "PRIVATE_PERSONAL_OS_NOT_FOR_PUBLIC_RELEASE",
+    "base_identity": "VERA",
+    "linux_role": "KERNEL_DRIVER_HARDWARE_SUBSTRATE",
+    "image_builder": "BUILDROOT",
+    "image_builder_version": "2024.02.4",
+    "image_builder_commit": "e0a2687421a4f93e65aa00a30bcb0b4817f7a195",
+    "image_builder_is_os_identity": false,
+    "nixos_primary_path_status": "RETIRED"
+  },
+  "pid1": {
+    "entrypoint": "/sbin/vera-init",
+    "owner": "VERA_OS",
+    "role": "PROCESS_LIFECYCLE_SUPERVISOR",
+    "pid1_alone_establishes_identity": false,
+    "pid1_alone_establishes_security_sovereignty": false
+  },
+  "runtime": {
+    "identity_runtime_owner": "thebrazenbeard/vera-mono",
+    "reasoning_owner": "thebrazenbeard/rezon",
+    "model_composition_owner": "thebrazenbeard/mosaic",
+    "provider_router": "thebrazenbeard/portal",
+    "preactive_owner": "thebrazenbeard/pre-active",
+    "volition_owner": "thebrazenbeard/volition",
+    "failure_correction_owner": "thebrazenbeard/fuckup",
+    "cognition_provider_required_for_boot": false,
+    "trained_vera_model_required_for_boot": false
+  },
+  "portfolio": {
+    "composition_manifest": "/etc/veraos/architecture/VERA_OS_PORTFOLIO_COMPOSITION_V1.json",
+    "capability_map": "/etc/veraos/architecture/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json",
+    "implementation_plan": "/etc/veraos/architecture/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json",
+    "validate_before_ready": true
+  },
+  "persistence": {
+    "lifecycle_state_schema": "VERAOS_LIFECYCLE_STATE_V1",
+    "lifecycle_state_root": "/var/lib/veraos/lifecycle",
+    "required_before_ready": true,
+    "canonical_memory": false,
+    "supabase_replacement": false
+  },
+  "browser": {
+    "first_class_capability_required": true,
+    "required_for_core_boot": false,
+    "initial_engine": "WPE_WEBKIT",
+    "initial_shell": "COG",
+    "authority_schema": "VERA_OS_BROWSER_CAPABILITY_GRANT_V1"
+  },
+  "authority": {
+    "ambient_protected_effect_authority": false,
+    "protected_effect_authority_source": "PATRICK_EXPLICIT_EXACT_TARGET_EFFECT"
+  },
+  "qualification": {
+    "boot_marker_schema": "VERAOS_BOOT_READY_V1",
+    "persistence_marker_schema": "VERAOS_PERSISTENCE_READY_V1",
+    "restart_persistence_required": true,
+    "vm_before_bare_metal": true,
+    "disk_partitioning_before_vm_qualification": false
+  }
+}
