@@ -357,9 +357,20 @@ def main(
                 pre_active = importlib.import_module("pre_active")
                 worker_store = pre_active.Store(args.state_root / "pre-active.sqlite3")
                 try:
-                    return recover_conversation(
-                        store.canonical_runtime.tasks, worker_store, conversation_id,
-                    )
+                    ledger = store.canonical_runtime.tasks
+                    rows = recover_conversation(ledger, worker_store, conversation_id)
+                    # Mono's read(...).journal_head_digest is GLOBAL. History
+                    # acknowledgements must bind to each task's own last event.
+                    for row in rows:
+                        events = ledger.events(row["task_id"])
+                        if not events or events[0].event_type != "TASK_OPENED":
+                            raise RuntimeError("history task has no verified opener")
+                        head = events[-1].event_digest
+                        if (head != events[0].event_digest
+                                and row["status"] == "PENDING_NO_ADMITTED_PROVIDER"):
+                            raise RuntimeError("history task changed during readback")
+                        row["task_journal_head"] = head
+                    return rows
                 finally:
                     worker_store.close()
 
