@@ -1,6 +1,9 @@
 name: VeraOS offline research contracts
 on:
   pull_request:
+  push:
+    branches:
+      - review/atomic-build-artifact-copy-20261025
   workflow_dispatch:
 
 permissions:
