@@ -141,8 +141,10 @@ make -C /work/buildroot O="$output" BR2_EXTERNAL=/workspace/buildroot olddefconf
 make -C /work/buildroot O="$output" BR2_EXTERNAL=/workspace/buildroot BR2_JLEVEL="$VERAOS_JOBS" -j"$VERAOS_JOBS"
 test -f "$output/images/bzImage"
 test -f "$output/images/rootfs.ext2"
-cp -n "$output/images/bzImage" /artifacts/veraos-bzImage
-cp -n "$output/images/rootfs.ext2" /artifacts/veraos-rootfs.ext2
+# GNU cp -n may return success without copying when a destination appears
+# after the host-side preflight. O_EXCL must fail the child build instead.
+dd if="$output/images/bzImage" of=/artifacts/veraos-bzImage bs=4M status=none conv=excl,fsync
+dd if="$output/images/rootfs.ext2" of=/artifacts/veraos-rootfs.ext2 bs=4M status=none conv=excl,fsync
 sha256sum /artifacts/veraos-bzImage > /artifacts/veraos-bzImage.sha256
 sha256sum /artifacts/veraos-rootfs.ext2 > /artifacts/veraos-rootfs.ext2.sha256
 '@
