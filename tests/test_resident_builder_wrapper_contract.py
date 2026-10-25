@@ -4,6 +4,7 @@ No Docker, Buildroot, or untrusted historical editor task is executed here.
 A green test proves static wiring, not a compiled or booted image.
 """
 from pathlib import Path
+import os
 import shutil
 import subprocess
 import tempfile
@@ -69,7 +70,8 @@ class ResidentBuilderWiringTests(unittest.TestCase):
                 )
         self.assertNotIn('cp -n "$output/images/', self.source)
 
-    @unittest.skipUnless(shutil.which("dd"), "GNU dd not available on this host")
+    @unittest.skipUnless(os.name == "posix" and shutil.which("dd"),
+                         "POSIX GNU dd not available on this host")
     def test_exclusive_copy_refuses_race_created_destination(self):
         # Reproduce the child copy's flags, including creation of an existing
         # path between the host preflight and the child write.
