@@ -44,6 +44,9 @@ if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
 
   python3 "$repo_root/tools/vm/Stage-VeraOSResidentSources.py" \
     --verify-stage "$stage" --repo-root "$repo_root"
+  # Parse required resident API symbols without importing staged third-party code.
+  python3 "$repo_root/tools/vm/Verify-ResidentDependencies.py" \
+    --components-root "$stage/components"
   # Sidecar is a SOURCE-GUEST PROFILE only; never claim final output/images
   # or a booted/selected QualifiedVeraRuntime from successful source staging.
   python3 "$repo_root/tools/vm/Verify-VeraOSResidentGuestProfile.py" \
