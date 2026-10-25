@@ -1,0 +1,78 @@
+{
+  "schema": "VERA_OS_RESIDENT_BUILDROOT_CANDIDATE_V1",
+  "status": "SOURCE_CANDIDATE_NOT_BUILT",
+  "baseline_provenance": {
+    "veraos_browser_image_source_head": "446bf8e33fa729298d3540ad227e0fcd02d2a9f7",
+    "baseline_buildroot_version": "2024.02.4",
+    "baseline_buildroot_commit": "e0a2687421a4f93e65aa00a30bcb0b4817f7a195",
+    "baseline_python": "3.11",
+    "baseline_image_is_resident_qualified": false
+  },
+  "candidate": {
+    "builder": "Buildroot",
+    "version": "2025.02.18",
+    "annotated_tag_object_sha": "b611e07ef088c70c1e21f77c30872bce97a1f1c2",
+    "peeled_git_commit": "d030e36bbc9669230c015be971b14b6e062cfdde",
+    "target_python_expected": "3.12.14",
+    "source_defconfig": "buildroot/configs/veraos_x86_64_resident_browser_defconfig",
+    "host_toolchain_and_kconfig_must_be_verified": true,
+    "isolated_build_volume": "veraos-resident-browser-python312-20261012",
+    "artifacts_should_not_overwrite_existing": true
+  },
+  "requires": {
+    "python_packages": [
+      {
+        "package": "python-jsonschema",
+        "version": "4.23.0",
+        "symbol": "BR2_PACKAGE_PYTHON_JSONSCHEMA",
+        "reason": "vera-mono and portal jsonschema>=4.23"
+      },
+      {
+        "package": "python-cryptography",
+        "version": "44.0.1",
+        "symbol": "BR2_PACKAGE_PYTHON_CRYPTOGRAPHY",
+        "reason": "vera-mono cryptography>=43.0"
+      },
+      {
+        "package": "python-pyyaml",
+        "version": "6.0.2",
+        "symbol": "BR2_PACKAGE_PYTHON_PYYAML",
+        "reason": "portal PyYAML>=6,<7"
+      }
+    ],
+    "python_stdlib_flags": [
+      "BR2_PACKAGE_PYTHON3_SQLITE",
+      "BR2_PACKAGE_PYTHON3_SSL"
+    ],
+    "browser_flags": [
+      "BR2_PACKAGE_MESA3D",
+      "BR2_PACKAGE_WPEWEBKIT",
+      "BR2_PACKAGE_COG",
+      "BR2_PACKAGE_COG_PLATFORM_DRM",
+      "BR2_PACKAGE_DEJAVU",
+      "BR2_PACKAGE_DEJAVU_SANS"
+    ],
+    "target_core_code": [
+      "thebrazenbeard/vera-mono",
+      "thebrazenbeard/portal",
+      "thebrazenbeard/pre-active",
+      "thebrazenbeard/volition"
+    ],
+    "subsystems_not_auto_booted": [
+      "thebrazenbeard/vera_model_training",
+      "thebrazenbeard/vera-agi",
+      "thebrazenbeard/RSLinux5000000"
+    ],
+    "model_runtime_optional": true,
+    "provider_authority": false
+  },
+  "next_evidence": [
+    "Resolve all profile Kconfig symbols and dependencies on exact pinned Buildroot source",
+    "Build isolated kernel/rootfs using updated pinned source, retain full receipts",
+    "Audit 90 repo manifest embedded source, four exact-package receipts, package dependency ABI",
+    "Observe Python imports in real guest",
+    "Boot twice and verify lifecycle markers and resident services",
+    "Qualify browser UI and model route separately"
+  ],
+  "cost_boundary": "No paid build infrastructure; Lappy compute authorized. No system deployment or install."
+}

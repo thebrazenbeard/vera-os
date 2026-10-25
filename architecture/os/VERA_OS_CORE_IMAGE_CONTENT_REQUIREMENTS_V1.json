@@ -1,0 +1,66 @@
+{
+  "schema": "VERA_OS_CORE_IMAGE_CONTENT_REQUIREMENTS_V1",
+  "status": "CANDIDATE_BUILD_GATE_NOT_BOOT_ACTIVATION",
+  "source_profile": "RESIDENT_VERA_CORE",
+  "profile_description": "Distinguish the minimal VeraOS boot/image from an image that actually carries the resident Vera runtime and orchestration sources.",
+  "required_components": [
+    {
+      "repository": "thebrazenbeard/vera-mono",
+      "component": "vera_mono",
+      "package_marker": "/opt/veraos/components/vera_mono/packages/vera_core/src/vera_core/__init__.py",
+      "minimum_python": "3.12",
+      "code_role": "CANONICAL_IDENTITY_AND_GOVERNED_RUNTIME",
+      "must_be_source_packaged": true
+    },
+    {
+      "repository": "thebrazenbeard/portal",
+      "component": "portal",
+      "package_marker": "/opt/veraos/components/portal/portal/__init__.py",
+      "minimum_python": "3.12",
+      "code_role": "ORCHESTRATION_AND_COGNITION_ROUTE",
+      "must_be_source_packaged": true
+    },
+    {
+      "repository": "thebrazenbeard/pre-active",
+      "component": "pre_active",
+      "package_marker": "/opt/veraos/components/pre_active/src/pre_active/__init__.py",
+      "minimum_python": "3.11",
+      "code_role": "AUTONOMOUS_TURN_ADMISSION",
+      "must_be_source_packaged": true
+    },
+    {
+      "repository": "thebrazenbeard/volition",
+      "component": "volition",
+      "package_marker": "/opt/veraos/components/volition/src/volition/__init__.py",
+      "minimum_python": "3.11",
+      "code_role": "GOVERNED_VOLITION_BRIDGE",
+      "must_be_source_packaged": true
+    }
+  ],
+  "native_os_marker": "/opt/veraos/src/veraos/pid1.py",
+  "embedded_catalogs": {
+    "composition": "/etc/veraos/architecture/VERA_OS_PORTFOLIO_COMPOSITION_V1.json",
+    "capability_map": "/etc/veraos/architecture/VERA_OS_PORTFOLIO_CAPABILITY_MAP_V1.json",
+    "implementation": "/etc/veraos/architecture/VERA_OS_PORTFOLIO_IMPLEMENTATION_PLAN_V1.json"
+  },
+  "python_runtime_marker": "/usr/bin/python3",
+  "excluded_from_resident_by_default": [
+    "thebrazenbeard/vera_model_training",
+    "thebrazenbeard/vera-agi",
+    "thebrazenbeard/RSLinux5000000",
+    "thebrazenbeard/blotter",
+    "thebrazenbeard/vera-adapter"
+  ],
+  "reason_for_exclusion": "Research, training, industrial/network tools and experimental adapters require deliberate separate admission; catalog membership must not imply boot activation.",
+  "admission_layers": [
+    "PORTFOLIO_CATALOG_BINDING",
+    "SOURCE_PACKAGE_MARKERS",
+    "PYTHON_AND_EXTERNAL_LIBRARY_ABI",
+    "IMPORT_QUALIFICATION_INSIDE_TARGET",
+    "RESIDENT_SERVICE_START_AND_ROUTE",
+    "ACTUAL_MODEL_PROVIDER_CONSUMPTION",
+    "VERAOS_UI_ROUNDTRIP"
+  ],
+  "claim_ceiling": "Source and image-marker auditing only. Presence of a file is not proof of executable imported code, selected route, active resident process, governance, trained weights or UI behavior.",
+  "protected_effect_authority": false
+}

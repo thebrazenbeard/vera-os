@@ -1,0 +1,55 @@
+{
+  "schema": "VERA_OS_SOURCE_ONLY_DISCOVERY_GAP_AWARENESS_V1",
+  "observed_date": "2026-10-17",
+  "baseline": "Existing V1 private capability inventory: 90 historical entries; new live inventory of 96 source repositories was independently reviewed by PORTAL PR #371.",
+  "gap_count": 6,
+  "scope": "SOURCE_AWARENESS_ONLY",
+  "source_basis": "Exact six live GitHub main commit heads plus their README text; source role only, no runnable binaries checked.",
+  "authority": false,
+  "do_not_infer": [
+    "Selected resident source",
+    "Added Buildroot package",
+    "Installed guest dependency",
+    "Model/identity/memory/effect admission",
+    "Live inventory current after pinned heads change"
+  ],
+  "requires_explicit_later_decision": true,
+  "entries": [
+    {
+      "repository": "thebrazenbeard/human-shield",
+      "exact_main_head": "1a904738dc7618317f68529998a455b18b8b7bf7",
+      "role": "Research-only human-safety scenario and counterplan evidence; no autonomous field response, surveillance or safety authorization.",
+      "status": "RESEARCH_ONLY_NOT_DEPLOYED"
+    },
+    {
+      "repository": "thebrazenbeard/physica",
+      "exact_main_head": "9cc1ae9c04f728c10d6bdd9f3b277083eb46a834",
+      "role": "Physics-aware simulation and numerical research, including optional neural dynamics; not a validated physical controller.",
+      "status": "SOURCE_RESEARCH_NOT_SAFETY_RATED"
+    },
+    {
+      "repository": "thebrazenbeard/redworm",
+      "exact_main_head": "c87f93dc40f3009807b7964ec845048f6af06d49",
+      "role": "Historical conversation/runtime continuity lineage and local source-evidence ledger; not installed canonical memory.",
+      "status": "PROVENANCE_ONLY_NOT_MEMORY_ADMITTED"
+    },
+    {
+      "repository": "thebrazenbeard/v-e-r-a",
+      "exact_main_head": "a1bbb9259ce7f3ce7ff18895257a0a7e162d228e",
+      "role": "44-branch source snapshot/materialization workspace (38 exact mirrors, five sanitized and one source-definition snapshot), not VeraOS guest runtime.",
+      "status": "SOURCE_WORKSPACE_NOT_GUEST_DEPENDENCY"
+    },
+    {
+      "repository": "thebrazenbeard/vera-model",
+      "exact_main_head": "682511b6b5945c874cdc550a9705b5371a151581",
+      "role": "Optional separate private GLM24B local development candidate, distinct from Qwen; not admitted model or trusted provider.",
+      "status": "MODEL_CANDIDATE_NOT_ADMITTED"
+    },
+    {
+      "repository": "thebrazenbeard/vision",
+      "exact_main_head": "5f1dfbb717193e97fb9c4c1096122aea2f522430",
+      "role": "Standalone visual-frame ingestion and bounded visual evidence; not qualified Vera semantic observation or effect authority.",
+      "status": "SOURCE_PERCEPTION_NOT_INSTALLED"
+    }
+  ]
+}
