@@ -44,6 +44,8 @@ class GuestParentSymlinkScopeTests(unittest.TestCase):
         for name in ("libsqlite3.so.0", "libssl.so.3", "libcrypto.so.3"):
             put("usr/lib/" + name)
         put("usr/bin/cog")
+        # PID 1 needs the guest's executable loopback tool.
+        put("sbin/ip").chmod(0o755)
         put("usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
         for name in ("pid1.py", "resident.py", "desktop.py"):
             put("opt/veraos/src/veraos/" + name)

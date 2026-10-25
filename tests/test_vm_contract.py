@@ -84,7 +84,9 @@ class VmContractTests(unittest.TestCase):
         self.assertNotIn(").Trim()", build)
         self.assertIn('$script = $script -replace "`r`n", "`n"', build)
         self.assertIn('veraos-buildroot-build.sh', build)
-        self.assertIn('[System.IO.File]::WriteAllText(', build)
+        # Exclusive creation protects historical build receipts from clobber.
+        self.assertIn('[IO.File]::Open($scriptPath, [IO.FileMode]::CreateNew', build)
+        self.assertIn('$scriptHandle.Flush($true)', build)
         self.assertNotIn('"-lc", $script', build)
         self.assertIn('BR2_JLEVEL="$VERAOS_JOBS"', build)
         self.assertIn('[ValidateSet("CORE_BOOT", "BROWSER", "RESIDENT_BROWSER")]', build)
