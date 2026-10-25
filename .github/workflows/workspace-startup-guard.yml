@@ -1,0 +1,19 @@
+name: Vera OS workspace startup safety
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check suspicious editor startup source without executing it
+        run: python -m unittest discover -s tests -p test_workspace_startup_safety.py -v
