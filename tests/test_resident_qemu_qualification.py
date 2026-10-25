@@ -15,6 +15,8 @@ q = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(q)
 HEAD = q.EXPECTED_SOURCE_HEAD
+REVIEWED_BUILD_SOURCE = "e1773d7c69916ffb75b6edb52b8b4472080b32b5"
+OBSOLETE_BUILD_SOURCE = "79e9258bf5bb5fa993a98966fcd81260ea0c4c92"
 
 
 class ResidentQemuQualificationTests(unittest.TestCase):
@@ -24,8 +26,8 @@ class ResidentQemuQualificationTests(unittest.TestCase):
         self.assertIn("--network", cmd)
         self.assertEqual(cmd[cmd.index("--network") + 1], "none")
         self.assertEqual(cmd[cmd.index("-nic") + 1], "none")
-        self.assertIn("type=bind,source=/tmp/image,target=/artifacts,readonly", cmd)
-        self.assertIn("type=bind,source=/tmp/log,target=/logs", cmd)
+        self.assertIn(f"type=bind,source={Path('/tmp/image')},target=/artifacts,readonly", cmd)
+        self.assertIn(f"type=bind,source={Path('/tmp/log')},target=/logs", cmd)
         self.assertIn("init=/sbin/vera-init", cmd[cmd.index("-append") + 1])
         self.assertEqual(cmd[cmd.index("--entrypoint") + 1], "/usr/bin/qemu-system-x86_64")
         self.assertEqual(cmd[cmd.index("-append") + 1], q.BOOT_CONSOLE)
@@ -38,6 +40,34 @@ class ResidentQemuQualificationTests(unittest.TestCase):
         self.assertEqual(cmd[cmd.index("-b") + 1], "/artifacts/veraos-rootfs.ext2")
         self.assertEqual(cmd[cmd.index("--entrypoint") + 1], "/usr/bin/qemu-img")
         self.assertEqual(cmd[-1], "/logs/veraos-qualification-overlay.qcow2")
+
+    def test_both_container_commands_are_unprivileged_immutable_and_writable_only_in_logs_and_tmp(self):
+        overlay = q.overlay_command("sha256:" + "f" * 64, Path("/host/image"), Path("/host/logs"))
+        qemu = q.qemu_command("sha256:" + "f" * 64, "unique-name",
+                              Path("/host/image"), Path("/host/logs"), memory=3072)
+        for command in (overlay, qemu):
+            self.assertEqual(command[command.index("--user") + 1], "1000:1000")
+            self.assertIn("--read-only", command)
+            self.assertEqual(command[command.index("--pids-limit") + 1], "64")
+            self.assertEqual(command[command.index("--cap-drop") + 1], "ALL")
+            self.assertEqual(command[command.index("--security-opt") + 1],
+                             "no-new-privileges")
+            self.assertEqual(command[command.index("--tmpfs") + 1],
+                             "/tmp:rw,nosuid,nodev,size=64m,mode=1777")
+            self.assertEqual(command[command.index("--env") + 1], "HOME=/tmp")
+            self.assertNotIn("--privileged", command)
+            mounts = [command[i + 1] for i, token in enumerate(command[:-1])
+                      if token == "--mount"]
+            self.assertEqual(mounts, [
+                f"type=bind,source={Path('/host/image')},target=/artifacts,readonly",
+                f"type=bind,source={Path('/host/logs')},target=/logs",
+            ])
+            self.assertIn("--network", command)
+            self.assertEqual(command[command.index("--network") + 1], "none")
+        self.assertEqual(overlay[-1], "/logs/veraos-qualification-overlay.qcow2")
+        self.assertEqual(qemu[qemu.index("-drive") + 1],
+                         "file=/logs/veraos-qualification-overlay.qcow2,format=qcow2,if=virtio")
+        self.assertEqual(qemu[qemu.index("-accel") + 1], "tcg")
 
     def sample_log(self, number=1):
         boot = q.expected_boot_marker(self.create_composition())
@@ -112,6 +142,25 @@ class ResidentQemuQualificationTests(unittest.TestCase):
         root, receipt = self.create_build_fixture()
         self.assertEqual(q.validate_build(root, HEAD), receipt)
 
+    def test_new_image_source_is_explicit_not_inferred_from_qualifier_revision(self):
+        # The qualifier will be committed AFTER the image-source commit. A
+        # separately reviewed build head is required, never its own HEAD.
+        self.assertEqual(q.EXPECTED_SOURCE_HEAD, REVIEWED_BUILD_SOURCE)
+        root, receipt = self.create_build_fixture()
+        self.assertEqual(q.validate_build(root, REVIEWED_BUILD_SOURCE), receipt)
+        receipt["SourceHead"] = OBSOLETE_BUILD_SOURCE
+        (root / "veraos-build-result.json").write_text(json.dumps(receipt))
+        with self.assertRaisesRegex(q.QualificationError, "unreviewed image source HEAD"):
+            q.validate_build(root, OBSOLETE_BUILD_SOURCE)
+
+    def test_qualifier_receipt_classifies_tool_and_build_source_separately(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        self.assertIn('qualifier_script_sha256 = sha256_file(Path(__file__).resolve())', source)
+        self.assertIn('"qualifier_script_sha256": qualifier_script_sha256', source)
+        self.assertIn('require(sha256_file(Path(__file__).resolve()) == qualifier_script_sha256', source)
+        self.assertIn('"qualifier_source_provenance_qualified": False', source)
+        self.assertIn('"source_to_image_build_provenance_independently_qualified": False', source)
+
     def test_build_receipt_rejects_wrong_source_or_builder(self):
         root, receipt = self.create_build_fixture()
         with self.assertRaisesRegex(q.QualificationError, "unreviewed image source HEAD"):
@@ -169,6 +218,24 @@ class ResidentQemuQualificationTests(unittest.TestCase):
                         "--logs", str(logs), "--source-head", HEAD,
                         "--expected-runner-image-id", "sha256:" + "f" * 64])
         self.assertEqual(sentinel.read_text(), 'previous evidence must survive')
+
+    def test_logs_cannot_be_inside_verified_stage_even_when_nonexistent(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            repo, artifacts, stage = (root / x for x in ("repo", "artifacts", "stage"))
+            for path in (repo, artifacts, stage):
+                path.mkdir()
+            logs = stage / "uncreated-logs"
+            with mock.patch.object(q.subprocess, "run",
+                                   side_effect=AssertionError("external command executed")) as run:
+                with self.assertRaisesRegex(q.QualificationError,
+                                            "outside verified resident source stage"):
+                    q.main(["--repo", str(repo), "--artifacts", str(artifacts),
+                            "--resident-source-stage", str(stage),
+                            "--logs", str(logs), "--source-head", HEAD,
+                            "--expected-runner-image-id", "sha256:" + "f" * 64])
+            run.assert_not_called()
+            self.assertFalse(logs.exists())
 
     def test_run_boot_success_path_with_synthetic_qemu_serial_output(self):
         """A real success must reach the final log evaluation without timeout."""

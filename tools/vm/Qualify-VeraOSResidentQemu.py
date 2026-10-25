@@ -19,7 +19,9 @@ import uuid
 
 
 BUILDROOT_COMMIT = "d030e36bbc9669230c015be971b14b6e062cfdde"
-EXPECTED_SOURCE_HEAD = "79e9258bf5bb5fa993a98966fcd81260ea0c4c92"
+# This is the reviewed *image-build source*, not the revision containing the
+# research-only qualifier. Keep these two source identities distinct.
+EXPECTED_SOURCE_HEAD = "e1773d7c69916ffb75b6edb52b8b4472080b32b5"
 TRUSTED_STAGE_VERIFIER_BLOB = "64395340a7cd9d45b016c770092544b7566f303c"
 SHA40 = re.compile(r"[0-9a-f]{40}\Z")
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
@@ -116,7 +118,14 @@ def assess_log(log: str, boot: str, pass_number: int) -> None:
 
 
 def docker_mounts(artifacts: Path, logs: Path) -> list[str]:
-    return ["--network", "none", "--mount", f"type=bind,source={artifacts},target=/artifacts,readonly",
+    # No container root, elevated capabilities, mutable image filesystem, or
+    # network. The fresh /logs bind is the only durable writable mount; QEMU's
+    # transient HOME and scratch files live on a bounded tmpfs.
+    return ["--network", "none", "--user", "1000:1000", "--read-only",
+            "--pids-limit", "64",
+            "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
+            "--tmpfs", "/tmp:rw,nosuid,nodev,size=64m,mode=1777", "--env", "HOME=/tmp",
+            "--mount", f"type=bind,source={artifacts},target=/artifacts,readonly",
             "--mount", f"type=bind,source={logs},target=/logs"]
 
 
@@ -208,6 +217,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--timeout-seconds", type=int, default=300)
     parser.add_argument("--memory-mib", type=int, default=3072)
     args = parser.parse_args(argv)
+    qualifier_script_sha256 = sha256_file(Path(__file__).resolve())
     repo, artifacts, logs, stage = (
         x.resolve() for x in (args.repo, args.artifacts, args.logs, args.resident_source_stage)
     )
@@ -217,6 +227,8 @@ def main(argv: list[str] | None = None) -> int:
             "logs must be outside source checkout")
     require(logs != artifacts and not logs.is_relative_to(artifacts),
             "logs must be outside artifacts")
+    require(logs != stage and not logs.is_relative_to(stage),
+            "logs must be outside verified resident source stage")
     require(not logs.exists(), "log directory already exists; refuse overwrite")
     require(args.source_head == EXPECTED_SOURCE_HEAD, "unreviewed image source HEAD")
     require(subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
@@ -240,6 +252,8 @@ def main(argv: list[str] | None = None) -> int:
     # immutable ID rather than tag closes the tag-change race during a boot.
     runner_id = pin_runner_image(args.runner_image, args.expected_runner_image_id)
     logs.mkdir(parents=True, exist_ok=False)
+    # qemu-img creates the overlay as the same unprivileged UID used by QEMU.
+    # If the host bind is not writable by that UID, check=True fails closed.
     subprocess.run(overlay_command(runner_id, artifacts, logs), check=True)
     results = []
     for number in (1, 2):
@@ -251,9 +265,17 @@ def main(argv: list[str] | None = None) -> int:
         results.append({"pass": number, "boot_ready": True, "resident_marker": True,
                         "persistence_marker": expected_persistence(number),
                         "log_sha256": sha256_file(logfile)})
+    require(sha256_file(Path(__file__).resolve()) == qualifier_script_sha256,
+            "qualifier source changed during research run")
     qualification = {
         "schema": "VERA_OS_RESIDENT_QEMU_RESEARCH_QUALIFICATION_V1",
         "source_head": args.source_head,
+        # Observed qualifier bytes are a different artifact from build source.
+        # The SHA permits later exact-tool review; it does not authenticate
+        # the tool's Git provenance or the kernel/rootfs build chain.
+        "qualifier_script_sha256": qualifier_script_sha256,
+        "qualifier_source_provenance_qualified": False,
+        "source_to_image_build_provenance_independently_qualified": False,
         "build_receipt_sha256": sha256_file(artifacts / "veraos-build-result.json"),
         "kernel_sha256": receipt["KernelSha256"],
         "rootfs_sha256": receipt["RootfsSha256"],
