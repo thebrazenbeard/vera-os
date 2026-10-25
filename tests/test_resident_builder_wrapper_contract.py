@@ -51,8 +51,10 @@ class ResidentBuilderWiringTests(unittest.TestCase):
 
     def test_child_shell_outputs_refuse_clobber(self):
         self.assertIn("set -euC", self.source)
-        self.assertIn("cp -n /work/output/images/bzImage /artifacts/veraos-bzImage", self.source)
-        self.assertIn("cp -n /work/output/images/rootfs.ext2 /artifacts/veraos-rootfs.ext2", self.source)
+        self.assertIn('cp -n "$output/images/bzImage" /artifacts/veraos-bzImage', self.source)
+        self.assertIn('cp -n "$output/images/rootfs.ext2" /artifacts/veraos-rootfs.ext2', self.source)
+        self.assertIn("output=/work/output", self.source)
+        self.assertIn('output="/work/output-resident-$VERAOS_SOURCE_HEAD"', self.source)
 
 
 if __name__ == "__main__":

@@ -19,8 +19,11 @@ import uuid
 
 
 BUILDROOT_COMMIT = "d030e36bbc9669230c015be971b14b6e062cfdde"
+EXPECTED_SOURCE_HEAD = "79e9258bf5bb5fa993a98966fcd81260ea0c4c92"
+TRUSTED_STAGE_VERIFIER_BLOB = "64395340a7cd9d45b016c770092544b7566f303c"
 SHA40 = re.compile(r"[0-9a-f]{40}\Z")
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
+IMAGE_ID = re.compile(r"sha256:[0-9a-f]{64}\Z")
 BOOT_CONSOLE = "root=/dev/vda rw console=ttyS0,115200 init=/sbin/vera-init"
 RESIDENT_MARKER = "VERAOS_RESIDENT_COMPONENTS_COMPOSED_V1"
 PANIC_MARKERS = ("Kernel panic", "Oops:", "BUG: unable to handle kernel")
@@ -45,6 +48,7 @@ def sha256_file(path: Path) -> str:
 
 def validate_build(artifacts: Path, expected_head: str) -> dict:
     require(SHA40.fullmatch(expected_head) is not None, "invalid exact source HEAD")
+    require(expected_head == EXPECTED_SOURCE_HEAD, "unreviewed image source HEAD")
     result_path = artifacts / "veraos-build-result.json"
     require(result_path.is_file(), "build receipt missing")
     result = json.loads(result_path.read_text(encoding="utf-8-sig"))
@@ -118,22 +122,26 @@ def docker_mounts(artifacts: Path, logs: Path) -> list[str]:
 
 def overlay_command(image: str, artifacts: Path, logs: Path) -> list[str]:
     return (["docker", "run", "--rm", *docker_mounts(artifacts, logs),
-             "--entrypoint", "qemu-img", image, "create", "-f", "qcow2", "-F", "raw",
+             "--entrypoint", "/usr/bin/qemu-img", image, "create", "-f", "qcow2", "-F", "raw",
              "-b", "/artifacts/veraos-rootfs.ext2", "/logs/veraos-qualification-overlay.qcow2"])
 
 
 def qemu_command(image: str, name: str, artifacts: Path, logs: Path, *, memory: int) -> list[str]:
     return (["docker", "run", "--rm", "--name", name, *docker_mounts(artifacts, logs),
-             image, "-m", str(memory), "-smp", "2", "-accel", "tcg", "-machine", "q35",
+             "--entrypoint", "/usr/bin/qemu-system-x86_64", image,
+             "-m", str(memory), "-smp", "2", "-accel", "tcg", "-machine", "q35",
              "-kernel", "/artifacts/veraos-bzImage", "-drive",
              "file=/logs/veraos-qualification-overlay.qcow2,format=qcow2,if=virtio",
              "-append", BOOT_CONSOLE, "-nic", "none", "-nographic", "-no-reboot"])
 
 
 def run_boot(command: list[str], name: str, logfile: Path, boot: str,
-             number: int, seconds: int) -> None:
+             number: int, seconds: int, *, dwell_seconds: float = 5.0) -> None:
     process = None
     observed_all_markers = False
+    first_marker_seen_at = None
+    clean_stop = False
+    require(dwell_seconds >= 5.0, "at least five seconds of live dwell required")
     try:
         with logfile.open("x", encoding="utf-8") as output:
             process = subprocess.Popen(command, stdout=output, stderr=subprocess.STDOUT)
@@ -142,30 +150,48 @@ def run_boot(command: list[str], name: str, logfile: Path, boot: str,
                 log = logfile.read_text(encoding="utf-8", errors="replace")
                 if any(x in log for x in PANIC_MARKERS):
                     raise QualificationError(f"guest panic on pass {number}")
+                if process.poll() is not None:
+                    raise QualificationError(
+                        f"QEMU exited before live dwell completed on pass {number}: {process.returncode}"
+                    )
                 markers_found = all(x in log for x in (boot, expected_persistence(number), RESIDENT_MARKER))
                 if markers_found:
                     assess_log(log, boot, number)
-                    observed_all_markers = True
-                    break
-                if process.poll() is not None:
-                    raise QualificationError(f"QEMU exited before markers on pass {number}: {process.returncode}")
+                    now = time.monotonic()
+                    if first_marker_seen_at is None:
+                        first_marker_seen_at = now
+                    if now - first_marker_seen_at >= dwell_seconds:
+                        observed_all_markers = True
+                        break
+                else:
+                    first_marker_seen_at = None
                 time.sleep(0.5)
             if not observed_all_markers:
                 raise QualificationError(f"QEMU timeout before markers on pass {number}")
     finally:
         if process is not None and process.poll() is None:
             # Only stop the uniquely generated container created by this invocation.
-            subprocess.run(["docker", "stop", "-t", "1", name],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                           timeout=15, check=False)
+            stopped = subprocess.run(["docker", "stop", "-t", "1", name],
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                     timeout=15, check=False)
+            clean_stop = stopped.returncode == 0
             try:
                 process.wait(timeout=10)
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait(timeout=10)
     if observed_all_markers:
+        require(clean_stop, "QEMU stopped unexpectedly after markers; no verified live dwell")
         # Include final output written during the bounded Docker/QEMU stop.
         assess_log(logfile.read_text(encoding="utf-8", errors="replace"), boot, number)
+
+
+def pin_runner_image(tag: str, claimed_id: str) -> str:
+    require(IMAGE_ID.fullmatch(claimed_id) is not None, "runner image SHA256 ID required")
+    observed = subprocess.run(["docker", "image", "inspect", "--format", "{{.Id}}", tag],
+                              check=True, capture_output=True, text=True).stdout.strip()
+    require(observed == claimed_id, "Docker runner tag disagrees with externally reviewed image ID")
+    return observed
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -177,6 +203,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="Unique nonexistent directory; no existing artifacts are overwritten")
     parser.add_argument("--source-head", required=True)
     parser.add_argument("--runner-image", default="veraos-qemu-runner:local")
+    parser.add_argument("--expected-runner-image-id", required=True,
+                        help="sha256:<64>, independently reviewed QEMU runner Docker image ID")
     parser.add_argument("--timeout-seconds", type=int, default=300)
     parser.add_argument("--memory-mib", type=int, default=3072)
     args = parser.parse_args(argv)
@@ -190,6 +218,7 @@ def main(argv: list[str] | None = None) -> int:
     require(logs != artifacts and not logs.is_relative_to(artifacts),
             "logs must be outside artifacts")
     require(not logs.exists(), "log directory already exists; refuse overwrite")
+    require(args.source_head == EXPECTED_SOURCE_HEAD, "unreviewed image source HEAD")
     require(subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
                            capture_output=True, text=True, check=True).stdout.strip() == args.source_head,
             "repo HEAD does not match requested exact SHA")
@@ -198,20 +227,25 @@ def main(argv: list[str] | None = None) -> int:
             "repo source tree is dirty")
     receipt = validate_build(artifacts, args.source_head)
     validate_resident_stage(stage, receipt)
+    verifier = repo / "tools/vm/Stage-VeraOSResidentSources.py"
+    verified_blob = subprocess.run(["git", "hash-object", "--", str(verifier)],
+                                   check=True, capture_output=True, text=True).stdout.strip()
+    require(verified_blob == TRUSTED_STAGE_VERIFIER_BLOB,
+            "staged-source verifier differs from reviewed exact Git blob")
     subprocess.run([sys.executable, str(repo / "tools/vm/Stage-VeraOSResidentSources.py"),
                     "--verify-stage", str(stage), "--repo-root", str(repo)],
                    check=True, stdout=subprocess.DEVNULL)
     boot = expected_boot_marker(repo / "architecture/portfolio/VERA_OS_PORTFOLIO_COMPOSITION_V1.json")
-    # The runner is an explicitly installed prerequisite, not implicitly built.
-    subprocess.run(["docker", "image", "inspect", args.runner_image],
-                   check=True, stdout=subprocess.DEVNULL)
+    # The runner ID is supplied from independent source-bound review. Using the
+    # immutable ID rather than tag closes the tag-change race during a boot.
+    runner_id = pin_runner_image(args.runner_image, args.expected_runner_image_id)
     logs.mkdir(parents=True, exist_ok=False)
-    subprocess.run(overlay_command(args.runner_image, artifacts, logs), check=True)
+    subprocess.run(overlay_command(runner_id, artifacts, logs), check=True)
     results = []
     for number in (1, 2):
         name = f"veraos-bt2-qualify-{uuid.uuid4().hex[:16]}"
         logfile = logs / f"veraos-pass{number}.log"
-        run_boot(qemu_command(args.runner_image, name, artifacts, logs,
+        run_boot(qemu_command(runner_id, name, artifacts, logs,
                               memory=args.memory_mib),
                  name, logfile, boot, number, args.timeout_seconds)
         results.append({"pass": number, "boot_ready": True, "resident_marker": True,
@@ -224,9 +258,14 @@ def main(argv: list[str] | None = None) -> int:
         "kernel_sha256": receipt["KernelSha256"],
         "rootfs_sha256": receipt["RootfsSha256"],
         "profile": "RESIDENT_BROWSER", "qemu_two_boots": True,
+        "runner_image_id": runner_id,
+        "live_dwell_seconds_per_boot": 5,
         "isolated_network": "DOCKER_NETWORK_NONE_AND_QEMU_NIC_NONE",
         "qualification_disk": "DISPOSABLE_QCOW2_OVERLAY_HOST_DISKS_UNTOUCHED",
-        "resident_component_import_observed": True,
+        "resident_component_import_serial_marker_observed": True,
+        "resident_component_import_independently_qualified": False,
+        "guest_pid1_heartbeat_qualified": False,
+        "runner_image_source_attestation_qualified": False,
         "model_admission_qualified": False,
         "protected_effect_authority_qualified": False,
         "desktop_render_qualified": False,

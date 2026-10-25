@@ -14,7 +14,7 @@ SPEC = importlib.util.spec_from_file_location("veraos_resident_qemu_qualifier", 
 q = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(q)
-HEAD = "a" * 40
+HEAD = q.EXPECTED_SOURCE_HEAD
 
 
 class ResidentQemuQualificationTests(unittest.TestCase):
@@ -27,6 +27,7 @@ class ResidentQemuQualificationTests(unittest.TestCase):
         self.assertIn("type=bind,source=/tmp/image,target=/artifacts,readonly", cmd)
         self.assertIn("type=bind,source=/tmp/log,target=/logs", cmd)
         self.assertIn("init=/sbin/vera-init", cmd[cmd.index("-append") + 1])
+        self.assertEqual(cmd[cmd.index("--entrypoint") + 1], "/usr/bin/qemu-system-x86_64")
         self.assertEqual(cmd[cmd.index("-append") + 1], q.BOOT_CONSOLE)
         self.assertNotIn("--privileged", cmd)
 
@@ -35,6 +36,7 @@ class ResidentQemuQualificationTests(unittest.TestCase):
         self.assertIn("-F", cmd)
         self.assertEqual(cmd[cmd.index("-F") + 1], "raw")
         self.assertEqual(cmd[cmd.index("-b") + 1], "/artifacts/veraos-rootfs.ext2")
+        self.assertEqual(cmd[cmd.index("--entrypoint") + 1], "/usr/bin/qemu-img")
         self.assertEqual(cmd[-1], "/logs/veraos-qualification-overlay.qcow2")
 
     def sample_log(self, number=1):
@@ -112,7 +114,7 @@ class ResidentQemuQualificationTests(unittest.TestCase):
 
     def test_build_receipt_rejects_wrong_source_or_builder(self):
         root, receipt = self.create_build_fixture()
-        with self.assertRaisesRegex(q.QualificationError, "SHA mismatch"):
+        with self.assertRaisesRegex(q.QualificationError, "unreviewed image source HEAD"):
             q.validate_build(root, "b" * 40)
         receipt["BuildrootVersion"] = "2024.02.4"
         (root / "veraos-build-result.json").write_text(json.dumps(receipt))
@@ -164,7 +166,8 @@ class ResidentQemuQualificationTests(unittest.TestCase):
             with self.assertRaisesRegex(q.QualificationError, "already exists"):
                 q.main(["--repo", str(repo), "--artifacts", str(artifacts),
                         "--resident-source-stage", str(root / "stage"),
-                        "--logs", str(logs), "--source-head", HEAD])
+                        "--logs", str(logs), "--source-head", HEAD,
+                        "--expected-runner-image-id", "sha256:" + "f" * 64])
         self.assertEqual(sentinel.read_text(), 'previous evidence must survive')
 
     def test_run_boot_success_path_with_synthetic_qemu_serial_output(self):
@@ -189,14 +192,130 @@ class ResidentQemuQualificationTests(unittest.TestCase):
             return FakeQemuProcess()
 
         with mock.patch.object(q.subprocess, "Popen", side_effect=fake_launch) as popen:
-            with mock.patch.object(q.subprocess, "run") as stop:
-                q.run_boot(["synthetic-docker-qemu"], "unique-container-1",
-                           logfile, boot, 1, 30)
+            with mock.patch.object(q.subprocess, "run",
+                                   return_value=q.subprocess.CompletedProcess([], 0)) as stop:
+                with mock.patch.object(q.time, "monotonic", side_effect=[0, 1, 1, 2, 8]):
+                    with mock.patch.object(q.time, "sleep"):
+                        q.run_boot(["synthetic-docker-qemu"], "unique-container-1",
+                                   logfile, boot, 1, 30)
         popen.assert_called_once()
         stop.assert_called_once()
         self.assertEqual(stop.call_args.args[0],
                          ["docker", "stop", "-t", "1", "unique-container-1"])
         self.assertEqual(logfile.read_text(), serial_output)
+
+    def test_marker_printing_process_that_exits_nonzero_is_rejected(self):
+        boot, serial_output = self.sample_log()
+        logfile = Path(self.temp.name) / "fake-exit.log"
+
+        class FakeEarlyExit:
+            returncode = 42
+
+            def poll(self):
+                return 42
+
+        def fake_launch(command, *, stdout, stderr):
+            stdout.write(serial_output)
+            stdout.flush()
+            return FakeEarlyExit()
+
+        with mock.patch.object(q.subprocess, "Popen", side_effect=fake_launch):
+            with mock.patch.object(q.subprocess, "run") as stop:
+                with self.assertRaisesRegex(q.QualificationError, "exited before live dwell"):
+                    q.run_boot(["synthetic-fake"], "never-stop", logfile, boot, 1, 30)
+        stop.assert_not_called()
+
+    def test_marker_printing_process_that_dies_during_dwell_is_rejected(self):
+        boot, serial_output = self.sample_log()
+        logfile = Path(self.temp.name) / "fake-late-exit.log"
+
+        class FakeLateExit:
+            returncode = 23
+
+            def __init__(self):
+                self.polls = 0
+
+            def poll(self):
+                self.polls += 1
+                return None if self.polls <= 1 else 23
+
+        def fake_launch(command, *, stdout, stderr):
+            stdout.write(serial_output)
+            stdout.flush()
+            return FakeLateExit()
+
+        with mock.patch.object(q.subprocess, "Popen", side_effect=fake_launch):
+            with mock.patch.object(q.subprocess, "run") as stop:
+                with mock.patch.object(q.time, "monotonic", side_effect=[0, 1, 1, 2]):
+                    with mock.patch.object(q.time, "sleep"):
+                        with self.assertRaisesRegex(q.QualificationError, "exited before live dwell"):
+                            q.run_boot(["fake"], "never-stop", logfile, boot, 1, 30)
+        stop.assert_not_called()
+
+    def test_failed_docker_stop_does_not_become_qualification_pass(self):
+        boot, serial_output = self.sample_log()
+        logfile = Path(self.temp.name) / "fake-stop-fail.log"
+
+        class FakeAlive:
+            def poll(self):
+                return None
+
+            def wait(self, timeout):
+                return 1
+
+        def fake_launch(command, *, stdout, stderr):
+            stdout.write(serial_output)
+            stdout.flush()
+            return FakeAlive()
+
+        with mock.patch.object(q.subprocess, "Popen", side_effect=fake_launch):
+            with mock.patch.object(q.subprocess, "run",
+                                   return_value=q.subprocess.CompletedProcess([], 1)):
+                with mock.patch.object(q.time, "monotonic", side_effect=[0, 1, 1, 2, 8]):
+                    with mock.patch.object(q.time, "sleep"):
+                        with self.assertRaisesRegex(q.QualificationError, "stopped unexpectedly"):
+                            q.run_boot(["fake"], "stopping-failed", logfile, boot, 1, 30)
+
+    def test_runner_tag_must_resolve_to_separately_pinned_sha256_id(self):
+        good = "sha256:" + "f" * 64
+        with mock.patch.object(q.subprocess, "run",
+                               return_value=q.subprocess.CompletedProcess([], 0, stdout=good + "\n")) as inspect:
+            self.assertEqual(q.pin_runner_image("reviewed:runner", good), good)
+        self.assertIn("{{.Id}}", inspect.call_args.args[0])
+        with mock.patch.object(q.subprocess, "run",
+                               return_value=q.subprocess.CompletedProcess([], 0, stdout=good + "\n")):
+            with self.assertRaisesRegex(q.QualificationError, "disagrees"):
+                q.pin_runner_image("reviewed:runner", "sha256:" + "0" * 64)
+
+    def test_wrong_verifier_blob_rejected_before_execution(self):
+        artifacts, receipt = self.create_build_fixture()
+        repo = artifacts / "repo"
+        repo.mkdir()
+        stage = artifacts / "stage"
+        stage.mkdir()
+        receipt_path = stage / "VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json"
+        receipt_path.write_text("{}")
+        receipt["ResidentCoreStageReceiptSha256"] = q.sha256_file(receipt_path)
+        (artifacts / "veraos-build-result.json").write_text(json.dumps(receipt))
+        logs = artifacts.parent / "distinct-nonexistent-qualification-logs"
+
+        def fake_git(cmd, *args, **kwargs):
+            self.assertEqual(cmd[0], "git", "unreviewed verifier was executed")
+            if "rev-parse" in cmd:
+                return q.subprocess.CompletedProcess(cmd, 0, stdout=HEAD + "\n")
+            if "status" in cmd:
+                return q.subprocess.CompletedProcess(cmd, 0, stdout="")
+            if "hash-object" in cmd:
+                return q.subprocess.CompletedProcess(cmd, 0, stdout="0" * 40 + "\n")
+            self.fail(f"unexpected external command {cmd}")
+
+        with mock.patch.object(q.subprocess, "run", side_effect=fake_git):
+            with self.assertRaisesRegex(q.QualificationError, "verifier differs"):
+                q.main(["--repo", str(repo), "--artifacts", str(artifacts),
+                        "--resident-source-stage", str(stage), "--logs", str(logs),
+                        "--source-head", HEAD,
+                        "--expected-runner-image-id", "sha256:" + "f" * 64])
+        self.assertFalse(logs.exists())
 
 
 if __name__ == "__main__":
