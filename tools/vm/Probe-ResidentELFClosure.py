@@ -139,10 +139,16 @@ def _parse_elf_bytes(data):
             break
     if not tags or tags[-1][0] != 0:
         raise ELFClosureError("ELF DT_NULL terminator missing")
-    if any(t in (15, 29) for t, _ in tags):
+    # A DT_RUNPATH pointing to the empty string adds no lookup directories
+    # (verified against the Buildroot 2025.02.18 host glibc loader). Still
+    # reject DT_RPATH, duplicate tags and every nonempty or invalid RUNPATH.
+    if any(t == 15 for t, _ in tags):
         raise ELFClosureError("ELF DT_RPATH/RUNPATH not yet supported: HOLD")
+    runpaths = [v for t, v in tags if t == 29]
+    if len(runpaths) > 1:
+        raise ELFClosureError("ELF DT_RPATH/RUNPATH duplicated: HOLD")
     needed_offsets = [v for t, v in tags if t == 1]
-    if not needed_offsets:
+    if not needed_offsets and not runpaths:
         return (), hashlib.sha256(data).hexdigest(), interpreter
     strtabs = [v for t, v in tags if t == 5]
     lengths = [v for t, v in tags if t == 10]
@@ -156,6 +162,9 @@ def _parse_elf_bytes(data):
     if start is None:
         raise ELFClosureError("ELF DT_STRTAB not inside PT_LOAD")
     strings = _range(data, start, lengths[0])
+    for off in runpaths:
+        if off >= len(strings) or strings[off:off + 1] != b"\0":
+            raise ELFClosureError("ELF DT_RPATH/RUNPATH nonempty or malformed: HOLD")
     needed = []
     for off in needed_offsets:
         if off >= len(strings):

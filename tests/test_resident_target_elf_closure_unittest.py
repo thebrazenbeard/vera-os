@@ -183,6 +183,38 @@ class ELFClosure(unittest.TestCase):
         with self.assertRaises(probe.ELFClosureError):
             probe.audit(self.root)
 
+    def test_empty_dt_runpath_with_bounded_string_table_is_not_extra_search(self):
+        # Buildroot 2025.02.18 emits DT_RUNPATH="" in target shared libs.
+        # An empty runpath does not introduce an additional search directory.
+        payload = bytearray(elf(["libcog.so.0"]))
+        struct.pack_into("<QQ", payload, 0x200 + 3 * 16, 29, 0)
+        struct.pack_into("<QQ", payload, 0x200 + 4 * 16, 0, 0)
+        struct.pack_into("<IIQQQQQQ", payload, 120,
+                         2, 4, 0x200, 0x200, 0, 5 * 16, 5 * 16, 8)
+        self.write("/usr/bin/cog", bytes(payload))
+        self.assertEqual(probe.audit(self.root)["unresolved"], [])
+
+    def test_nonempty_dt_runpath_remains_a_hold(self):
+        payload = bytearray(elf(["libcog.so.0"]))
+        struct.pack_into("<QQ", payload, 0x200 + 3 * 16, 29, 1)
+        struct.pack_into("<QQ", payload, 0x200 + 4 * 16, 0, 0)
+        struct.pack_into("<IIQQQQQQ", payload, 120,
+                         2, 4, 0x200, 0x200, 0, 5 * 16, 5 * 16, 8)
+        self.write("/usr/bin/cog", bytes(payload))
+        with self.assertRaisesRegex(probe.ELFClosureError, "RPATH/RUNPATH"):
+            probe.audit(self.root)
+
+    def test_duplicate_empty_runpath_tags_are_not_accepted(self):
+        payload = bytearray(elf(["libcog.so.0"]))
+        struct.pack_into("<QQ", payload, 0x200 + 3 * 16, 29, 0)
+        struct.pack_into("<QQ", payload, 0x200 + 4 * 16, 29, 0)
+        struct.pack_into("<QQ", payload, 0x200 + 5 * 16, 0, 0)
+        struct.pack_into("<IIQQQQQQ", payload, 120,
+                         2, 4, 0x200, 0x200, 0, 6 * 16, 6 * 16, 8)
+        self.write("/usr/bin/cog", bytes(payload))
+        with self.assertRaisesRegex(probe.ELFClosureError, "RPATH/RUNPATH"):
+            probe.audit(self.root)
+
     def test_unknown_native_search_path_holds(self):
         payload=bytearray(elf(["libcog.so.0"]))
         struct.pack_into("<QQ",payload,0x200+16*3,29,0x300)
