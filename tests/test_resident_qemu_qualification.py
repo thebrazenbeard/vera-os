@@ -15,7 +15,7 @@ q = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(q)
 HEAD = q.EXPECTED_SOURCE_HEAD
-REVIEWED_BUILD_SOURCE = "18209d61fd45f2d57dbe41f7e70f6023b2db92d5"
+REVIEWED_BUILD_SOURCE = "4676de96a948003567b5efeae4f1d6cf090b7e87"
 OBSOLETE_BUILD_SOURCE = "79e9258bf5bb5fa993a98966fcd81260ea0c4c92"
 
 
