@@ -56,6 +56,11 @@ if [ "${VERAOS_REQUIRE_RESIDENT_CORE:-0}" = "1" ]; then
 
   install -d "$target_dir/opt/veraos/components"
   cp -R "$stage/components/." "$target_dir/opt/veraos/components/"
+  # A frozen read-only stage can contain 0555 directories. cp -R retains
+  # their modes, causing Buildroot's non-root ext2 cleanup (rm -rf FS_DIR)
+  # to fail after image creation. Change ONLY copied target directories;
+  # never chmod the frozen stage, source files, or protected host paths.
+  find "$target_dir/opt/veraos/components" -type d -exec chmod u+w {} +
   install -m 0644 "$stage/VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json" \
     "$target_dir/etc/veraos/architecture/VERA_OS_RESIDENT_COMPONENTS_BUILD_RECEIPT_V1.json"
 
