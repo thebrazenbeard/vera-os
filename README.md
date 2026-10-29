@@ -33,6 +33,15 @@ Primary goals:
 - [`docs/04-security-and-authority-model.md`](docs/04-security-and-authority-model.md) — OS-level governance direction
 - [`docs/05-open-questions.md`](docs/05-open-questions.md) — unresolved architecture questions
 
+## STM conversation-history integration status (2026-10-28)
+
+The `thebrazenbeard/stm` library contains opt-in current-session memory, local SQLite historical evidence, a source-stage Windows named-pipe and Android/Linux peer-identity gateway, and the selected **day-30 review / day-45 local expiry** policy. STM source availability is **not** VeraOS runtime installation or identity-bound conversation admission.
+
+This repository's `/api/conversation` and `/api/conversation/history` localhost endpoints are source-level conversation/task evidence interfaces, **not** user-authenticated STM producers. Browser Origin/Host, loopback and conversation IDs must never be accepted as personal-memory credentials. No automatic archive capture is authorized.
+
+A real integration requires a host-owned authenticated caller identity, a trusted mapping to exact owner/agent/session and current consent, privileged archive access fenced from untrusted HTTP handlers, supervised retention/backup cleanup, and a separate private DeepMemoryStorage receiver with verifiable correction, deletion, consent revocation and receipt semantics. Until those are installed and tested against a live host, the bridge must fail closed. Source tests and emulator evidence cannot replace that readback.
+
+See [STM repository](https://github.com/thebrazenbeard/stm) for source and open review changes. The 30/45 rule applies only to **new consented** archive admissions, not existing VeraOS task journals.
 ## Status
 
 This repository is in **architecture discovery**. Documents record the current working model and should not be read as proof that any component has been implemented, installed, deployed, or validated.
