@@ -66,17 +66,18 @@ class QuarantineJournal:
         self.db.commit()
 
     def append(self, event):
-        if not isinstance(event, SyntheticEvent):
+        if type(event) is not SyntheticEvent:
             raise ValueError("synthetic event required")
         body = event.canonical()
         with self.db:
+            inserted = self.db.execute(
+                "INSERT OR IGNORE INTO synthetic_events VALUES (?, ?)",
+                (event.event_id, body),
+            ).rowcount == 1
             row = self.db.execute("SELECT body FROM synthetic_events WHERE event_id=?", (event.event_id,)).fetchone()
-            if row is not None:
-                if row[0] != body:
-                    raise ValueError("event id conflict")
-                return False
-            self.db.execute("INSERT INTO synthetic_events VALUES (?, ?)", (event.event_id, body))
-        return True
+            if row is None or row[0] != body:
+                raise ValueError("event id conflict")
+            return inserted
 
     def close(self):
         self.db.close()
