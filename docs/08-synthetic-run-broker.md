@@ -7,6 +7,8 @@ policy and receipt chain. A request supplies a fixture event identifier, the
 unchanging declared generation digest, and the current policy digest from
 `snapshot()`. The caller supplies an integer monotonic time. Steps are
 serialized under one lock. No public outcome or reducer input exists.
+The maximum is 256 events per run, additionally bounded by the lease's step
+and query limits.
 
 The broker picks the first untried action; then it picks the highest empirical
 reward mean, using integer comparisons and allowlist-order tie breaks. It
@@ -30,12 +32,18 @@ checks precede replay; expiry at `now >= expiry` denies replay. Valid forward
 time is retained even if the rest of a call is rejected. After root
 reservation, any exception faults the broker permanently and consumes the
 reservation; it is not refunded. A fault can occur before the underlying
-lease precommit succeeds. There is no restart or recovery API.
+lease precommit succeeds. Handling injected exceptions is not a guarantee
+against arbitrary asynchronous interruption, interpreter termination or
+process crashes; even exception or lock cleanup may itself be interrupted.
+There is no restart or recovery API.
 
 The `DECLARED_EXTERNAL_VERIFIER` label satisfies the prior fixture contract;
 it does not establish an independent or authenticated verifier. Another
 instance may reuse IDs and budgets; the caller can lie about time; Python
-private fields are accessible. There is no durable global lease, process or
+private fields are accessible. Receipts expose the synthetic outcome, and
+snapshots expose aggregate rewards, to trusted callers. No caller-supplied
+outcome means neither feedback secrecy nor external authentication.
+There is no durable global lease, process or
 host isolation, crash recovery, real verifier identity, local model training,
 actual weights, causal generalization, runtime wiring, host probing, external
 effect adapter or private-data ingestion. The prior production admission hook

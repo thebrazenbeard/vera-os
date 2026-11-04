@@ -1,4 +1,6 @@
 import dataclasses
+import inspect
+import sys
 import threading
 import unittest
 from concurrent.futures import ThreadPoolExecutor
@@ -164,6 +166,52 @@ class SyntheticRunTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             b.facade("a").step(request(b, "x"), True)
         self.assertEqual(b.snapshot().reserved_events, 0)
+
+    def test_fixture_capacity_boundary(self):
+        large_lease = dataclasses.replace(lease(), max_steps=300, max_queries=300)
+        SyntheticRun(RunSpec("run", 256, (0, 1)), large_lease)
+        with self.assertRaises(ValueError):
+            SyntheticRun(RunSpec("run", 257, (0, 1)), large_lease)
+
+    def test_base_exception_at_lease_seams_faults_and_releases_lock(self):
+        for seam in ("precommit", "record_outcome"):
+            with self.subTest(seam=seam):
+                b = broker()
+                def fail(*args):
+                    raise KeyboardInterrupt("injected")
+                setattr(b._lease_state, seam, fail)
+                req = request(b, "x")
+                with self.assertRaises(KeyboardInterrupt):
+                    b.facade("a").step(req, 1)
+                self.assertFalse(b._lock.locked())
+                self.assertEqual(b.snapshot().reserved_events, 1)
+                self.assertTrue(b.snapshot().faulted)
+                with self.assertRaises(ValueError):
+                    b.facade("a").step(req, 2)
+
+    def test_trace_interrupt_immediately_after_reservation_faults(self):
+        b = broker()
+        req = request(b, "x")
+        lines, start = inspect.getsourcelines(SyntheticRun._step)
+        reservation = next(i for i, line in enumerate(lines)
+                           if "self._reserved += 1" in line)
+        target = start + reservation + 1
+        def trace(frame, event, arg):
+            if (frame.f_code is SyntheticRun._step.__code__
+                    and event == "line" and frame.f_lineno == target):
+                raise KeyboardInterrupt("after reservation")
+            return trace
+        try:
+            sys.settrace(trace)
+            with self.assertRaises(KeyboardInterrupt):
+                b.facade("a").step(req, 1)
+        finally:
+            sys.settrace(None)
+        self.assertFalse(b._lock.locked())
+        self.assertEqual(b.snapshot().reserved_events, 1)
+        self.assertTrue(b.snapshot().faulted)
+        with self.assertRaises(ValueError):
+            b.facade("a").step(req, 2)
 
 
 if __name__ == "__main__":

@@ -81,7 +81,7 @@ class SyntheticRun:
             raise ValueError("exact fixture types required")
         lease.validate()
         if (not _valid_id(spec.run_id) or type(spec.max_events) is not int
-                or not 1 <= spec.max_events <= min(lease.max_steps, lease.max_queries)
+                or not 1 <= spec.max_events <= min(256, lease.max_steps, lease.max_queries)
                 or type(spec.rewards_by_action) is not tuple
                 or len(spec.rewards_by_action) != len(lease.actions)
                 or any(type(r) is not int or r not in (0, 1)
@@ -148,8 +148,8 @@ class SyntheticRun:
                 raise ValueError("generation or policy mismatch")
             if self._reserved >= self._spec.max_events:
                 raise ValueError("root budget exhausted")
-            self._reserved += 1
             try:
+                self._reserved += 1
                 index = next((i for i, n in enumerate(self._counts) if n == 0), None)
                 if index is None:
                     index = 0
