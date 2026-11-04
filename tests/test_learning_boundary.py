@@ -35,6 +35,14 @@ class BoundaryTests(unittest.TestCase):
             with self.subTest(raw=raw), self.assertRaises(ValueError):
                 SyntheticEvent.parse(raw)
 
+    def test_string_subclass_cannot_bypass_event_size_limit(self):
+        class ForgedRaw(str):
+            def encode(self, *args, **kwargs):
+                return b""
+
+        with self.assertRaises(ValueError):
+            SyntheticEvent.parse(ForgedRaw(event() + " " * 513))
+
     def test_replay_conflict_and_restart(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "journal.sqlite"
