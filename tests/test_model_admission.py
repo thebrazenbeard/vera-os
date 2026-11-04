@@ -19,7 +19,7 @@ def candidate() -> dict:
         "schema": "VERA_OS_LOCAL_MODEL_PROVIDER_CANDIDATE_V1",
         "artifact_id": "vera-qwen35-test",
         "producer": {
-            "repository": "thebrazenbeard/vera_model_training",
+            "repository": "thebrazenbeard/model-training",
             "source_branch": "work/test",
             "source_commit": "1" * 40,
         },
@@ -71,9 +71,21 @@ class ModelAdmissionTests(unittest.TestCase):
 
     def test_training_repo_cannot_self_issue_final_qualification(self) -> None:
         item = candidate()
-        item["qualification"]["issuer_repository"] = "thebrazenbeard/vera_model_training"
+        item["qualification"]["issuer_repository"] = "thebrazenbeard/model-training"
 
         with self.assertRaisesRegex(ModelAdmissionError, "separate"):
+            validate_local_model_provider_candidate(item)
+
+    def test_legacy_producer_alias_not_accepted_as_current_source(self) -> None:
+        item = candidate()
+        item["producer"]["repository"] = "thebrazenbeard/vera_model_training"
+        with self.assertRaisesRegex(ModelAdmissionError, "producer"):
+            validate_local_model_provider_candidate(item)
+
+    def test_arbitrary_qualifier_cannot_claim_final_admission(self) -> None:
+        item = candidate()
+        item["qualification"]["issuer_repository"] = "untrusted/fake-reviewer"
+        with self.assertRaisesRegex(ModelAdmissionError, "VeraOS"):
             validate_local_model_provider_candidate(item)
 
     def test_qualification_must_bind_exact_artifact_manifest(self) -> None:
@@ -123,3 +135,4 @@ class ModelAdmissionTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

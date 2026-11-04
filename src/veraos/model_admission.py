@@ -57,8 +57,8 @@ def validate_local_model_provider_candidate(
 
     producer = _mapping(data.get("producer"), "producer")
     _require(
-        producer.get("repository") == "thebrazenbeard/vera_model_training",
-        "unexpected model producer",
+        producer.get("repository") == "thebrazenbeard/model-training",
+        "unexpected model producer; use canonical thebrazenbeard/model-training",
     )
     _text(producer.get("source_branch"), "producer.source_branch")
     _sha40(producer.get("source_commit"), "producer.source_commit")
@@ -102,6 +102,10 @@ def validate_local_model_provider_candidate(
     _require(
         issuer != producer.get("repository"),
         "qualification issuer must be separate from model producer",
+    )
+    _require(
+        issuer == "thebrazenbeard/vera-os",
+        "qualification issuer must be the independent VeraOS owner",
     )
 
     qualified_manifest = _sha256(
@@ -175,3 +179,4 @@ def local_model_route_eligible(candidate: Mapping[str, Any]) -> bool:
 
 validate_cognition_engine_candidate = validate_local_model_provider_candidate
 candidate_route_eligible = local_model_route_eligible
+
