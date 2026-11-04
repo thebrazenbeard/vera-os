@@ -28,6 +28,11 @@ The loopback URL is a host-local observation address, not a phone or
 cross-host transport address. Neither it nor the syntactic `host_id` binds a
 cryptographic device identity. Evidence timestamps are parsed but not trusted
 for freshness without a separately authenticated clock/readback contract.
+The timestamp must use RFC3339 seconds and an explicit timezone; empty URL
+query/fragment delimiters and control-bearing model names are rejected.
+`process_seen=false` means a process name was not observed, **not** that a
+model inventory or healthy exact-model endpoint observation is disproved.
+Those independent observations may rank higher, but still grant no route.
 
 Future route admission must independently verify actor/host/model origin,
 exact weights and runtime receipts, permitted inference API and TLS transport,

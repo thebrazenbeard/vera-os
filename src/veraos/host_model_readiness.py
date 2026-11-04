@@ -16,6 +16,7 @@ from urllib.parse import urlsplit
 
 _SCHEMA = "VERAOS_HOST_MODEL_OBSERVATION_V1"
 _HOST_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+_RFC3339 = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$")
 _REQUIRED = {
     "schema", "host_id", "os", "backend", "endpoint", "model_id",
     "observed_at", "process_seen", "catalogued_models", "resident_models",
@@ -32,12 +33,18 @@ def _require(condition: bool, message: str) -> None:
         raise HostModelObservationError(message)
 
 
+def _model_id(value: object, label: str) -> str:
+    _require(isinstance(value, str) and bool(value.strip()) and value == value.strip(),
+             f"{label} must be a nonempty exact string")
+    _require(all(ord(char) >= 32 and ord(char) != 127 for char in value),
+             f"{label} cannot contain control characters")
+    return value
+
+
 def _models(value: object, label: str) -> list[str]:
     _require(isinstance(value, list), f"{label} must be a list")
-    _require(
-        all(isinstance(model, str) and bool(model.strip()) for model in value),
-        f"{label} must contain nonempty model IDs",
-    )
+    for index, model in enumerate(value):
+        _model_id(model, f"{label}[{index}]")
     return value
 
 
@@ -46,6 +53,8 @@ def _loopback_origin(value: object) -> str:
              "endpoint must be an exact origin string")
     _require(all(32 < ord(char) < 127 for char in value),
              "endpoint cannot contain whitespace, controls, or non-ASCII ambiguity")
+    _require("?" not in value and "#" not in value,
+             "endpoint must have no query or fragment delimiters")
     try:
         uri = urlsplit(value)
         port = uri.port
@@ -83,10 +92,10 @@ def classify_host_model_observation(observation: Mapping[str, Any]) -> dict[str,
     _require(isinstance(observation["backend"], str) and observation["backend"] in {"ollama", "llama_cpp", "koboldcpp"},
              "unsupported backend")
     endpoint = _loopback_origin(observation["endpoint"])
-    model_id = observation["model_id"]
-    _require(isinstance(model_id, str) and bool(model_id.strip()), "model_id required")
+    model_id = _model_id(observation["model_id"], "model_id")
     stamp = observation["observed_at"]
-    _require(isinstance(stamp, str), "observed_at must be RFC3339 text")
+    _require(isinstance(stamp, str) and _RFC3339.fullmatch(stamp) is not None,
+             "observed_at must be RFC3339 text with seconds and timezone")
     try:
         parsed = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
     except ValueError as exc:
@@ -99,8 +108,8 @@ def classify_host_model_observation(observation: Mapping[str, Any]) -> dict[str,
     _require(isinstance(health, Mapping) and set(health) == {"healthy", "model_id"},
              "endpoint_health fields do not match schema")
     _require(type(health["healthy"]) is bool, "endpoint health must be boolean")
-    _require(health["model_id"] is None or isinstance(health["model_id"], str),
-             "endpoint model ID must be string or null")
+    if health["model_id"] is not None:
+        _model_id(health["model_id"], "endpoint_health.model_id")
 
     state = "UNOBSERVED"
     if observation["process_seen"]:
@@ -109,7 +118,7 @@ def classify_host_model_observation(observation: Mapping[str, Any]) -> dict[str,
         state = "MODEL_CATALOGUED"
     if model_id in resident:
         state = "MODEL_RESIDENT"
-    if health["healthy"] and health["model_id"] == model_id and observation["process_seen"]:
+    if health["healthy"] and health["model_id"] == model_id:
         state = "EXACT_MODEL_ENDPOINT_OBSERVED"
 
     return {

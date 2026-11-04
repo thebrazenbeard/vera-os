@@ -83,6 +83,44 @@ class HostModelObservationTests(unittest.TestCase):
         item["endpoint"] = "http://127.0.0.1:\n11434"
         with self.assertRaises(HostModelObservationError):
             classify_host_model_observation(item)
+
+    def test_rejects_empty_query_and_fragment_delimiters_on_origin(self) -> None:
+        for suffix in ("?", "#"):
+            item = observation()
+            item["endpoint"] += suffix
+            with self.assertRaises(HostModelObservationError):
+                classify_host_model_observation(item)
+
+    def test_rejects_non_rfc3339_timestamp_even_if_datetime_accepts_it(self) -> None:
+        for stamp in ("2026-11-04", "2026-11-04 15:00:00Z", "2026-11-04T15:00Z"):
+            item = observation()
+            item["observed_at"] = stamp
+            with self.assertRaises(HostModelObservationError):
+                classify_host_model_observation(item)
+
+    def test_rejects_controls_in_requested_or_advertised_model_ids(self) -> None:
+        for key in ("model_id", "catalogued_models", "resident_models"):
+            item = observation()
+            if key == "model_id":
+                item[key] = "qwen\n5"
+            else:
+                item[key] = ["qwen\n5"]
+            with self.assertRaises(HostModelObservationError):
+                classify_host_model_observation(item)
+        item = observation()
+        item["endpoint_health"]["model_id"] = "qwen\n5"
+        with self.assertRaises(HostModelObservationError):
+            classify_host_model_observation(item)
+
+    def test_endpoint_evidence_outweighs_process_name_probe(self) -> None:
+        item = observation()
+        item["process_seen"] = False
+        item["resident_models"] = [item["model_id"]]
+        self.assertEqual(classify_host_model_observation(item)["observed_state"], "MODEL_RESIDENT")
+        item["endpoint_health"] = {"healthy": True, "model_id": item["model_id"]}
+        result = classify_host_model_observation(item)
+        self.assertEqual(result["observed_state"], "EXACT_MODEL_ENDPOINT_OBSERVED")
+        self.assertFalse(result["route_eligible"])
         item = observation()
         item["observed_at"] = "yesterday"
         with self.assertRaises(HostModelObservationError):
