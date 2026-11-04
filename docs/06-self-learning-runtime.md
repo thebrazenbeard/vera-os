@@ -18,6 +18,8 @@ Stored hashes are unverified declarations, not attestations of actual bytes.
 Event generation is caller-provided; this source does not prove an action was
 chosen before feedback. Snapshots bind declared references within a local value,
 not provider state, in-flight requests, or cluster-wide atomicity.
+The rollback test covers an orderly connection close with an uncommitted SQLite
+transaction; it does not test a process crash, power loss, or storage failure.
 
 Future admission requires separately authenticated and scoped actor, explicit
 consent and revocation, provenance/retention, verified artifact and evaluation
