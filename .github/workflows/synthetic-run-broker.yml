@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'src/veraos/synthetic_run.py'
+      - 'src/veraos/learning_lease.py'
       - 'tests/test_synthetic_run.py'
       - 'docs/08-synthetic-run-broker.md'
       - '.github/workflows/synthetic-run-broker.yml'
