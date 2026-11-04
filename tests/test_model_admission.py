@@ -64,10 +64,22 @@ def candidate() -> dict:
 
 
 class ModelAdmissionTests(unittest.TestCase):
-    def test_exact_candidate_is_route_eligible(self) -> None:
+    def test_exact_candidate_is_structurally_valid_but_not_route_eligible(self) -> None:
         item = candidate()
         validate_local_model_provider_candidate(item)
-        self.assertTrue(local_model_route_eligible(item))
+        self.assertFalse(local_model_route_eligible(item))
+
+    def test_claimed_pass_and_forged_hashes_cannot_admit_route(self) -> None:
+        item = candidate()
+        item["artifact_id"] = "attacker-synthetic-forgery"
+        item["producer"]["source_commit"] = "f" * 40
+        item["base"]["repository"] = "attacker/unverified-weights"
+        item["base"]["revision"] = "d" * 40
+        item["training"]["train_sha256"] = "f" * 64
+        item["training"]["receipt_sha256"] = "e" * 64
+        item["qualification"]["suite_sha256"] = "d" * 64
+        validate_local_model_provider_candidate(item)
+        self.assertFalse(local_model_route_eligible(item))
 
     def test_training_repo_cannot_self_issue_final_qualification(self) -> None:
         item = candidate()
