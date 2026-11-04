@@ -48,3 +48,17 @@ be represented as guaranteed erasure of trained weights.
   feasible training on available hardware; trusted provenance, privacy lifecycle,
   real evaluator independence, and safe deployment. No hardware, provider or
   runtime claims follow from source tests.
+
+### Prospective closed loop — OFF
+
+Astra proposed a separately authorized finite lease specifying the exact task,
+read-only strategy, model generation, data scope, verifier, episode and exploration
+limits, and expiry. The learner would precommit action probabilities and expected
+outcome; an independently authorized tool would act; an independent verifier
+would score; an idempotent join would update a bounded head for the next generation;
+prospective tests and stop conditions would gate any later use. Such a head would
+be parameter adaptation, not a base-model weight update. This PR implements none
+of the lease, action, verifier, update, or consumption machinery. Luna's independent
+model review highlighted that every production entrypoint, including restore,
+debug and fallback, must be checked for rejected-signal consumption before any
+integration; that inventory has not been performed here. Luna had no live source.
