@@ -11,7 +11,7 @@ _FIELDS = {"schema", "event_id", "seed", "action", "outcome", "generation_sha256
 
 
 def _digest(value):
-    if not isinstance(value, str) or not _HASH.fullmatch(value):
+    if type(value) is not str or not _HASH.fullmatch(value):
         raise ValueError("expected lowercase SHA-256")
     return value
 
@@ -41,7 +41,7 @@ class SyntheticEvent:
                            parse_constant=lambda _: (_ for _ in ()).throw(ValueError("non-finite")))
         if not isinstance(value, dict) or set(value) != _FIELDS or value["schema"] != "synthetic-event-v1":
             raise ValueError("invalid event schema")
-        if not isinstance(value["event_id"], str) or not _ID.fullmatch(value["event_id"]):
+        if type(value["event_id"]) is not str or not _ID.fullmatch(value["event_id"]):
             raise ValueError("invalid event id")
         for key, maximum in (("seed", 65535), ("action", 15), ("outcome", 1)):
             if type(value[key]) is not int or not 0 <= value[key] <= maximum:
@@ -51,6 +51,9 @@ class SyntheticEvent:
 
     def canonical(self):
         # Revalidate even if a caller directly constructed the dataclass.
+        if type(self.event_id) is not str or not _ID.fullmatch(self.event_id):
+            raise ValueError("invalid event id")
+        _digest(self.generation_sha256)
         raw = json.dumps({"schema": "synthetic-event-v1", **self.__dict__},
                          sort_keys=True, separators=(",", ":"), allow_nan=False)
         parsed = SyntheticEvent.parse(raw)
@@ -115,7 +118,7 @@ class GenerationSnapshot:
     evaluation: EvaluationRef
 
     def __post_init__(self):
-        if not isinstance(self.request_id, str) or not _ID.fullmatch(self.request_id):
+        if type(self.request_id) is not str or not _ID.fullmatch(self.request_id):
             raise ValueError("invalid request id")
         if type(self.candidate) is not CandidateRef or type(self.evaluation) is not EvaluationRef:
             raise ValueError("invalid references")
