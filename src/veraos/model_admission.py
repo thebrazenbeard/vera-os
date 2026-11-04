@@ -170,11 +170,16 @@ def validate_local_model_provider_candidate(
 
 
 def local_model_route_eligible(candidate: Mapping[str, Any]) -> bool:
+    """Treat descriptive PASS as evidence only, never runtime admission.
+
+    No independent signed owner attestation, trusted manifest-byte custody,
+    runtime endpoint binding, or current revocation check is provided by this
+    source-only descriptor. The public compatibility API therefore fails
+    closed until a separate qualified admission mechanism exists. Do not add
+    a caller-supplied ``trusted`` flag to this untrusted mapping.
+    """
     validate_local_model_provider_candidate(candidate)
-    return (
-        candidate["qualification"]["status"] == "PASS"
-        and candidate["admission"]["status"] == "VERAOS_ROUTE_ELIGIBLE"
-    )
+    return False
 
 
 validate_cognition_engine_candidate = validate_local_model_provider_candidate
