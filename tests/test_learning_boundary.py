@@ -117,6 +117,24 @@ class BoundaryTests(unittest.TestCase):
                       {"candidate": candidate(), "issuer": "vera-os"}):
             self.assertIs(production_admitted(**claim), False)
 
+    def test_subclass_cannot_forge_lineage_equality(self):
+        class ForgedCandidate(CandidateRef):
+            def __eq__(self, other):
+                return True
+
+        class ForgedEvaluation(EvaluationRef):
+            pass
+
+        real = candidate()
+        forged = ForgedCandidate(**candidate(base_sha256="0" * 64).__dict__)
+        evaluation = EvaluationRef(real, "f" * 64)
+        with self.assertRaises(ValueError):
+            EvaluationRef(forged, "f" * 64)
+        with self.assertRaises(ValueError):
+            GenerationSnapshot("1" * 32, forged, evaluation)
+        with self.assertRaises(ValueError):
+            GenerationSnapshot("1" * 32, real, ForgedEvaluation(real, "f" * 64))
+
 
 if __name__ == "__main__":
     unittest.main()
