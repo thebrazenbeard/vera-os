@@ -135,6 +135,24 @@ class BoundaryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             GenerationSnapshot("1" * 32, real, ForgedEvaluation(real, "f" * 64))
 
+    def test_string_subclass_cannot_forge_reference_equality(self):
+        class ForgedString(str):
+            def __eq__(self, other):
+                return True
+
+        with self.assertRaises(ValueError):
+            candidate(base_sha256=ForgedString("0" * 64))
+        real = candidate()
+        with self.assertRaises(ValueError):
+            GenerationSnapshot(ForgedString("1" * 32), real, EvaluationRef(real, "f" * 64))
+        with tempfile.TemporaryDirectory() as tmp:
+            journal = QuarantineJournal(Path(tmp) / "journal.sqlite")
+            with self.assertRaises(ValueError):
+                journal.append(SyntheticEvent(ForgedString("a" * 32), 1, 2, 1, "b" * 64))
+            with self.assertRaises(ValueError):
+                journal.append(SyntheticEvent("a" * 32, 1, 2, 1, ForgedString("b" * 64)))
+            journal.close()
+
 
 if __name__ == "__main__":
     unittest.main()
