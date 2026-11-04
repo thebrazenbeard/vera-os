@@ -102,7 +102,7 @@ class EvaluationRef:
     report_sha256: str
 
     def __post_init__(self):
-        if not isinstance(self.candidate, CandidateRef):
+        if type(self.candidate) is not CandidateRef:
             raise ValueError("candidate required")
         _digest(self.report_sha256)
 
@@ -117,7 +117,7 @@ class GenerationSnapshot:
     def __post_init__(self):
         if not isinstance(self.request_id, str) or not _ID.fullmatch(self.request_id):
             raise ValueError("invalid request id")
-        if not isinstance(self.candidate, CandidateRef) or not isinstance(self.evaluation, EvaluationRef):
+        if type(self.candidate) is not CandidateRef or type(self.evaluation) is not EvaluationRef:
             raise ValueError("invalid references")
         if self.candidate != self.evaluation.candidate:
             raise ValueError("candidate/evaluation mismatch")
