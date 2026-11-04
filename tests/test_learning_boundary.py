@@ -2,7 +2,9 @@ import dataclasses
 import json
 import sqlite3
 import tempfile
+import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from veraos.learning_boundary import (SyntheticEvent, QuarantineJournal, CandidateRef,
@@ -48,7 +50,7 @@ class BoundaryTests(unittest.TestCase):
             self.assertEqual(journal.db.execute("SELECT count(*) FROM synthetic_events").fetchone()[0], 1)
             journal.close()
 
-    def test_rolled_back_partial_transaction_not_accepted_after_restart(self):
+    def test_orderly_close_rolls_back_uncommitted_transaction(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "journal.sqlite"
             journal = QuarantineJournal(path)
@@ -57,6 +59,38 @@ class BoundaryTests(unittest.TestCase):
             journal.close()  # SQLite rolls back an uncommitted transaction.
             journal = QuarantineJournal(path)
             self.assertTrue(journal.append(SyntheticEvent.parse(event())))
+            journal.close()
+
+    def test_concurrent_identical_appends_are_idempotent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "journal.sqlite"
+            QuarantineJournal(path).close()
+            barrier = threading.Barrier(2)
+
+            def append():
+                journal = QuarantineJournal(path)
+                try:
+                    barrier.wait(timeout=5)
+                    return journal.append(SyntheticEvent.parse(event()))
+                finally:
+                    journal.close()
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                results = list(pool.map(lambda _: append(), range(2)))
+            self.assertEqual(sorted(results), [False, True])
+            with sqlite3.connect(path) as db:
+                self.assertEqual(db.execute("SELECT count(*) FROM synthetic_events").fetchone()[0], 1)
+
+    def test_subclass_cannot_override_canonical_storage(self):
+        class ForgedEvent(SyntheticEvent):
+            def canonical(self):
+                return '{"real_data":"foreign"}'
+
+        with tempfile.TemporaryDirectory() as tmp:
+            journal = QuarantineJournal(Path(tmp) / "journal.sqlite")
+            with self.assertRaises(ValueError):
+                journal.append(ForgedEvent("a" * 32, 1, 2, 1, "b" * 64))
+            self.assertEqual(journal.db.execute("SELECT count(*) FROM synthetic_events").fetchone()[0], 0)
             journal.close()
 
     def test_direct_construction_is_revalidated(self):
