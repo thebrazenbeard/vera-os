@@ -117,6 +117,8 @@ class LeaseTests(unittest.TestCase):
         l = lease()
         for changes in (dict(probabilities_ppm=(float('nan'), 0)),
                         dict(probabilities_ppm=(float('inf'), 0)),
+                        dict(probabilities_ppm=(1_000_000,)),
+                        dict(probabilities_ppm=(1_000_000, 0, 0)),
                         dict(probabilities_ppm=(True, 999_999)),
                         dict(probabilities_ppm=(0, 1_000_000), selected_propensity_ppm=0),
                         dict(probabilities_ppm=(700_000, 299_999)),
@@ -137,6 +139,21 @@ class LeaseTests(unittest.TestCase):
         for changes in (dict(mode="LIVE"), dict(actions=("a", "a")), dict(max_queries=True)):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 SyntheticLease(lease(**changes))
+
+    def test_rejection_preserves_budget_and_pending_except_clock(self):
+        l = lease(max_queries=1, max_steps=1)
+        s, d = SyntheticLease(l), decision(l)
+        with self.assertRaises(ValueError):
+            s.precommit(dataclasses.replace(d, action="unknown"), 2)
+        self.assertTrue(s.precommit(d, 2))
+        with self.assertRaises(ValueError):
+            s.record_outcome(outcome(l, d, generation_sha256="f" * 64), 3)
+        with self.assertRaises(ValueError):
+            s.precommit(decision(l, event_id="event2", sequence=2, step=2), 3)
+        self.assertFalse(s.precommit(d, 3))
+        self.assertTrue(s.record_outcome(outcome(l, d), 3))
+        with self.assertRaises(ValueError):
+            s.precommit(decision(l, event_id="event2", sequence=2, step=2), 3)
 
 
 if __name__ == "__main__":
