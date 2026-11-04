@@ -35,7 +35,7 @@ class SyntheticEvent:
 
     @classmethod
     def parse(cls, raw):
-        if not isinstance(raw, str) or len(raw.encode("utf-8")) > 512:
+        if type(raw) is not str or len(raw.encode("utf-8")) > 512:
             raise ValueError("invalid event size")
         value = json.loads(raw, object_pairs_hook=_no_duplicates,
                            parse_constant=lambda _: (_ for _ in ()).throw(ValueError("non-finite")))
