@@ -1,0 +1,88 @@
+import dataclasses
+import json
+import sqlite3
+import tempfile
+import unittest
+from pathlib import Path
+
+from veraos.learning_boundary import (SyntheticEvent, QuarantineJournal, CandidateRef,
+                                      EvaluationRef, GenerationSnapshot, production_admitted)
+
+
+def event(**changes):
+    value = dict(schema="synthetic-event-v1", event_id="a" * 32, seed=7,
+                 action=3, outcome=1, generation_sha256="b" * 64)
+    value.update(changes)
+    return json.dumps(value)
+
+
+def candidate(**changes):
+    values = dict(base_sha256="a" * 64, tokenizer_sha256="b" * 64,
+                  template_sha256="c" * 64, config_sha256="d" * 64,
+                  adapter_sha256="e" * 64)
+    values.update(changes)
+    return CandidateRef(**values)
+
+
+class BoundaryTests(unittest.TestCase):
+    def test_strict_parse_rejects_extra_actor_consent_and_ambiguous_json(self):
+        for raw in (event(actor="authenticated"), event(consent=True), event(seed=True),
+                    event(outcome=2), event(generation_sha256="A" * 64),
+                    event().replace('"seed": 7', '"seed": 7, "seed": 8'),
+                    event() + " " * 513):
+            with self.subTest(raw=raw), self.assertRaises(ValueError):
+                SyntheticEvent.parse(raw)
+
+    def test_replay_conflict_and_restart(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "journal.sqlite"
+            journal = QuarantineJournal(path)
+            original = SyntheticEvent.parse(event())
+            self.assertTrue(journal.append(original))
+            self.assertFalse(journal.append(SyntheticEvent.parse(event())))
+            with self.assertRaises(ValueError):
+                journal.append(SyntheticEvent.parse(event(outcome=0)))
+            journal.close()
+            journal = QuarantineJournal(path)
+            self.assertFalse(journal.append(original))
+            self.assertEqual(journal.db.execute("SELECT count(*) FROM synthetic_events").fetchone()[0], 1)
+            journal.close()
+
+    def test_rolled_back_partial_transaction_not_accepted_after_restart(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "journal.sqlite"
+            journal = QuarantineJournal(path)
+            journal.db.execute("BEGIN")
+            journal.db.execute("INSERT INTO synthetic_events VALUES (?, ?)", ("a" * 32, "partial"))
+            journal.close()  # SQLite rolls back an uncommitted transaction.
+            journal = QuarantineJournal(path)
+            self.assertTrue(journal.append(SyntheticEvent.parse(event())))
+            journal.close()
+
+    def test_direct_construction_is_revalidated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            journal = QuarantineJournal(Path(tmp) / "journal.sqlite")
+            with self.assertRaises(ValueError):
+                journal.append(SyntheticEvent("a" * 32, True, 2, 1, "b" * 64))
+            journal.close()
+
+    def test_snapshot_lineage_and_immutable_shape(self):
+        c = candidate()
+        evaluation = EvaluationRef(c, "f" * 64)
+        snap = GenerationSnapshot("1" * 32, c, evaluation)
+        with self.assertRaises(dataclasses.FrozenInstanceError):
+            snap.request_id = "2" * 32
+        for key in c.__dict__:
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                GenerationSnapshot("1" * 32, candidate(**{key: "0" * 64}), evaluation)
+        with self.assertRaises(ValueError):
+            EvaluationRef(c, "not-a-hash")
+
+    def test_self_asserted_pass_or_approval_never_admits(self):
+        for claim in ({}, {"pass": True}, {"authenticated": True, "consent": True},
+                      {"candidate": candidate(), "issuer": "vera-os"}):
+            self.assertIs(production_admitted(**claim), False)
+
+
+if __name__ == "__main__":
+    unittest.main()
