@@ -33,6 +33,9 @@ Identical replays return false and do not consume budget; divergent IDs fail.
 Expiry and revocation take precedence even over identical replays. Time is a
 caller-supplied nonnegative integer; backward movement during this instance is
 rejected, and expiry is exclusive (`now >= expiry` denies). This cannot establish
-real time or detect an initially false clock, restart, process crash, or manipulation
+real time. A well-typed nondecreasing clock value advances the time watermark even
+if the associated operation is later rejected; this is intentional fail-closed
+behavior. Rejected operations do not otherwise reserve budget or alter the join.
+It cannot detect an initially false clock, restart, process crash, or manipulation
 of instance state. No receipt, successful join, or test establishes eligibility for
 production, actual learning, provider state, durable ordering, or a real-world event.
