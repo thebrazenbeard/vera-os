@@ -26,6 +26,15 @@ SOCKET_NAME = "pilot.sock"
 _TASK_ID = re.compile(r"[0-9a-f]{32}\Z", re.ASCII)
 
 
+def _object_without_duplicate_keys(pairs: list[tuple[str, object]]) -> dict:
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise PilotError("duplicate JSON key")
+        value[key] = item
+    return value
+
+
 def _peer_linux_uid(client: socket.socket) -> int:
     """Obtain kernel-provided credentials, never trust a JSON-supplied UID."""
     if not hasattr(socket, "SO_PEERCRED") or client.family != socket.AF_UNIX:
@@ -53,7 +62,8 @@ def _read_request(client: socket.socket) -> dict:
     if trailing:
         raise PilotError("one JSON request per connection")
     try:
-        value = json.loads(line.decode("utf-8"))
+        value = json.loads(line.decode("utf-8"),
+                           object_pairs_hook=_object_without_duplicate_keys)
     except (UnicodeError, ValueError) as exc:
         raise PilotError("invalid request JSON") from exc
     if type(value) is not dict:
@@ -151,10 +161,23 @@ def query(root: Path, request: dict) -> dict:
         client.settimeout(2.0)
         client.connect(str(path))
         client.sendall(raw)
-        line = client.recv(4096)
-        if b"\n" not in line:
-            raise PilotError("invalid or truncated response")
-        return json.loads(line.split(b"\n", 1)[0].decode("utf-8"))
+        deadline = time.monotonic() + 2.0
+        received = bytearray()
+        while b"\n" not in received:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise PilotError("response deadline expired; effect outcome unknown")
+            client.settimeout(min(1.0, remaining))
+            chunk = client.recv(min(512, 4097 - len(received)))
+            if not chunk:
+                raise PilotError("response truncated; effect outcome unknown")
+            received.extend(chunk)
+            if len(received) > 4096:
+                raise PilotError("oversized response; effect outcome unknown")
+        line, _, trailing = received.partition(b"\n")
+        if trailing:
+            raise PilotError("unexpected multiple responses")
+        return json.loads(line.decode("utf-8"))
 
 
 def main(argv: list[str] | None = None) -> int:
