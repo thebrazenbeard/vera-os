@@ -10,6 +10,7 @@ environment variable is only a test selector, never evidence of identity.
 """
 from __future__ import annotations
 
+from contextlib import closing
 import errno
 import os
 from pathlib import Path
@@ -60,7 +61,9 @@ def _attempt_open(path: Path, mode: int) -> None:
 class ExplicitUnqualifiedBaseline(unittest.TestCase):
     def test_same_uid_sqlite_append_only_triggers_are_not_tamper_proof(self):
         """Pure in-memory counterexample; not a live worker isolation test."""
-        with sqlite3.connect(":memory:") as db:
+        # sqlite3's context manager commits/rolls back but does not close;
+        # explicit closing prevents a Python 3.14 ResourceWarning on finalization.
+        with closing(sqlite3.connect(":memory:")) as db, db:
             db.executescript("""
                 CREATE TABLE events (seq INTEGER PRIMARY KEY, code TEXT);
                 CREATE TRIGGER events_no_delete BEFORE DELETE ON events
