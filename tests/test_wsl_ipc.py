@@ -101,6 +101,11 @@ class WSLLocalIPCTests(unittest.TestCase):
             client.connect(str(self.root / wsl_ipc.SOCKET_NAME))
             client.sendall(b"not-json\n")
             self.assertEqual(json.loads(client.recv(1024))["result"], "DENIED")
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+            client.settimeout(2)
+            client.connect(str(self.root / wsl_ipc.SOCKET_NAME))
+            client.sendall(b'{"action":"status","action":"run"}\n')
+            self.assertEqual(json.loads(client.recv(1024))["result"], "DENIED")
         with self.assertRaises(PilotError):
             wsl_ipc.query(self.root, {"action": "status", "junk": "x" * 1500})
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
@@ -159,6 +164,32 @@ class WSLLocalIPCTests(unittest.TestCase):
         with patch("veraos.wsl_ipc.time.monotonic", side_effect=lambda: next(tick)):
             with self.assertRaises(PilotError):
                 wsl_ipc._read_request(SlowClient())
+
+    def test_client_reassembles_fragmented_unix_stream_response(self):
+        class FragmentSocket:
+            def __init__(self):
+                self.parts = iter((b'{"tasks":', b' 1}', b'\n'))
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return None
+
+            def settimeout(self, _):
+                return None
+
+            def connect(self, _):
+                return None
+
+            def sendall(self, _):
+                return None
+
+            def recv(self, _):
+                return next(self.parts)
+
+        with patch("veraos.wsl_ipc.socket.socket", return_value=FragmentSocket()):
+            self.assertEqual(wsl_ipc.query(self.root, {"action": "status"}), {"tasks": 1})
 
 
 if __name__ == "__main__":
