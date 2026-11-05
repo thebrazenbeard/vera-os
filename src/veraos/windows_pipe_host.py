@@ -99,6 +99,9 @@ class ObservedWindowsToken:
 class EphemeralPipe:
     name: str
     handle: int
+    # Captured from the broker process token when the DACL was constructed.
+    # This is NOT caller input or an authorization grant.
+    owner_logon_sid: str
 
 
 def _require_windows() -> None:
@@ -136,6 +139,20 @@ def _client_dacl_sddl(logon_sid: str) -> str:
         raise WindowsPipeUnavailable("client DACL grants pipe instance creation")
     return (f"D:P(A;;0x{CLIENT_PIPE_ACCESS:08x};;;{logon_sid})"
             "(A;;GA;;;SY)")
+
+
+def _require_same_logon_sid(owner_logon_sid: str, client_logon_sid: str) -> None:
+    """Refuse a client token outside the pipe owner's observed logon SID.
+
+    This is a defense-in-depth post-impersonation check: the pipe DACL also
+    grants SYSTEM and may be bypassed by administrators. Passing does not
+    establish user consent, verify server custody, or authorize an operation.
+    """
+    if (type(owner_logon_sid) is not str or type(client_logon_sid) is not str
+            or not _LOGON_SID.fullmatch(owner_logon_sid)
+            or not _LOGON_SID.fullmatch(client_logon_sid)
+            or owner_logon_sid != client_logon_sid):
+        raise WindowsPipeUnavailable("pipe client logon session mismatch")
 
 
 def _bind(dll: object, symbol: str, restype: object, argtypes: list[object]):
@@ -271,7 +288,8 @@ def ephemeral_pipe() -> Iterator[EphemeralPipe]:
     if not handle or int(handle) == ctypes.c_void_p(-1).value:
         raise _last_error("secure pipe creation unavailable")
     try:
-        yield EphemeralPipe(name=name, handle=int(handle))
+        yield EphemeralPipe(name=name, handle=int(handle),
+                            owner_logon_sid=logon_sid)
     finally:
         native.CloseHandle(handle)
 
@@ -284,7 +302,9 @@ def observe_after_read(pipe: EphemeralPipe) -> ObservedWindowsToken:
     and must not by itself be treated as an authentication/grant decision.
     """
     native = _Native()
-    if type(pipe) is not EphemeralPipe or type(pipe.handle) is not int or pipe.handle <= 0:
+    if (type(pipe) is not EphemeralPipe or type(pipe.handle) is not int
+            or pipe.handle <= 0 or type(pipe.owner_logon_sid) is not str
+            or not _LOGON_SID.fullmatch(pipe.owner_logon_sid)):
         raise WindowsPipeUnavailable("invalid server pipe handle")
     # Do not carry an ambient thread impersonation into a new pipe request.
     if not native.RevertToSelf():
@@ -298,6 +318,8 @@ def observe_after_read(pipe: EphemeralPipe) -> ObservedWindowsToken:
                                       True, ctypes.byref(token)):
             raise _last_error("client impersonation token unavailable")
         sid = _token_sid(native, token, TOKEN_USER)
+        client_logon_sid = _token_sid(native, token, TOKEN_LOGON_SID)
+        _require_same_logon_sid(pipe.owner_logon_sid, client_logon_sid)
         auth_id = _token_authentication_luid(native, token)
         return ObservedWindowsToken(user_sid=sid, logon_luid=auth_id)
     finally:

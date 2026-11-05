@@ -87,7 +87,7 @@ class WindowsPipeSourceContractTests(unittest.TestCase):
             with host.ephemeral_pipe():
                 self.fail("non-Windows must never create a pipe")
         with self.assertRaises(host.WindowsPipeUnavailable):
-            host.observe_after_read(host.EphemeralPipe("untrusted", 1))
+            host.observe_after_read(host.EphemeralPipe("untrusted", 1, "S-1-5-5-100-200"))
 
     def test_no_public_auth_grant_or_external_effect_entrypoint(self):
         self.assertFalse(hasattr(host, "issue_grant"))

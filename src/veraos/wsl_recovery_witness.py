@@ -52,6 +52,10 @@ def assert_matches_external_checkpoint(
             not _DIGEST.fullmatch(checkpoint.keyed_digest)):
         raise PilotError("external recovery checkpoint unavailable or malformed; hold")
 
+    # Do not permit caller-created TEMP copies to satisfy keyed schema/data
+    # checks, or attached connection state outside the claimed database.
+    _require_unshadowed_main_connection(db)
+
     # A DB with a lost keyed table, schema, marker, or owner must fail before
     # any comparison. The in-DB digest is not used as authentication.
     _require_keyed_ledger_schema(db)
@@ -97,6 +101,20 @@ def _source_rows(db: sqlite3.Connection, query: str) -> list:
     return rows
 
 
+def _require_unshadowed_main_connection(db: sqlite3.Connection) -> None:
+    """Reject connection-local state omitted by either recovery comparison.
+
+    The pilot expects one persistent database, `main`. Attached databases
+    can carry unscanned state, and TEMP objects can shadow unqualified reads.
+    This does not authenticate the caller or the witness's actual issuer.
+    """
+    databases = db.execute("PRAGMA database_list").fetchall()
+    if not databases or any(row[1] not in ("main", "temp") for row in databases):
+        raise PilotError("attached pilot database unsupported; hold")
+    if db.execute("SELECT 1 FROM sqlite_temp_master LIMIT 1").fetchone():
+        raise PilotError("unsupported temporary pilot schema can shadow main; hold")
+
+
 def full_pilot_state_digest(db: sqlite3.Connection) -> str:
     """Fingerprint all known pilot tables and their schema, not just keyed IDs.
 
@@ -122,8 +140,7 @@ def _compute_full_pilot_state_digest(db: sqlite3.Connection) -> str:
     # persistent task and still obtain the old digest on this connection.
     # The pilot never needs temporary objects: refuse their presence rather
     # than treating a caller-controlled shadow as durable state.
-    if db.execute("SELECT 1 FROM sqlite_temp_master LIMIT 1").fetchone():
-        raise PilotError("unsupported temporary pilot schema; hold")
+    _require_unshadowed_main_connection(db)
     # Views and future sqlite_master object kinds are durable schema state.
     # Previously omitted views could be inserted without changing the digest.
     if db.execute("SELECT 1 FROM sqlite_master WHERE "
