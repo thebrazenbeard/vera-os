@@ -1,8 +1,8 @@
 """Source-contract probes for WSL IPC duplicate delivery and reply loss.
 
-These tests intentionally characterize the *current* declared IPC contract.
-There is no accepted request-id/idempotency contract yet: duplicate submission
-is an identified future design gap, not a regression against this prototype.
+These tests characterize the *unkeyed legacy* IPC submit contract. A newer
+opt-in 32-hex `request_id` path has keyed retry deduplication in Draft #73,
+but unkeyed submissions still duplicate work and assert no caller identity.
 """
 from __future__ import annotations
 
@@ -94,7 +94,7 @@ class IPCReplayGapTests(unittest.TestCase):
                          ["SUBMITTED", "SUBMITTED"])
         self.assertEqual(query(self.root, {"action": "status"})["tasks"], 2)
 
-    def test_request_id_and_caller_identity_fields_rejected_not_ignored(self) -> None:
+    def test_malformed_request_id_and_caller_identity_fields_rejected_not_ignored(self) -> None:
         for unexpected in (
             {"request_id": "client-1"},
             {"request_id": "client-1", "uid": 0},
@@ -112,13 +112,13 @@ class IPCReplayGapTests(unittest.TestCase):
         self.assertEqual(self._state()["tasks"], [])
         self.assertEqual(self._state()["events"], [])
 
-    def test_lost_submit_reply_commits_task_but_no_replay_key_available(self) -> None:
+    def test_lost_unkeyed_submit_reply_commits_task_but_no_replay_key_available(self) -> None:
         request = {"action": "submit", "worker": "digest", "filename": "fixture.txt"}
         self._send_without_receiving(request)
         self._await(lambda: len(self._state()["tasks"]) == 1)
         # A status read tells the client only counts, not the task id issued
         # before its response was lost. Admin-side journal readback can recover
-        # the id, but the currently declared IPC protocol has no read-by-key.
+        # the id, but the legacy unkeyed request has no read-by-key.
         remote = query(self.root, {"action": "status"})
         self.assertEqual(remote["tasks"], 1)
         self.assertEqual(remote["events"], 1)
@@ -164,7 +164,7 @@ class IPCDispatchContractTests(unittest.TestCase):
         with Pilot.init(self.root):
             pass
 
-    def test_same_submit_replay_is_not_idempotent(self) -> None:
+    def test_same_unkeyed_submit_replay_is_not_idempotent(self) -> None:
         with Pilot(self.root) as pilot:
             request = {"action": "submit", "worker": "inspect", "filename": "fixture.txt"}
             first = _dispatch(pilot, request)
@@ -172,7 +172,7 @@ class IPCDispatchContractTests(unittest.TestCase):
             self.assertNotEqual(first["task_id"], second["task_id"])
             self.assertEqual(len(pilot.snapshot()["tasks"]), 2)
 
-    def test_unknown_request_id_fails_closed_without_receipt(self) -> None:
+    def test_malformed_request_id_fails_closed_without_receipt(self) -> None:
         with Pilot(self.root) as pilot:
             with self.assertRaises(PilotError):
                 _dispatch(pilot, {"action": "submit", "worker": "inspect",
