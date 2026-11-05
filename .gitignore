@@ -17,8 +17,6 @@ venv/
 *.egg-info/
 
 # Operator secrets and local-only runtime state. Template files remain visible.
-.env
-.env.*
 !.env.example
 !.env.sample
 !.env.*.example
@@ -45,3 +43,5 @@ venv/
 *.vmdk
 *.ext2
 *.iso
+config.bat
+node_modules

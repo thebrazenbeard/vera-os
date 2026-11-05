@@ -45,7 +45,9 @@ def _shared_mount_count(text: str) -> int:
         after = row.split(" - ", 1)[1].split()
         if not after:
             raise IsolationProbeError("mount filesystem type missing")
-        if after[0].lower() in {"9p", "drvfs"}:
+        # Keep the read-only audit aligned with the disposable-runner mount
+        # guard: WSL shared paths can also appear with the fuse.wsl type.
+        if after[0].lower() in {"9p", "drvfs", "fuse.wsl"}:
             count += 1
     return count
 

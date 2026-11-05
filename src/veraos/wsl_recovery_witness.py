@@ -52,6 +52,32 @@ def assert_matches_external_checkpoint(
             not _DIGEST.fullmatch(checkpoint.keyed_digest)):
         raise PilotError("external recovery checkpoint unavailable or malformed; hold")
 
+    # The schema, marker, count, and digest must come from one SQLite WAL
+    # snapshot. A series of autocommit SELECTs can otherwise mix values from
+    # different commits by a concurrent writer. This is consistency only;
+    # the issuer and write serialization still require independent custody.
+    # A caller-owned transaction may already hold a stale WAL read snapshot.
+    # Without a protected writer lease, there is no safe way for this API to
+    # certify that such a transaction represents the current ledger. Hold
+    # instead of accepting a snapshot pinned before another writer committed.
+    if db.in_transaction:
+        raise PilotError("external checkpoint preexisting transaction; hold")
+    version_before = db.execute("PRAGMA data_version").fetchone()[0]
+    db.execute("BEGIN")
+    try:
+        _assert_keyed_checkpoint_in_snapshot(db, checkpoint)
+    finally:
+        db.rollback()
+    if db.execute("PRAGMA data_version").fetchone()[0] != version_before:
+        # A cooperating writer committed during the comparison. The snapshot
+        # may have matched an older ledger, but cannot certify the current
+        # state. This detection does not replace a real writer/issuer lease.
+        raise PilotError("external checkpoint concurrent database change; hold")
+
+
+def _assert_keyed_checkpoint_in_snapshot(
+    db: sqlite3.Connection, checkpoint: ExternalCheckpoint
+) -> None:
     # Do not permit caller-created TEMP copies to satisfy keyed schema/data
     # checks, or attached connection state outside the claimed database.
     _require_unshadowed_main_connection(db)
