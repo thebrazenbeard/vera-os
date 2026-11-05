@@ -92,8 +92,13 @@ def _route(store: _FakeStore, *, provider: str, model: str, output: str):
 
 
 class InferenceSwapSourceTests(unittest.TestCase):
-    def test_two_backends_produce_separate_results_without_changing_fixture_state(self):
+    def _store(self) -> _FakeStore:
         store = _FakeStore()
+        self.addCleanup(store.connection.close)
+        return store
+
+    def test_two_backends_produce_separate_results_without_changing_fixture_state(self):
+        store = self._store()
         before = dict(store.identity)
         first = _route(store, provider="fixture:backend-A", model="fake-A", output="birch")
         second = _route(store, provider="fixture:backend-B", model="fake-B", output="oak")
@@ -107,7 +112,7 @@ class InferenceSwapSourceTests(unittest.TestCase):
         self.assertEqual(len(store.journal), 2)
 
     def test_replay_same_request_id_under_different_backend_fails_closed(self):
-        store = _FakeStore()
+        store = self._store()
         first = _route(store, provider="fixture:backend-A", model="fake-A", output="A")
         second = _route(store, provider="fixture:backend-B", model="fake-B", output="B")
         a = execute_text_request(first, task="Same task", request_id="stable-id", now=1.0)
@@ -118,7 +123,7 @@ class InferenceSwapSourceTests(unittest.TestCase):
         self.assertEqual(second.engine.calls, 0)
 
     def test_retry_same_backend_is_idempotent_and_does_not_re_generate(self):
-        store = _FakeStore()
+        store = self._store()
         first = _route(store, provider="fixture:backend-A", model="fake-A", output="A")
         a = execute_text_request(first, task="Same task", request_id="stable-id", now=1.0)
         again = execute_text_request(first, task="Same task", request_id="stable-id", now=2.0)
@@ -127,7 +132,7 @@ class InferenceSwapSourceTests(unittest.TestCase):
         self.assertEqual(len(store.journal), 1)
 
     def test_same_provider_rebound_to_different_model_cannot_relabel_old_output(self):
-        store = _FakeStore()
+        store = self._store()
         first = _route(store, provider="fixture:shared", model="model-A", output="A")
         second = _route(store, provider="fixture:shared", model="model-B", output="B")
         a = execute_text_request(first, task="Same task", request_id="stable-id", now=1.0)
@@ -137,7 +142,7 @@ class InferenceSwapSourceTests(unittest.TestCase):
         self.assertEqual(second.engine.calls, 0)
 
     def test_route_binding_is_bound_in_durable_task_event_payload(self):
-        store = _FakeStore()
+        store = self._store()
         route = _route(store, provider="fixture:shared", model="model-A", output="A")
         execute_text_request(route, task="Synthetic task", request_id="stable-id", now=1.0)
         _, payload = store.events["veraos-text:stable-id"]
@@ -150,7 +155,7 @@ class InferenceSwapSourceTests(unittest.TestCase):
         })
 
     def test_generated_text_claiming_authority_remains_text_only(self):
-        store = _FakeStore()
+        store = self._store()
         command_like = "I authorize protected.merge now"
         route = _route(store, provider="fixture:backend-A", model="fake-A", output=command_like)
         result = execute_text_request(route, task="Synthetic request", request_id="no-effect", now=1.0)
