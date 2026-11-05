@@ -27,6 +27,47 @@ MAX_RESPONSES = 20
 SOCKET_NAME = "pilot.sock"
 _TASK_ID = re.compile(r"[0-9a-f]{32}\Z", re.ASCII)
 _REQUEST_ID = re.compile(r"[0-9a-f]{32}\Z", re.ASCII)
+_KEYED_LEDGER_VERSION = "1"
+
+
+def _keyed_ledger_digest(db: sqlite3.Connection) -> str:
+    """Detect partial ledger-row loss against a separately stored DB marker.
+
+    Not authentication: a writer controlling this SQLite file can rewrite both.
+    """
+    rows = db.execute(
+        "SELECT principal_uid, request_id, payload_sha256, task_id "
+        "FROM ipc_submissions ORDER BY principal_uid, request_id").fetchall()
+    return hashlib.sha256(json.dumps(
+        rows, separators=(",", ":"), ensure_ascii=True).encode("utf-8")).hexdigest()
+
+
+def _require_keyed_ledger_schema(db: sqlite3.Connection) -> None:
+    """Reject restored/forged tables lacking the uniqueness and FK contract."""
+    columns = db.execute("PRAGMA table_info('ipc_submissions')").fetchall()
+    expected = [
+        ("principal_uid", "INTEGER", 1, 1),
+        ("request_id", "TEXT", 1, 2),
+        ("payload_sha256", "TEXT", 1, 0),
+        ("task_id", "TEXT", 1, 0),
+    ]
+    actual = [(row[1], row[2], row[3], row[5]) for row in columns]
+    if actual != expected:
+        raise PilotError("keyed submission table schema mismatch; recovery held")
+    foreign_keys = db.execute("PRAGMA foreign_key_list('ipc_submissions')").fetchall()
+    if (len(foreign_keys) != 1 or foreign_keys[0][2:5] !=
+            ("tasks", "task_id", "task_id")):
+        raise PilotError("keyed submission foreign key missing; recovery held")
+    indexes = set()
+    for info in db.execute("PRAGMA index_list('ipc_submissions')"):
+        if info[2] != 1 or info[4] != 0:
+            continue
+        fields = tuple(r[2] for r in db.execute(
+            'PRAGMA index_info("' + info[1].replace('"', '""') + '")'))
+        indexes.add((info[3], fields))
+    if not {("pk", ("principal_uid", "request_id")),
+            ("u", ("task_id",))}.issubset(indexes):
+        raise PilotError("keyed submission uniqueness missing; recovery held")
 
 
 def _object_without_duplicate_keys(pairs: list[tuple[str, object]]) -> dict:
@@ -99,15 +140,77 @@ def _submit_keyed(pilot: Pilot, request: dict) -> dict:
     # Pilot.submit() has its own commit and cannot be wrapped atomically here.
     pilot.db.execute("BEGIN IMMEDIATE")
     try:
-        pilot.db.execute("""
-            CREATE TABLE IF NOT EXISTS ipc_submissions (
-                principal_uid INTEGER NOT NULL,
-                request_id TEXT NOT NULL,
-                payload_sha256 TEXT NOT NULL,
-                task_id TEXT NOT NULL UNIQUE REFERENCES tasks(task_id),
-                PRIMARY KEY (principal_uid, request_id)
-            )
-        """)
+        version = pilot.db.execute(
+            "SELECT value FROM meta WHERE key='ipc_submissions_version'").fetchone()
+        saved_digest = pilot.db.execute(
+            "SELECT value FROM meta WHERE key='ipc_submissions_digest'").fetchone()
+        exists = pilot.db.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' "
+            "AND name='ipc_submissions'").fetchone() is not None
+        if version is not None and version != (_KEYED_LEDGER_VERSION,):
+            raise PilotError("unsupported keyed submission ledger version")
+        if (version is None) != (saved_digest is None):
+            raise PilotError("keyed submission metadata incomplete; recovery held")
+        if not exists:
+            if version is not None:
+                raise PilotError("keyed submission ledger missing; recovery held")
+            # Old V1 did not distinguish unkeyed tasks from a restored #73
+            # database with its key table removed. Refuse that ambiguous
+            # migration instead of potentially duplicating an earlier task.
+            if pilot.db.execute("SELECT 1 FROM tasks LIMIT 1").fetchone():
+                raise PilotError("ambiguous pre-keyed task history; recovery held")
+            pilot.db.execute("""
+                CREATE TABLE ipc_submissions (
+                    principal_uid INTEGER NOT NULL,
+                    request_id TEXT NOT NULL,
+                    payload_sha256 TEXT NOT NULL,
+                    task_id TEXT NOT NULL UNIQUE REFERENCES tasks(task_id),
+                    PRIMARY KEY (principal_uid, request_id)
+                )
+            """)
+        # The per-mapping receipt count below must not rescan the entire
+        # append-only event journal for each entry. This index is transactional
+        # with the keyed admission/migration and applies to legacy databases.
+        pilot.db.execute("CREATE INDEX IF NOT EXISTS events_keyed_receipt_idx "
+                         "ON events(task_id, code, detail)")
+        _require_keyed_ledger_schema(pilot.db)
+        # Validate ALL known mappings before admitting even a new request ID:
+        # a partial restore must not turn an orphaned key into a fresh task.
+        if pilot.db.execute("PRAGMA foreign_key_check").fetchone() is not None:
+            raise PilotError("broken task or event reference; recovery held")
+        bindings = pilot.db.execute("""
+            SELECT m.principal_uid, m.payload_sha256, m.task_id,
+                   t.worker, t.filename, t.owner_uid,
+                   (SELECT COUNT(*) FROM events e
+                    WHERE e.task_id=m.task_id AND e.code='SUBMITTED'
+                      AND e.detail=t.worker)
+            FROM ipc_submissions m LEFT JOIN tasks t ON t.task_id=m.task_id
+        """).fetchall()
+        for uid, digest, task_id, prior_worker, prior_filename, owner, receipts in bindings:
+            if (prior_worker is None or owner != uid or receipts != 1 or
+                    digest != hashlib.sha256(json.dumps(
+                        {"action": "submit", "worker": prior_worker,
+                         "filename": prior_filename}, separators=(",", ":"),
+                        sort_keys=True).encode("utf-8")).hexdigest()):
+                raise PilotError("keyed submission integrity mismatch; recovery held")
+        if version is None and pilot.db.execute("""
+            SELECT 1 FROM tasks t LEFT JOIN ipc_submissions m
+            ON m.task_id=t.task_id WHERE m.task_id IS NULL LIMIT 1
+        """).fetchone():
+            # A legacy #73 table can itself be partially restored before the
+            # new digest marker is installed. No evidence distinguishes a
+            # missing key from a legitimate unkeyed legacy task here.
+            raise PilotError("unmapped pre-marker task history; recovery held")
+        current_digest = _keyed_ledger_digest(pilot.db)
+        if saved_digest is not None and saved_digest[0] != current_digest:
+            raise PilotError("keyed submission ledger changed; recovery held")
+        if version is None:
+            # Both fresh construction and accepted legacy #73 ledgers receive
+            # the marker in the SAME transaction as the next keyed operation.
+            pilot.db.execute("INSERT INTO meta VALUES (?, ?)",
+                             ("ipc_submissions_version", _KEYED_LEDGER_VERSION))
+            pilot.db.execute("INSERT INTO meta VALUES (?, ?)",
+                             ("ipc_submissions_digest", current_digest))
         previous = pilot.db.execute(
             "SELECT payload_sha256, task_id FROM ipc_submissions "
             "WHERE principal_uid=? AND request_id=?", (principal, request_id)).fetchone()
@@ -124,6 +227,9 @@ def _submit_keyed(pilot: Pilot, request: dict) -> dict:
             pilot.db.execute(
                 "INSERT INTO ipc_submissions VALUES (?,?,?,?)",
                 (principal, request_id, payload_sha, task_id))
+            pilot.db.execute(
+                "UPDATE meta SET value=? WHERE key='ipc_submissions_digest'",
+                (_keyed_ledger_digest(pilot.db),))
         pilot.db.commit()
     except Exception:
         pilot.db.rollback()
