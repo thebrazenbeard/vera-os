@@ -22,7 +22,10 @@ fixed workers for a named fixture file in a private test directory:
 | `digest` | Read at most 8 KiB under `input/`, calculate SHA-256 | Create one exclusive `<task-id>.sha256` file in `derived/` |
 
 The SQLite task state and append-only event table record submission, atomic
-claim, output intent, completion/cancellation, and recovery hold. The fixed
+claim, output intent, completion/cancellation, and recovery hold. Conditional
+status transitions refuse stale completion/cancellation writes. A cooperating
+Linux `flock` lease refuses restart recovery while a live worker is active;
+it is not a security control against same-UID code that ignores the lease. The fixed
 effect broker rejects every `deny-effect` request and records a denial. It
 does not forward shell, Git, network, financial, credential, or host actions.
 The CLI uses the **effective Linux UID** as its sole caller identity, owns its
