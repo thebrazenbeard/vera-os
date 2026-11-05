@@ -54,7 +54,10 @@ def _validate_root(root: Path, *, exists: bool) -> None:
         backing = root if exists else root.parent
         # $HOME can be altered by the caller; only the OS account database
         # supplies the intended Linux home device for this first WSL pilot.
-        owner_home = Path(pwd.getpwuid(_uid()).pw_dir).resolve(strict=True)
+        try:
+            owner_home = Path(pwd.getpwuid(_uid()).pw_dir).resolve(strict=True)
+        except (KeyError, OSError) as exc:
+            raise PilotError("Linux owner account home is unavailable") from exc
         if backing.stat().st_dev != owner_home.stat().st_dev:
             raise PilotError("WSL state must use the native Linux home filesystem")
     if exists:
