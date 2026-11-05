@@ -6,6 +6,7 @@ Vera identity, or independent worker sandbox. This is not a public service.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -16,14 +17,16 @@ import sys
 import threading
 import re
 import time
+import uuid
 
-from .wsl_pilot import Pilot, PilotError, _uid
+from .wsl_pilot import Pilot, PilotError, _NAME, _uid
 
 
 MAX_REQUEST = 1024
 MAX_RESPONSES = 20
 SOCKET_NAME = "pilot.sock"
 _TASK_ID = re.compile(r"[0-9a-f]{32}\Z", re.ASCII)
+_REQUEST_ID = re.compile(r"[0-9a-f]{32}\Z", re.ASCII)
 
 
 def _object_without_duplicate_keys(pairs: list[tuple[str, object]]) -> dict:
@@ -71,6 +74,63 @@ def _read_request(client: socket.socket) -> dict:
     return value
 
 
+def _submit_keyed(pilot: Pilot, request: dict) -> dict:
+    """Atomically bind a same-UID request ID to one durable fixture task.
+
+    This is only a Linux UID-scoped retry mechanism, NOT human identity or
+    protected-effect authorization. Legacy unkeyed V1 submit remains distinct.
+    """
+    worker, filename, request_id = (request["worker"], request["filename"],
+                                    request["request_id"])
+    if type(request_id) is not str or not _REQUEST_ID.fullmatch(request_id):
+        raise PilotError("invalid request ID")
+    # Match the Pilot.submit fixture allowlist before opening the transaction.
+    if type(worker) is not str or worker not in ("inspect", "digest"):
+        raise PilotError("unrecognized worker")
+    if (type(filename) is not str or not _NAME.fullmatch(filename)
+            or filename in (".", "..")):
+        raise PilotError("input must be a simple fixture filename")
+    principal = _uid()
+    payload = json.dumps({"action": "submit", "worker": worker, "filename": filename},
+                         separators=(",", ":"), sort_keys=True).encode("utf-8")
+    payload_sha = hashlib.sha256(payload).hexdigest()
+    # Explicit BEGIN IMMEDIATE covers the schema-on-first-use migration,
+    # request uniqueness, task insertion, and SUBMITTED receipt in ONE commit.
+    # Pilot.submit() has its own commit and cannot be wrapped atomically here.
+    pilot.db.execute("BEGIN IMMEDIATE")
+    try:
+        pilot.db.execute("""
+            CREATE TABLE IF NOT EXISTS ipc_submissions (
+                principal_uid INTEGER NOT NULL,
+                request_id TEXT NOT NULL,
+                payload_sha256 TEXT NOT NULL,
+                task_id TEXT NOT NULL UNIQUE REFERENCES tasks(task_id),
+                PRIMARY KEY (principal_uid, request_id)
+            )
+        """)
+        previous = pilot.db.execute(
+            "SELECT payload_sha256, task_id FROM ipc_submissions "
+            "WHERE principal_uid=? AND request_id=?", (principal, request_id)).fetchone()
+        if previous is not None:
+            if previous[0] != payload_sha:
+                raise PilotError("request ID reused for different payload")
+            task_id = previous[1]
+        else:
+            task_id = uuid.uuid4().hex
+            pilot.db.execute("INSERT INTO tasks VALUES (?,?,?,?,?)",
+                             (task_id, worker, filename, "QUEUED", principal))
+            pilot.db.execute("INSERT INTO events(task_id,code,detail) VALUES (?,?,?)",
+                             (task_id, "SUBMITTED", worker))
+            pilot.db.execute(
+                "INSERT INTO ipc_submissions VALUES (?,?,?,?)",
+                (principal, request_id, payload_sha, task_id))
+        pilot.db.commit()
+    except Exception:
+        pilot.db.rollback()
+        raise
+    return {"task_id": task_id}
+
+
 def _dispatch(pilot: Pilot, request: dict) -> dict:
     # A strict key allowlist prevents a caller-supplied role, uid, path, or
     # arbitrary Python/tool payload from gaining any meaning.
@@ -82,12 +142,18 @@ def _dispatch(pilot: Pilot, request: dict) -> dict:
         "cancel": {"action", "task_id"},
         "deny-effect": {"action", "effect"},
     }
-    if type(action) is not str or action not in schemas or set(request) != schemas[action]:
+    keys = set(request)
+    allowed_keys = schemas.get(action) if type(action) is str else None
+    if (allowed_keys is None or
+            (keys != allowed_keys and not (
+                action == "submit" and keys == allowed_keys | {"request_id"}))):
         raise PilotError("unsupported action or unexpected fields")
     if action in ("run", "cancel") and (
             type(request["task_id"]) is not str or not _TASK_ID.fullmatch(request["task_id"])):
         raise PilotError("invalid task ID")
     if action == "submit":
+        if "request_id" in request:
+            return _submit_keyed(pilot, request)
         return {"task_id": pilot.submit(request["worker"], request["filename"])}
     if action == "run":
         return {"status": pilot.run(request["task_id"])}
