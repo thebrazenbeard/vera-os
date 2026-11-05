@@ -17,8 +17,15 @@ import pwd
 import re
 import sqlite3
 import stat
+import subprocess
 import sys
+import tempfile
 import uuid
+
+from veraos.worker_execution_gate import (
+    DEV_INLINE_FIXTURE, DEV_SUBPROCESS_FIXTURE, WorkerExecutionHeld,
+    assess_worker_execution, require_dev_fixture_execution,
+)
 
 
 SCHEMA = "VERAOS_WSL_PILOT_V1"
@@ -223,13 +230,78 @@ class Pilot:
                         count += 1
             return count
 
-    def protected_effect(self, kind: str) -> bool:
-        """Fixed default-deny broker; never forwards external effects."""
+    def protected_effect(self, kind: str, *, task_id: str | None = None) -> bool:
+        """Always deny; optionally record untrusted local task context.
+
+        A task ID is caller-asserted *context*, not an authenticated principal,
+        Windows PING, grant, approval, or authorization to execute the effect.
+        Legacy calls retain their original unbound plain-text receipt format.
+        """
         if type(kind) is not str or not 1 <= len(kind) <= 48 or not _NAME.fullmatch(kind):
             raise PilotError("invalid effect label")
+        if task_id is not None and (type(task_id) is not str or
+                                    re.fullmatch(r"[0-9a-f]{32}", task_id) is None):
+            raise PilotError("invalid local task reference")
+        policy = assess_worker_execution(
+            operation="protected-effect", requested_effects=(kind,))
+        if (policy.dev_fixture_allowed or
+                policy.production_worker_isolation != "HOLD" or
+                policy.protected_effects != "DENIED"):
+            raise PilotError("unexpected protected effect authority promotion")
         with self.db:
-            self._event(None, "PROTECTED_EFFECT_DENIED", kind)
+            if task_id is None:
+                self._event(None, "PROTECTED_EFFECT_DENIED", kind)
+            else:
+                row = self.db.execute(
+                    "SELECT 1 FROM tasks WHERE task_id=? AND owner_uid=?",
+                    (task_id, _uid()),
+                ).fetchone()
+                # Never populate events.task_id from a caller's assertion:
+                # consumers could otherwise misread it as authenticated causality.
+                detail = json.dumps({
+                    "schema": "VERAOS_LOCAL_TASK_DENIAL_V1",
+                    "effect": kind,
+                    "association": ("CALLER_ASSERTED_EXISTING_LOCAL_TASK" if row else
+                                    "UNBOUND_UNKNOWN_LOCAL_TASK"),
+                    "asserted_task_id": task_id if row else None,
+                    "authenticated_principal_id": None,
+                    "windows_ping_request_id": None,
+                }, sort_keys=True, separators=(",", ":"))
+                self._event(None, "PROTECTED_EFFECT_DENIED", detail)
         return False
+
+    def _record_worker_isolation_denial(
+        self, *, task_id: object, execution_mode: object,
+    ) -> None:
+        """Persist a denied intent without pretending its task claim is identity.
+
+        This same-UID SQLite record is useful for restart diagnostics only. It
+        neither authenticates the requestor nor proves kernel/Windows isolation.
+        The event's authoritative task_id column deliberately stays NULL.
+        """
+        well_formed_id = (type(task_id) is str and
+                          re.fullmatch(r"[0-9a-f]{32}", task_id) is not None)
+        bounded_mode = (execution_mode if type(execution_mode) is str and
+                        1 <= len(execution_mode) <= 64 and
+                        _NAME.fullmatch(execution_mode) else None)
+        with self.db:
+            known_local_task = bool(well_formed_id and self.db.execute(
+                "SELECT 1 FROM tasks WHERE task_id=? AND owner_uid=?",
+                (task_id, _uid()),
+            ).fetchone())
+            detail = json.dumps({
+                "schema": "VERAOS_LOCAL_ISOLATION_DENIAL_V1",
+                "requested_execution_mode": bounded_mode,
+                "association": ("CALLER_ASSERTED_EXISTING_LOCAL_TASK" if known_local_task else
+                                "UNBOUND_UNKNOWN_LOCAL_TASK"),
+                "asserted_task_id": task_id if known_local_task else None,
+                "authenticated_principal_id": None,
+                "trusted_windows_issuer": None,
+                "receipt_authority": "SAME_UID_SQLITE_ONLY",
+                "production_worker_isolation": "HOLD",
+                "protected_effects": "DENIED",
+            }, sort_keys=True, separators=(",", ":"))
+            self._event(None, "WORKER_ISOLATION_DENIED", detail)
 
     def _input(self, filename: str, *, read: bool) -> int | bytes:
         flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
@@ -276,16 +348,111 @@ class Pilot:
             os.close(directory)
 
     def run(self, task_id: str) -> str:
+        require_dev_fixture_execution(operation=DEV_INLINE_FIXTURE)
         with self._worker_lease(exclusive=False):
             return self._run_with_lease(task_id)
 
-    def _run_with_lease(self, task_id: str) -> str:
+    def run_dev_process(
+        self, task_id: str, *, execution_mode: str = DEV_SUBPROCESS_FIXTURE,
+    ) -> str:
+        """Opt-in DEV-ONLY data-scoped subprocess; same UID is NOT isolation."""
+        try:
+            require_dev_fixture_execution(operation=execution_mode)
+        except WorkerExecutionHeld as exc:
+            self._record_worker_isolation_denial(
+                task_id=task_id, execution_mode=execution_mode)
+            raise PilotError("worker execution held: development fixture only") from exc
+        with self._worker_lease(exclusive=False):
+            return self._run_with_lease(task_id, process_worker=True)
+
+    def _run_data_scoped_child(self, worker: str, payload: bytes) -> dict:
+        """No task DB/path, ambient env or inherited input FDs reach the child.
+
+        The fixed child runs with the *same* Linux UID and can still exercise
+        that UID's filesystem privileges. This is process/data separation,
+        never an operating-system enforcement of worker capabilities.
+        """
+        require_dev_fixture_execution(operation=DEV_SUBPROCESS_FIXTURE)
+        if (worker not in ("inspect", "digest") or type(payload) is not bytes or
+                len(payload) > MAX_INPUT_BYTES):
+            raise PilotError("invalid scoped development worker input")
+        entry = Path(__file__).with_name("wsl_worker_child.py")
+        interpreter = Path(sys.executable)
+        if (not entry.is_absolute() or not entry.is_file() or entry.is_symlink() or
+                not interpreter.is_absolute() or not interpreter.is_file()):
+            raise PilotError("fixed read-only worker entrypoint unavailable")
+        try:
+            # A fresh private Linux directory avoids inheriting the shell's
+            # ambient working directory (and keeps fixture residue bounded).
+            with tempfile.TemporaryDirectory(prefix="scoped-worker-", dir=self.root) as cwd:
+                with subprocess.Popen(
+                    [str(interpreter), "-I", "-B", str(entry), worker],
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE, env={}, cwd=cwd,
+                    close_fds=True, start_new_session=True,
+                ) as child:
+                    observed_pid = child.pid
+                    try:
+                        stdout, stderr = child.communicate(input=payload, timeout=5)
+                    except subprocess.TimeoutExpired as exc:
+                        child.kill()
+                        child.communicate(timeout=5)
+                        raise PilotError("scoped development worker timed out") from exc
+                    exit_code = child.returncode
+        except OSError as exc:
+            raise PilotError("scoped development worker unavailable") from exc
+        if exit_code != 0 or stderr or len(stdout) > 256:
+            raise PilotError("scoped development worker failed or emitted unexpected output")
+        try:
+            result = json.loads(stdout)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise PilotError("invalid scoped development worker output") from exc
+        if (type(result) is not dict or result.get("worker") != worker or
+                type(result.get("pid")) is not int or result["pid"] <= 0 or
+                result["pid"] != observed_pid or observed_pid == os.getpid() or
+                type(result.get("env_keys")) is not list or
+                not all(type(x) is str for x in result["env_keys"]) or
+                not set(result["env_keys"]).issubset({"LC_CTYPE"})):
+            raise PilotError("scoped development worker provenance mismatch")
+        if worker == "inspect":
+            if (type(result.get("size")) is not int or
+                    not 0 <= result["size"] <= MAX_INPUT_BYTES or
+                    set(result) != {"worker", "pid", "env_keys", "size"}):
+                raise PilotError("invalid inspect worker result")
+        elif worker == "digest":
+            if (type(result.get("sha256")) is not str or
+                    re.fullmatch(r"[0-9a-f]{64}", result["sha256"]) is None or
+                    set(result) != {"worker", "pid", "env_keys", "sha256"}):
+                raise PilotError("invalid digest worker result")
+        else:
+            raise PilotError("invalid scoped development worker type")
+        return result
+
+    def _run_with_lease(self, task_id: str, *, process_worker: bool = False) -> str:
         if not self.claim(task_id):
             raise PilotError("task is not queued or is already owned")
         worker, filename = self.db.execute(
             "SELECT worker,filename FROM tasks WHERE task_id=?", (task_id,)).fetchone()
         try:
-            if worker == "inspect":
+            if process_worker:
+                if worker == "inspect":
+                    size = self._input(filename, read=False)
+                    output = self._run_data_scoped_child(worker, str(size).encode("ascii"))
+                    if output["size"] != size:
+                        raise PilotError("inspect scoped result mismatch")
+                    detail = f"bytes={output['size']}"
+                else:
+                    data = self._input(filename, read=True)
+                    output = self._run_data_scoped_child(worker, data)
+                    detail = output["sha256"]
+                # This is a process-execution observation, not a trusted
+                # authenticated worker principal or capability receipt.
+                with self.db:
+                    self._event(task_id, "DEV_SUBPROCESS_OBSERVED",
+                                json.dumps({"pid": output["pid"], "worker": worker,
+                                            "scope": "SAME_UID_DATA_ONLY"},
+                                           sort_keys=True, separators=(",", ":")))
+            elif worker == "inspect":
                 result = self._input(filename, read=False)
                 detail = f"bytes={result}"
             else:
@@ -340,9 +507,11 @@ def main(argv: list[str] | None = None) -> int:
     submit = cmds.add_parser("submit")
     submit.add_argument("worker", choices=("inspect", "digest"))
     submit.add_argument("filename")
-    for name in ("run", "cancel"):
+    for name in ("run", "dev-run-process", "cancel"):
         cmds.add_parser(name).add_argument("task_id")
-    cmds.add_parser("deny-effect").add_argument("effect")
+    deny = cmds.add_parser("deny-effect")
+    deny.add_argument("effect")
+    deny.add_argument("--task-id", help="caller-asserted local task context; NEVER identity")
     args = parser.parse_args(argv)
     try:
         with (Pilot.init(args.root) if args.command == "init" else Pilot(args.root)) as pilot:
@@ -352,12 +521,14 @@ def main(argv: list[str] | None = None) -> int:
                 result = {"task_id": pilot.submit(args.worker, args.filename)}
             elif args.command == "run":
                 result = {"status": pilot.run(args.task_id)}
+            elif args.command == "dev-run-process":
+                result = {"status": pilot.run_dev_process(args.task_id)}
             elif args.command == "cancel":
                 result = {"status": pilot.cancel(args.task_id)}
             elif args.command == "recover":
                 result = {"recovery_held": pilot.recover()}
             elif args.command == "deny-effect":
-                result = {"allowed": pilot.protected_effect(args.effect)}
+                result = {"allowed": pilot.protected_effect(args.effect, task_id=args.task_id)}
             else:
                 result = pilot.snapshot()
         print(json.dumps(result, sort_keys=True))

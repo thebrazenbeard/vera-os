@@ -1,3 +1,47 @@
 branch_structure.json
 temp_auto_push.bat
 temp_interactive_push.bat
+
+# Local Python tooling and disposable checkouts; keep source/tests trackable.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+.venv/
+venv/
+/dist/
+/build/
+*.egg-info/
+
+# Operator secrets and local-only runtime state. Template files remain visible.
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.*.example
+!.env.*.sample
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+*.db
+*.db-wal
+*.db-shm
+
+# Never accidentally stage local model weights or VM disk/image outputs.
+*.gguf
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.vhdx
+*.qcow2
+*.vdi
+*.vmdk
+*.ext2
+*.iso

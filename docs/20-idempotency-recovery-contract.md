@@ -1,0 +1,31 @@
+# WSL IPC keyed-submit recovery contract — successor draft (stacked on #73)
+
+Evidence boundary: original source at `54b37ee498b48756a9666f28a17cdea7a919938a`, proposed follow-on source changes and disposable tests in `tests/test_wsl_ipc_schema_migration.py`. This is not a qualified host deployment, authenticated Vera identity, or production service.
+
+## Current supported semantics (source-backed)
+
+- A client may submit `{"action":"submit","worker":"inspect|digest","filename":"...","request_id":"<32 lowercase hex>"}`. The request ID is **optional**; legacy unkeyed submits can create multiple tasks on retry.
+- The key is `(Linux UID, request_id)`. The canonicalized action/worker/filename digest must match on retry. Conflicting reuse is denied, and an exact retry returns the original task ID.
+- Under `BEGIN IMMEDIATE`, the IPC entrypoint creates `ipc_submissions` on first keyed use, sets `meta.ipc_submissions_version=1`, inserts the queued task and `SUBMITTED` event, binds the key to that task, and commits all together. A precommit exception rolls back the whole transaction. A response lost **after** commit can be retried using the same key.
+- Before processing a keyed request, the successor code checks version marker/table agreement, a SHA-256 fingerprint of the **complete mapping ledger** stored atomically in `meta.ipc_submissions_digest`, foreign-key integrity, every existing mapping's task owner and canonical payload, and one matching `SUBMITTED` event. Missing table, missing/altered row with surviving fingerprint, or orphaned mapping **holds** instead of retrying. An existing #73-era mapping table with valid contents can be marked version 1 on first access **only when every preexisting task has a mapping**. No marker/table with existing tasks, or an unmarked table with unmapped tasks, is ambiguous and refuses automatic keyed migration, including some legitimate older unkeyed histories.
+- This is same-UID retry protection only; Linux UID is not a Windows SID, human authorization, tenant boundary, or independent worker sandbox. A local socket does not grant protected-effect authority.
+
+## Critical residual downgrade/partial-restore objection
+
+> **Hostile challenge:** The #73 implementation lacked a keyed-ledger marker and could silently duplicate after loss of the request mapping, or return an orphaned task ID. An initial table-only marker fix was independently falsified: deleting only one mapping **row** left the marker/table intact and duplicated work. This successor adds a whole-ledger fingerprint and covers the reproducible row-loss case, but marker, fingerprint, task and mapping still live in one mutable SQLite file under one Linux UID. A malicious same-UID process or rollback to an earlier *consistent* snapshot can erase/rewrite a whole period of history, including marker evidence. There is no independent host-owned monotonic checkpoint, trusted backup custody, or production rollback detection.
+
+These are deliberately inconsistent-state fixtures, not evidence of double-commit in a normal atomic SQLite transaction. The successor's regression tests enforce fail-closed behavior for an absent mapping table, orphaned mapping, mismatched task payload and ambiguous V1 migration. Complete database backup restores and postcommit response loss remain separate positive controls.
+
+## Remaining recovery policy before relying on this across real machine restores
+
+1. Treat the complete `pilot.sqlite3` as one consistency unit. Use SQLite's backup API or a clean stopped database checkpoint; never restore only `tasks`, `events`, or `ipc_submissions` from different snapshots. Preserve original ownership, private permissions, WAL consistency, and a verified backup receipt. Never hand-copy a live SQLite database while writers are running.
+2. The successor introduces the **durable IPC idempotency migration/version and complete-ledger fingerprint** in `meta` atomically with first keyed write, without changing `meta.schema=VERAOS_WSL_PILOT_V1`. No-marker/no-table plus existing tasks, or unmarked table with unmapped tasks, is rejected rather than automatically upgraded. Host-owned repair and authorized migration of such V1 histories require a separately reviewed protocol.
+3. Integrity checks now gate keyed admission. Maintain their regression tests, including missing mapping *row*, task owner/payload, structural table PK/UNIQUE/FK constraints and the `SUBMITTED` receipt. A transactional `events(task_id,code,detail)` index prevents each mapping's receipt check from rescanning the full journal. The validation still scans the complete mapping ledger on each keyed request and does not scale indefinitely. Additionally qualify backup WAL/checkpoint consistency, tamper detection, downgrade writers and independent host receipt anchoring before treating this as production recovery.
+4. On restored state, retry with the same `(principal_uid, request_id, exact payload)` and verify original task ID, exactly one task and one submission event. Use different request IDs for *new* intended work. Never silently switch a keyed retry to unkeyed submit.
+5. Maintain backup receipts and explicit migration tests for fresh V1, already-keyed state, complete restore, mapping missing, orphan map, interrupted first migration, and client disconnect after commit.
+
+## Deterministic test boundaries and interpretation
+
+`PYTHONPATH=src python -m unittest discover -s tests -p 'test_wsl_ipc_schema_migration.py' -v`. Sixteen passing local fixture tests exercise the new fail-closed gates (including row loss and malformed table constraints) plus normal SQLite creation, rollback, lost response, version migration and complete backup/restore. Root-owned CI environments patch the pilot's user-ID check solely for source-level fixture coverage; actual WSL validation must run as a non-root Linux user without that patch.
+
+Even after Lappy verification, classify keyed IPC as suitable for **fresh disposable pilot testing**, ordinary lost-reply retry and narrow fail-closed corruption checks, **not** as independently backup/recovery-qualified identity or protection against a privileged/same-UID state rollback. No host configuration, GPU load, service autostart, credentials, or protected effects are authorized by this document.
