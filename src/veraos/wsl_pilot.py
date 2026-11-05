@@ -22,6 +22,11 @@ import sys
 import tempfile
 import uuid
 
+from veraos.worker_execution_gate import (
+    DEV_INLINE_FIXTURE, DEV_SUBPROCESS_FIXTURE, WorkerExecutionHeld,
+    assess_worker_execution, require_dev_fixture_execution,
+)
+
 
 SCHEMA = "VERAOS_WSL_PILOT_V1"
 MAX_INPUT_BYTES = 8192
@@ -237,6 +242,12 @@ class Pilot:
         if task_id is not None and (type(task_id) is not str or
                                     re.fullmatch(r"[0-9a-f]{32}", task_id) is None):
             raise PilotError("invalid local task reference")
+        policy = assess_worker_execution(
+            operation="protected-effect", requested_effects=(kind,))
+        if (policy.dev_fixture_allowed or
+                policy.production_worker_isolation != "HOLD" or
+                policy.protected_effects != "DENIED"):
+            raise PilotError("unexpected protected effect authority promotion")
         with self.db:
             if task_id is None:
                 self._event(None, "PROTECTED_EFFECT_DENIED", kind)
@@ -304,11 +315,18 @@ class Pilot:
             os.close(directory)
 
     def run(self, task_id: str) -> str:
+        require_dev_fixture_execution(operation=DEV_INLINE_FIXTURE)
         with self._worker_lease(exclusive=False):
             return self._run_with_lease(task_id)
 
-    def run_dev_process(self, task_id: str) -> str:
+    def run_dev_process(
+        self, task_id: str, *, execution_mode: str = DEV_SUBPROCESS_FIXTURE,
+    ) -> str:
         """Opt-in DEV-ONLY data-scoped subprocess; same UID is NOT isolation."""
+        try:
+            require_dev_fixture_execution(operation=execution_mode)
+        except WorkerExecutionHeld as exc:
+            raise PilotError("worker execution held: development fixture only") from exc
         with self._worker_lease(exclusive=False):
             return self._run_with_lease(task_id, process_worker=True)
 
@@ -319,6 +337,7 @@ class Pilot:
         that UID's filesystem privileges. This is process/data separation,
         never an operating-system enforcement of worker capabilities.
         """
+        require_dev_fixture_execution(operation=DEV_SUBPROCESS_FIXTURE)
         if (worker not in ("inspect", "digest") or type(payload) is not bytes or
                 len(payload) > MAX_INPUT_BYTES):
             raise PilotError("invalid scoped development worker input")
