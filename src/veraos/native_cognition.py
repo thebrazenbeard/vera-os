@@ -131,9 +131,20 @@ def execute_text_request(
         raise ValueError("request_id must be a stable bounded token")
 
     store = admitted.store
+    # A request ID is a stable idempotency domain, not a license to relabel a
+    # previously completed output after a model/provider swap. The durable
+    # event payload must bind to the exact selected cognition route so that a
+    # strict deduplicating store rejects a conflicting retry. These declared
+    # route fields are *not* proof that the underlying artifact was attested.
+    route_identity = {
+        "adapter_id": admitted.binding.adapter_id,
+        "route_id": admitted.binding.route_id,
+        "provider_id": admitted.provider_id,
+        "model": admitted.model,
+    }
     event_id = store.enqueue_event(
         kind="task.requested",
-        payload={"task": task.strip(), "capabilities": []},
+        payload={"task": task.strip(), "capabilities": [], "route_identity": route_identity},
         priority=0,
         dedup_key=f"veraos-text:{request_id}",
         now=now,
@@ -147,10 +158,7 @@ def execute_text_request(
             event_type="VERAOS_COGNITION_ROUTE_SELECTED",
             subject_id=event_id,
             payload={
-                "adapter_id": admitted.binding.adapter_id,
-                "route_id": admitted.binding.route_id,
-                "provider_id": admitted.provider_id,
-                "model": admitted.model,
+                **route_identity,
                 "effect_class": "COGNITION_ONLY",
             },
             now=now,
@@ -173,7 +181,7 @@ def execute_text_request(
         return {
             "status": "PENDING", "run_id": None, "final_text": None,
             "event_id": event_id, "route_id": admitted.binding.route_id,
-            "provider_id": admitted.provider_id,
+            "provider_id": admitted.provider_id, "model": admitted.model,
         }
     run = store.get_run(run_id)
     return {
@@ -183,4 +191,5 @@ def execute_text_request(
         "final_text": run["final_text"] if run["status"] == "COMPLETED" else None,
         "route_id": admitted.binding.route_id,
         "provider_id": admitted.provider_id,
+        "model": admitted.model,
     }

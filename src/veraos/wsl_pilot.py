@@ -223,12 +223,38 @@ class Pilot:
                         count += 1
             return count
 
-    def protected_effect(self, kind: str) -> bool:
-        """Fixed default-deny broker; never forwards external effects."""
+    def protected_effect(self, kind: str, *, task_id: str | None = None) -> bool:
+        """Always deny; optionally record untrusted local task context.
+
+        A task ID is caller-asserted *context*, not an authenticated principal,
+        Windows PING, grant, approval, or authorization to execute the effect.
+        Legacy calls retain their original unbound plain-text receipt format.
+        """
         if type(kind) is not str or not 1 <= len(kind) <= 48 or not _NAME.fullmatch(kind):
             raise PilotError("invalid effect label")
+        if task_id is not None and (type(task_id) is not str or
+                                    re.fullmatch(r"[0-9a-f]{32}", task_id) is None):
+            raise PilotError("invalid local task reference")
         with self.db:
-            self._event(None, "PROTECTED_EFFECT_DENIED", kind)
+            if task_id is None:
+                self._event(None, "PROTECTED_EFFECT_DENIED", kind)
+            else:
+                row = self.db.execute(
+                    "SELECT 1 FROM tasks WHERE task_id=? AND owner_uid=?",
+                    (task_id, _uid()),
+                ).fetchone()
+                # Never populate events.task_id from a caller's assertion:
+                # consumers could otherwise misread it as authenticated causality.
+                detail = json.dumps({
+                    "schema": "VERAOS_LOCAL_TASK_DENIAL_V1",
+                    "effect": kind,
+                    "association": ("CALLER_ASSERTED_EXISTING_LOCAL_TASK" if row else
+                                    "UNBOUND_UNKNOWN_LOCAL_TASK"),
+                    "asserted_task_id": task_id if row else None,
+                    "authenticated_principal_id": None,
+                    "windows_ping_request_id": None,
+                }, sort_keys=True, separators=(",", ":"))
+                self._event(None, "PROTECTED_EFFECT_DENIED", detail)
         return False
 
     def _input(self, filename: str, *, read: bool) -> int | bytes:
@@ -342,7 +368,9 @@ def main(argv: list[str] | None = None) -> int:
     submit.add_argument("filename")
     for name in ("run", "cancel"):
         cmds.add_parser(name).add_argument("task_id")
-    cmds.add_parser("deny-effect").add_argument("effect")
+    deny = cmds.add_parser("deny-effect")
+    deny.add_argument("effect")
+    deny.add_argument("--task-id", help="caller-asserted local task context; NEVER identity")
     args = parser.parse_args(argv)
     try:
         with (Pilot.init(args.root) if args.command == "init" else Pilot(args.root)) as pilot:
@@ -357,7 +385,7 @@ def main(argv: list[str] | None = None) -> int:
             elif args.command == "recover":
                 result = {"recovery_held": pilot.recover()}
             elif args.command == "deny-effect":
-                result = {"allowed": pilot.protected_effect(args.effect)}
+                result = {"allowed": pilot.protected_effect(args.effect, task_id=args.task_id)}
             else:
                 result = pilot.snapshot()
         print(json.dumps(result, sort_keys=True))

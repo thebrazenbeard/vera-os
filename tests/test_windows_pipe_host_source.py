@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from veraos import windows_pipe_host as host
@@ -22,12 +23,25 @@ class WindowsPipeSourceContractTests(unittest.TestCase):
         self.assertIn("_require_native_abi()", source)
         verify = inspect.getsource(host._require_native_abi)
         for required in ("_TOKEN_STATISTICS", "_SECURITY_ATTRIBUTES",
-                         "_LUID", "AuthenticationId.offset", "ModifiedId.offset"):
+                         "_LUID", "_SID_AND_ATTRIBUTES", "_TOKEN_USER",
+                         "_TOKEN_GROUPS_ONE", "Groups.offset",
+                         "AuthenticationId.offset", "ModifiedId.offset"):
             self.assertIn(required, verify)
         # No Win32 API calls: if these tests ever run on a Windows test host,
         # fail before token parsing if its ctypes ABI is not the expected one.
         if sys.platform == "win32":
             host._require_native_abi()
+
+    def test_token_groups_abi_drift_is_rejected_before_token_dereference(self):
+        class PoisonedGroups(host.ctypes.Structure):
+            _fields_ = [("GroupCount", host.wintypes.DWORD),
+                        ("Unexpected", host.wintypes.DWORD * 4),
+                        ("Groups", host._SID_AND_ATTRIBUTES * 1)]
+
+        with patch.object(host, "_TOKEN_GROUPS_ONE", PoisonedGroups):
+            with self.assertRaisesRegex(host.WindowsPipeUnavailable,
+                                        "native Windows security ABI mismatch"):
+                host._require_native_abi()
 
     def test_explicit_logon_sid_dacl_and_no_pipe_instance_creation_grant(self):
         self.assertEqual(host.CLIENT_PIPE_ACCESS & host.FILE_CREATE_PIPE_INSTANCE, 0)

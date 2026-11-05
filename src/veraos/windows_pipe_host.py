@@ -111,6 +111,11 @@ def _require_native_abi() -> None:
     pointer = ctypes.sizeof(ctypes.c_void_p)
     if (pointer not in (4, 8) or ctypes.sizeof(wintypes.DWORD) != 4
             or ctypes.sizeof(wintypes.LONG) != 4 or ctypes.sizeof(_LUID) != 8
+            or ctypes.sizeof(_SID_AND_ATTRIBUTES) != (16 if pointer == 8 else 8)
+            or _SID_AND_ATTRIBUTES.Attributes.offset != pointer
+            or ctypes.sizeof(_TOKEN_USER) != (16 if pointer == 8 else 8)
+            or ctypes.sizeof(_TOKEN_GROUPS_ONE) != (24 if pointer == 8 else 12)
+            or _TOKEN_GROUPS_ONE.Groups.offset != (8 if pointer == 8 else 4)
             or ctypes.sizeof(_TOKEN_STATISTICS) != 56
             or _TOKEN_STATISTICS.AuthenticationId.offset != 8
             or _TOKEN_STATISTICS.ModifiedId.offset != 48
