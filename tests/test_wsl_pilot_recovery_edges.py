@@ -10,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import os
 from pathlib import Path
+import pwd
 import shutil
 import sqlite3
 import tempfile
@@ -30,7 +31,9 @@ class StateRecoveryEdges(unittest.TestCase):
             uid_stub = patch("veraos.wsl_pilot._uid", return_value=0)
             uid_stub.start()
             self.addCleanup(uid_stub.stop)
-        outer = Path(tempfile.mkdtemp(prefix="veraos-recovery-edge-"))
+        native_home = (Path(pwd.getpwuid(os.geteuid()).pw_dir)
+                       if "microsoft" in os.uname().release.lower() else None)
+        outer = Path(tempfile.mkdtemp(prefix="veraos-recovery-edge-", dir=native_home))
         self.addCleanup(shutil.rmtree, outer)
         self.root = outer / "state"
         with Pilot.init(self.root):
