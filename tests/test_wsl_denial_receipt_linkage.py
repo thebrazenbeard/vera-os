@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import pwd
 import shutil
 import sys
 import tempfile
@@ -38,7 +39,12 @@ class DenialReceiptLinkageSourceTests(unittest.TestCase):
             uid_patch = patch("veraos.wsl_pilot._uid", return_value=0)
             uid_patch.start()
             self.addCleanup(uid_patch.stop)
-        self.parent = Path(tempfile.mkdtemp(prefix="veraos-denial-link-"))
+        # On WSL the native Linux account home, not /tmp or a Windows mount,
+        # is the only supported pilot-state filesystem.
+        native_home = (Path(pwd.getpwuid(os.geteuid()).pw_dir)
+                       if "microsoft" in os.uname().release.lower() else None)
+        self.parent = Path(tempfile.mkdtemp(prefix="veraos-denial-link-",
+                                            dir=native_home))
         self.addCleanup(shutil.rmtree, self.parent)
         self.root = self.parent / "pilot"
         with Pilot.init(self.root):
