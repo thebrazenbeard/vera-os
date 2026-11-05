@@ -8,7 +8,7 @@ as the same Linux user are not isolated from each other.
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 import hashlib
 import json
 import os
@@ -100,7 +100,9 @@ class Pilot:
         os.close(fd)
         fd = os.open(root / "pilot.lock", os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         os.close(fd)
-        with sqlite3.connect(db_path) as db:
+        # sqlite3's context manager commits but does *not* close; explicitly
+        # close the initializer connection (Python 3.14 warns on leaked DBs).
+        with closing(sqlite3.connect(db_path)) as db, db:
             db.executescript("""
                 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
                 CREATE TABLE tasks (
