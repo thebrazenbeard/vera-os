@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import pwd
 import shutil
 import socket
 import stat
@@ -30,7 +31,9 @@ class WSLLocalIPCTests(unittest.TestCase):
             self._patch_peer.start()
             self.addCleanup(self._patch_uid.stop)
             self.addCleanup(self._patch_peer.stop)
-        self.outer = Path(tempfile.mkdtemp(prefix="veraos-ipc-"))
+        native_home = (Path(pwd.getpwuid(os.geteuid()).pw_dir)
+                       if "microsoft" in os.uname().release.lower() else None)
+        self.outer = Path(tempfile.mkdtemp(prefix="veraos-ipc-", dir=native_home))
         self.addCleanup(shutil.rmtree, self.outer)
         self.root = self.outer / "pilot"
         with Pilot.init(self.root):
