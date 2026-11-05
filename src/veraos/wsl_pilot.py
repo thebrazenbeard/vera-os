@@ -13,6 +13,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import pwd
 import re
 import sqlite3
 import stat
@@ -51,7 +52,10 @@ def _validate_root(root: Path, *, exists: bool) -> None:
         # This first WSL experiment uses the native home filesystem only.
         # st_dev also rejects a Windows 9p mount bind-mounted beneath /home.
         backing = root if exists else root.parent
-        if backing.stat().st_dev != Path.home().stat().st_dev:
+        # $HOME can be altered by the caller; only the OS account database
+        # supplies the intended Linux home device for this first WSL pilot.
+        owner_home = Path(pwd.getpwuid(_uid()).pw_dir).resolve(strict=True)
+        if backing.stat().st_dev != owner_home.stat().st_dev:
             raise PilotError("WSL state must use the native Linux home filesystem")
     if exists:
         if root.is_symlink() or not root.is_dir():
