@@ -19,6 +19,7 @@ import tempfile
 import threading
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -134,6 +135,16 @@ class WSLLocalPilotTests(unittest.TestCase):
         with self.assertRaises(PilotError):
             Pilot.init(link / "new-pilot")
         self.assertFalse((self.root.parent / "new-pilot").exists())
+
+    def test_spoofed_home_cannot_authorize_foreign_mount_device(self) -> None:
+        foreign = Path("/dev/shm")
+        if not foreign.exists() or foreign.stat().st_dev == Path.home().stat().st_dev:
+            self.skipTest("no independent tmpfs device in this environment")
+        # The previous baseline trusted HOME and would accept this mount.
+        with patch.dict(os.environ, {"HOME": str(foreign)}), \
+                patch("veraos.wsl_pilot.os.uname", return_value=SimpleNamespace(release="microsoft")):
+            with self.assertRaises(PilotError):
+                Pilot.init(foreign / "veraos-mount-check-never-create")
 
     def test_input_validation_rejects_traversal_and_ambient_files(self) -> None:
         with Pilot(self.root) as pilot:
