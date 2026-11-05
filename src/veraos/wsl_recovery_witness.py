@@ -117,6 +117,18 @@ def full_pilot_state_digest(db: sqlite3.Connection) -> str:
 
 
 def _compute_full_pilot_state_digest(db: sqlite3.Connection) -> str:
+    # Unqualified SQLite lookups resolve TEMP objects before main. A caller
+    # can otherwise clone a known-good main.tasks into TEMP.tasks, modify the
+    # persistent task and still obtain the old digest on this connection.
+    # The pilot never needs temporary objects: refuse their presence rather
+    # than treating a caller-controlled shadow as durable state.
+    if db.execute("SELECT 1 FROM sqlite_temp_master LIMIT 1").fetchone():
+        raise PilotError("unsupported temporary pilot schema; hold")
+    # Views and future sqlite_master object kinds are durable schema state.
+    # Previously omitted views could be inserted without changing the digest.
+    if db.execute("SELECT 1 FROM sqlite_master WHERE "
+                  "type NOT IN ('table','index','trigger') LIMIT 1").fetchone():
+        raise PilotError("unsupported pilot schema object; hold")
     tables = {row[0] for row in db.execute(
         "SELECT name FROM sqlite_master WHERE type='table'")}
     if tables != _FULL_STATE_TABLES:
