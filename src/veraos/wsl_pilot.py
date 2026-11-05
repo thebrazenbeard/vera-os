@@ -8,6 +8,7 @@ as the same Linux user are not isolated from each other.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
@@ -42,6 +43,16 @@ def _validate_root(root: Path, *, exists: bool) -> None:
         raise PilotError("absolute dedicated Linux state path required")
     if root.parts[:2] == ("/", "mnt"):
         raise PilotError("Windows and other /mnt mounts are not pilot state roots")
+    # Resolve every ancestor: a lexical /home/... spelling may actually lead
+    # through a symlink into a Windows mount.
+    if root.resolve(strict=False) != root:
+        raise PilotError("state path may not traverse symlinks")
+    if os.name == "posix" and "microsoft" in os.uname().release.lower():
+        # This first WSL experiment uses the native home filesystem only.
+        # st_dev also rejects a Windows 9p mount bind-mounted beneath /home.
+        backing = root if exists else root.parent
+        if backing.stat().st_dev != Path.home().stat().st_dev:
+            raise PilotError("WSL state must use the native Linux home filesystem")
     if exists:
         if root.is_symlink() or not root.is_dir():
             raise PilotError("state root must be an actual directory")
@@ -70,6 +81,11 @@ class Pilot:
         if row != (str(_uid()),) or schema != (SCHEMA,):
             self.db.close()
             raise PilotError("owner or schema mismatch")
+        lease = self.root / "pilot.lock"
+        if lease.is_symlink() or not lease.is_file() or lease.stat().st_uid != _uid() or (
+                stat.S_IMODE(lease.stat().st_mode) & 0o077):
+            self.db.close()
+            raise PilotError("private worker lease required")
 
     @classmethod
     def init(cls, root: Path) -> "Pilot":
@@ -81,6 +97,8 @@ class Pilot:
             (root / child).mkdir(mode=0o700)
         db_path = root / "pilot.sqlite3"
         fd = os.open(db_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        os.close(fd)
+        fd = os.open(root / "pilot.lock", os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         os.close(fd)
         with sqlite3.connect(db_path) as db:
             db.executescript("""
@@ -121,6 +139,25 @@ class Pilot:
         self.db.execute("INSERT INTO events(task_id,code,detail) VALUES (?,?,?)",
                         (task_id, code, detail))
 
+    @contextmanager
+    def _worker_lease(self, *, exclusive: bool):
+        """Prevent recovery from racing any live cooperating worker process."""
+        import fcntl  # POSIX/WSL only; this is not a hostile same-UID boundary.
+
+        fd = os.open(self.root / "pilot.lock", os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        try:
+            kind = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
+            try:
+                fcntl.flock(fd, kind | fcntl.LOCK_NB)
+            except BlockingIOError as exc:
+                raise PilotError("active worker lease; retry after workers stop") from exc
+            try:
+                yield
+            finally:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+        finally:
+            os.close(fd)
+
     def submit(self, worker: str, filename: str) -> str:
         if worker not in ("inspect", "digest"):
             raise PilotError("unrecognized worker")
@@ -146,25 +183,36 @@ class Pilot:
 
     def cancel(self, task_id: str) -> str:
         with self.db:
+            # UPDATE itself takes SQLite's writer lock. No stale SELECT may
+            # authorize a later overwrite of COMPLETED or RECOVERY_HELD.
+            if self.db.execute("UPDATE tasks SET status='CANCELLED' "
+                               "WHERE task_id=? AND status='QUEUED'", (task_id,)).rowcount:
+                self._event(task_id, "CANCELLED")
+                return "CANCELLED"
+            if self.db.execute("UPDATE tasks SET status='CANCEL_REQUESTED' "
+                               "WHERE task_id=? AND status='RUNNING'", (task_id,)).rowcount:
+                self._event(task_id, "CANCEL_REQUESTED")
+                return "CANCEL_REQUESTED"
             row = self.db.execute("SELECT status FROM tasks WHERE task_id=?", (task_id,)).fetchone()
             if row is None:
                 raise PilotError("unknown task")
-            current = row[0]
-            target = {"QUEUED": "CANCELLED", "RUNNING": "CANCEL_REQUESTED"}.get(current)
-            if target:
-                self.db.execute("UPDATE tasks SET status=? WHERE task_id=?", (target, task_id))
-                self._event(task_id, target)
-            return target or current
+            return row[0]
 
     def recover(self) -> int:
         """Never auto-retry interrupted work, especially after output intent."""
-        with self.db:
-            ids = [r[0] for r in self.db.execute(
-                "SELECT task_id FROM tasks WHERE status IN ('RUNNING','CANCEL_REQUESTED')")]
-            for task_id in ids:
-                self.db.execute("UPDATE tasks SET status='RECOVERY_HELD' WHERE task_id=?", (task_id,))
-                self._event(task_id, "RECOVERY_HELD", "manual reconciliation required")
-        return len(ids)
+        with self._worker_lease(exclusive=True):
+            with self.db:
+                ids = [r[0] for r in self.db.execute(
+                    "SELECT task_id FROM tasks WHERE status IN ('RUNNING','CANCEL_REQUESTED')")]
+                count = 0
+                for task_id in ids:
+                    update = self.db.execute(
+                        "UPDATE tasks SET status='RECOVERY_HELD' WHERE task_id=? "
+                        "AND status IN ('RUNNING','CANCEL_REQUESTED')", (task_id,))
+                    if update.rowcount:
+                        self._event(task_id, "RECOVERY_HELD", "manual reconciliation required")
+                        count += 1
+            return count
 
     def protected_effect(self, kind: str) -> bool:
         """Fixed default-deny broker; never forwards external effects."""
@@ -208,7 +256,9 @@ class Pilot:
             fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
                          getattr(os, "O_NOFOLLOW", 0), 0o600, dir_fd=directory)
             try:
-                os.write(fd, (digest + "\n").encode("ascii"))
+                payload = (digest + "\n").encode("ascii")
+                if os.write(fd, payload) != len(payload):
+                    raise PilotError("short derived output write")
                 os.fsync(fd)
             finally:
                 os.close(fd)
@@ -217,6 +267,10 @@ class Pilot:
             os.close(directory)
 
     def run(self, task_id: str) -> str:
+        with self._worker_lease(exclusive=False):
+            return self._run_with_lease(task_id)
+
+    def _run_with_lease(self, task_id: str) -> str:
         if not self.claim(task_id):
             raise PilotError("task is not queued or is already owned")
         worker, filename = self.db.execute(
@@ -231,23 +285,32 @@ class Pilot:
             with self.db:
                 state = self.db.execute("SELECT status FROM tasks WHERE task_id=?", (task_id,)).fetchone()[0]
                 if state == "CANCEL_REQUESTED":
-                    self.db.execute("UPDATE tasks SET status='CANCELLED' WHERE task_id=?", (task_id,))
-                    self._event(task_id, "CANCELLED")
-                    return "CANCELLED"
+                    update = self.db.execute("UPDATE tasks SET status='CANCELLED' "
+                                             "WHERE task_id=? AND status='CANCEL_REQUESTED'", (task_id,))
+                    if update.rowcount:
+                        self._event(task_id, "CANCELLED")
+                        return "CANCELLED"
                 if state != "RUNNING":
                     raise PilotError("unexpected task state; no effect admitted")
             if worker == "digest":
                 self._derive(task_id, detail)
             with self.db:
-                state = self.db.execute("SELECT status FROM tasks WHERE task_id=?", (task_id,)).fetchone()[0]
-                final = "COMPLETED" if state == "RUNNING" else "RECOVERY_HELD"
-                self.db.execute("UPDATE tasks SET status=? WHERE task_id=?", (final, task_id))
-                self._event(task_id, final, "output_written" if worker == "digest" else detail)
-                return final
+                if self.db.execute("UPDATE tasks SET status='COMPLETED' "
+                                   "WHERE task_id=? AND status='RUNNING'", (task_id,)).rowcount:
+                    self._event(task_id, "COMPLETED", "output_written" if worker == "digest" else detail)
+                    return "COMPLETED"
+                if self.db.execute("UPDATE tasks SET status='RECOVERY_HELD' "
+                                   "WHERE task_id=? AND status='CANCEL_REQUESTED'", (task_id,)).rowcount:
+                    self._event(task_id, "RECOVERY_HELD", "cancel raced output; inspect before restart")
+                    return "RECOVERY_HELD"
+                raise PilotError("task changed after work; no terminal overwrite")
         except Exception:
             with self.db:
-                self.db.execute("UPDATE tasks SET status='RECOVERY_HELD' WHERE task_id=?", (task_id,))
-                self._event(task_id, "WORKER_HELD", "inspect failure or ambiguous output")
+                update = self.db.execute(
+                    "UPDATE tasks SET status='RECOVERY_HELD' WHERE task_id=? "
+                    "AND status IN ('RUNNING','CANCEL_REQUESTED')", (task_id,))
+                if update.rowcount:
+                    self._event(task_id, "WORKER_HELD", "inspect failure or ambiguous output")
             raise
 
     def snapshot(self) -> dict:
