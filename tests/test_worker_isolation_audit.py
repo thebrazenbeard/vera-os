@@ -48,6 +48,23 @@ class WorkerIsolationAuditTests(unittest.TestCase):
         self.assertIn("seccomp_filter_not_observed", result["reasons"])
         self.assertEqual(result["host_shared_mount_count"], 1)
 
+    def test_fuse_wsl_shared_mount_is_counted_and_never_qualifies(self):
+        # A host-shared WSL mount can be identified as fuse.wsl, including
+        # when its mountpoint is not the obvious /mnt/c or /mnt/d location.
+        # Treating it as native would under-report hostile child exposure.
+        result = classify_observation(
+            uid=2001, parent_uid=1000, mount_namespace="mnt:[2]",
+            parent_mount_namespace="mnt:[1]", status_text=STATUS,
+            mountinfo_text=(NATIVE_MOUNT +
+                            "11 2 0:99 / /home/vera/host-share rw - fuse.wsl host rw\n"),
+            interop_environment_present=False,
+            interop_directory_traversable=False,
+            windows_executable_accessible=False,
+        )
+        self.assertEqual(result["host_shared_mount_count"], 1)
+        self.assertIn("host_shared_mount_visible", result["reasons"])
+        self.assertEqual(result["production_worker_isolation"], "HOLD")
+
     def test_malformed_status_or_mountinfo_fails_closed(self):
         shared = dict(
             uid=1000, parent_uid=1000, mount_namespace="mnt:[1]",
