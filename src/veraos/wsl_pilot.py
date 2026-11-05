@@ -270,6 +270,39 @@ class Pilot:
                 self._event(None, "PROTECTED_EFFECT_DENIED", detail)
         return False
 
+    def _record_worker_isolation_denial(
+        self, *, task_id: object, execution_mode: object,
+    ) -> None:
+        """Persist a denied intent without pretending its task claim is identity.
+
+        This same-UID SQLite record is useful for restart diagnostics only. It
+        neither authenticates the requestor nor proves kernel/Windows isolation.
+        The event's authoritative task_id column deliberately stays NULL.
+        """
+        well_formed_id = (type(task_id) is str and
+                          re.fullmatch(r"[0-9a-f]{32}", task_id) is not None)
+        bounded_mode = (execution_mode if type(execution_mode) is str and
+                        1 <= len(execution_mode) <= 64 and
+                        _NAME.fullmatch(execution_mode) else None)
+        with self.db:
+            known_local_task = bool(well_formed_id and self.db.execute(
+                "SELECT 1 FROM tasks WHERE task_id=? AND owner_uid=?",
+                (task_id, _uid()),
+            ).fetchone())
+            detail = json.dumps({
+                "schema": "VERAOS_LOCAL_ISOLATION_DENIAL_V1",
+                "requested_execution_mode": bounded_mode,
+                "association": ("CALLER_ASSERTED_EXISTING_LOCAL_TASK" if known_local_task else
+                                "UNBOUND_UNKNOWN_LOCAL_TASK"),
+                "asserted_task_id": task_id if known_local_task else None,
+                "authenticated_principal_id": None,
+                "trusted_windows_issuer": None,
+                "receipt_authority": "SAME_UID_SQLITE_ONLY",
+                "production_worker_isolation": "HOLD",
+                "protected_effects": "DENIED",
+            }, sort_keys=True, separators=(",", ":"))
+            self._event(None, "WORKER_ISOLATION_DENIED", detail)
+
     def _input(self, filename: str, *, read: bool) -> int | bytes:
         flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
         directory = os.open(self.root / "input", flags | os.O_DIRECTORY)
@@ -326,6 +359,8 @@ class Pilot:
         try:
             require_dev_fixture_execution(operation=execution_mode)
         except WorkerExecutionHeld as exc:
+            self._record_worker_isolation_denial(
+                task_id=task_id, execution_mode=execution_mode)
             raise PilotError("worker execution held: development fixture only") from exc
         with self._worker_lease(exclusive=False):
             return self._run_with_lease(task_id, process_worker=True)

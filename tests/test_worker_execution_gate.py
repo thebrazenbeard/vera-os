@@ -123,8 +123,12 @@ class PilotWorkerGateIntegrationTests(unittest.TestCase):
                     with self.assertRaisesRegex(PilotError, "development fixture only"):
                         pilot.run_dev_process(task_id, execution_mode=mode)
             self.assertEqual(pilot.snapshot()["tasks"][0]["status"], "QUEUED")
-            self.assertEqual(
-                [x["code"] for x in pilot.snapshot()["events"]], ["SUBMITTED"])
+            events = pilot.snapshot()["events"]
+            self.assertEqual([x["code"] for x in events],
+                             ["SUBMITTED"] + ["WORKER_ISOLATION_DENIED"] * 4)
+            for event in events[1:]:
+                self.assertIsNone(event["task_id"])
+                self.assertIsNone(json.loads(event["detail"])["authenticated_principal_id"])
 
     def test_real_pilot_dev_path_and_effect_denial_keep_receipts(self):
         with Pilot(self.root) as pilot:
