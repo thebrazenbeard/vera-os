@@ -11,6 +11,7 @@ from pathlib import Path
 import pwd
 import shutil
 import socket
+import sqlite3
 import sys
 import tempfile
 import threading
@@ -92,6 +93,26 @@ class KeyedSubmitSQLiteTests(unittest.TestCase):
         with Pilot(self.root) as pilot:
             self.assertEqual(len(pilot.snapshot()["tasks"]), 1)
             self.assertEqual(len(pilot.snapshot()["events"]), 1)
+
+    def test_failure_after_task_and_event_but_before_key_insert_rolls_back(self):
+        # Initialize the optional schema with one legitimate key. The trigger
+        # then aborts a *later* key mapping INSERT, after task/event writes.
+        first = self.dispatch(self.request())
+        with Pilot(self.root) as pilot:
+            pilot.db.executescript("""
+                CREATE TRIGGER deny_ipc_key_insert BEFORE INSERT ON ipc_submissions
+                BEGIN SELECT RAISE(ABORT, 'inject mapping insert failure'); END;
+            """)
+        second = self.request(request_id="b" * 32)
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.dispatch(second)
+        with Pilot(self.root) as pilot:
+            self.assertEqual(len(pilot.snapshot()["tasks"]), 1)
+            self.assertEqual(len(pilot.snapshot()["events"]), 1)
+            pilot.db.execute("DROP TRIGGER deny_ipc_key_insert")
+            pilot.db.commit()
+        self.assertEqual(self.dispatch(self.request()), first)
+        self.assertNotEqual(self.dispatch(second), first)
 
     def test_unkeyed_legacy_submit_is_explicitly_not_idempotent(self):
         request = {"action": "submit", "worker": "inspect", "filename": "fixture.txt"}
