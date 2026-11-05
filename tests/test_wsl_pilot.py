@@ -35,7 +35,10 @@ class WSLLocalPilotTests(unittest.TestCase):
             simulated = patch("veraos.wsl_pilot._uid", return_value=0)
             simulated.start()
             self.addCleanup(simulated.stop)
-        top = Path(tempfile.mkdtemp(prefix="veraos-wsl-test-"))
+        # Real WSL uses a tmpfs at /tmp; put tests on Linux-native home ext4
+        # to exercise actual process restart against disk-backed state.
+        test_parent = Path.home() if "microsoft" in os.uname().release.lower() else None
+        top = Path(tempfile.mkdtemp(prefix="veraos-wsl-test-", dir=test_parent))
         self.addCleanup(shutil.rmtree, top)
         self.root = top / "pilot"
         with Pilot.init(self.root):
@@ -59,6 +62,7 @@ class WSLLocalPilotTests(unittest.TestCase):
     def test_private_linux_state_and_os_user_binding(self) -> None:
         self.assertEqual(stat.S_IMODE(self.root.stat().st_mode), 0o700)
         self.assertEqual(stat.S_IMODE((self.root / "pilot.sqlite3").stat().st_mode), 0o600)
+        self.assertEqual(stat.S_IMODE((self.root / "pilot.lock").stat().st_mode), 0o600)
         self.assertEqual(stat.S_IMODE((self.root / "derived").stat().st_mode), 0o700)
         with Pilot(self.root) as pilot:
             self.assertEqual(pilot.snapshot()["schema"], SCHEMA)
@@ -123,6 +127,14 @@ class WSLLocalPilotTests(unittest.TestCase):
         with self.assertRaises(PilotError):
             Pilot(Path("/mnt/c/Users/anyone/veraos-pilot"))
 
+    def test_state_root_rejects_symlinked_ancestor(self) -> None:
+        # A /home-looking path must not silently resolve through a symlink.
+        link = self.root.parent / "alias"
+        link.symlink_to(self.root.parent, target_is_directory=True)
+        with self.assertRaises(PilotError):
+            Pilot.init(link / "new-pilot")
+        self.assertFalse((self.root.parent / "new-pilot").exists())
+
     def test_input_validation_rejects_traversal_and_ambient_files(self) -> None:
         with Pilot(self.root) as pilot:
             for name in ("../outside", "a/b", "..", "", " .", "x" * 100):
@@ -178,6 +190,54 @@ class WSLLocalPilotTests(unittest.TestCase):
             events = [e["code"] for e in pilot.snapshot()["events"]]
         self.assertEqual(events.count("CLAIMED"), 1)
         self.assertEqual(self._status(task_id), "RUNNING")
+
+    def test_cancel_during_output_held_and_recovery_refuses_live_worker(self) -> None:
+        entered = threading.Event()
+        release = threading.Event()
+        with Pilot(self.root) as pilot:
+            task_id = pilot.submit("digest", "sample.txt")
+
+        def worker() -> str:
+            with Pilot(self.root) as pilot:
+                actual = pilot._derive
+
+                def held_derive(identifier: str, digest: str) -> None:
+                    entered.set()
+                    if not release.wait(5):
+                        raise AssertionError("interleaving gate expired")
+                    actual(identifier, digest)
+
+                pilot._derive = held_derive
+                return pilot.run(task_id)
+
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            result = pool.submit(worker)
+            self.assertTrue(entered.wait(5), "worker never reached output seam")
+            try:
+                with Pilot(self.root) as pilot:
+                    self.assertEqual(pilot.cancel(task_id), "CANCEL_REQUESTED")
+                    with self.assertRaises(PilotError):
+                        pilot.recover()
+            finally:
+                release.set()
+            self.assertEqual(result.result(timeout=5), "RECOVERY_HELD")
+
+        self.assertEqual(self._status(task_id), "RECOVERY_HELD")
+        self.assertTrue((self.root / "derived" / (task_id + ".sha256")).exists())
+        with Pilot(self.root) as pilot:
+            self.assertEqual(pilot.cancel(task_id), "RECOVERY_HELD")
+            self.assertEqual(pilot.recover(), 0)
+            self.assertEqual([e["code"] for e in pilot.snapshot()["events"]],
+                             ["SUBMITTED", "CLAIMED", "CANCEL_REQUESTED", "OUTPUT_INTENT", "RECOVERY_HELD"])
+
+    def test_completed_state_cannot_be_overwritten_by_cancel_or_recovery(self) -> None:
+        with Pilot(self.root) as pilot:
+            task_id = pilot.submit("inspect", "sample.txt")
+            self.assertEqual(pilot.run(task_id), "COMPLETED")
+            self.assertEqual(pilot.cancel(task_id), "COMPLETED")
+            self.assertEqual(pilot.recover(), 0)
+            self.assertEqual([e["code"] for e in pilot.snapshot()["events"]],
+                             ["SUBMITTED", "CLAIMED", "COMPLETED"])
 
     @unittest.skipIf(os.geteuid() == 0, "requires actual unprivileged OS identity")
     def test_real_subprocess_interruption_is_quarantined_on_restart(self) -> None:
