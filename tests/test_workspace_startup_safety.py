@@ -146,6 +146,19 @@ def unsafe_editor_configs(root: Path) -> list[str]:
                 findings.append(relative.as_posix() + " (invalid settings)")
             elif {key.casefold() for key in data} & {"tasks", "task.allowautomatictasks"}:
                 findings.append(relative.as_posix() + " (workspace task override)")
+        if name.endswith(".code-workspace"):
+            if not isinstance(data, dict):
+                findings.append(relative.as_posix() + " (invalid workspace)")
+            else:
+                for key, settings in data.items():
+                    if str(key).casefold() != "settings":
+                        continue
+                    if not isinstance(settings, dict):
+                        findings.append(relative.as_posix() + " (invalid workspace settings)")
+                    elif {str(k).casefold() for k in settings} & {
+                        "tasks", "task.allowautomatictasks",
+                    }:
+                        findings.append(relative.as_posix() + " (workspace task override)")
     return findings
 
 
@@ -241,6 +254,34 @@ class WorkspaceStartupSafetyTests(unittest.TestCase):
             )
             findings = unsafe_editor_configs(root)
             self.assertEqual(2, len(findings), findings)
+
+    def test_code_workspace_task_overrides_fail_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "optin.code-workspace").write_text(
+                '{"folders":[{"path":"."}],"settings":{"task.allowAutomaticTasks":"on"}}',
+                encoding="utf-8",
+            )
+            (root / "case.CODE-WORKSPACE.").write_text(
+                '{"folders":[],"SeTTings":{"TaSkS":[]}}',
+                encoding="utf-8",
+            )
+            (root / "malformed.code-workspace").write_text(
+                '{"settings":"not a settings mapping"}', encoding="utf-8",
+            )
+            (root / "safe.code-workspace").write_text(
+                '{"folders":[],"tasks":{"tasks":[{"label":"manual",'
+                '"command":"echo safe"}]}}', encoding="utf-8",
+            )
+            findings = unsafe_editor_configs(root)
+            self.assertEqual(
+                [
+                    "case.CODE-WORKSPACE. (workspace task override)",
+                    "malformed.code-workspace (invalid workspace settings)",
+                    "optin.code-workspace (workspace task override)",
+                ],
+                sorted(findings),
+            )
 
     def test_windows_aliases_and_duplicate_json_fail_closed(self):
         with tempfile.TemporaryDirectory() as directory:
