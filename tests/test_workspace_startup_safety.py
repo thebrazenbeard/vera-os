@@ -64,6 +64,15 @@ def prohibited_source_paths(root: Path) -> list[str]:
             findings.append(relative.as_posix())
         elif path.is_symlink():
             findings.append(relative.as_posix() + " (symlink)")
+        elif path.is_file() and path.suffix.casefold() == ".ttf":
+            try:
+                with path.open("rb") as stream:
+                    signature = stream.read(4)
+            except OSError:
+                findings.append(relative.as_posix() + " (unreadable font)")
+            else:
+                if signature not in (b"\x00\x01\x00\x00", b"OTTO", b"true", b"typ1"):
+                    findings.append(relative.as_posix() + " (invalid font signature)")
     return findings
 
 
@@ -132,6 +141,17 @@ class WorkspaceStartupSafetyTests(unittest.TestCase):
             self.assertEqual(4, len(findings), findings)
             self.assertTrue(any("ordinary.woff2 (symlink)" in item for item in findings))
             self.assertTrue(any("ancestor-link (symlink)" in item for item in findings))
+
+    def test_disguised_ttf_bytes_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fonts = root / "public" / "fonts"
+            fonts.mkdir(parents=True)
+            (fonts / "ordinary.ttf").write_bytes(b"\x00\x01\x00\x00" + b"0" * 20)
+            (fonts / "fake-font.ttf").write_bytes(b"\t" * 40 + b"console.log('not a font')")
+            findings = prohibited_source_paths(root)
+            self.assertIn("public/fonts/fake-font.ttf (invalid font signature)", findings)
+            self.assertFalse(any("ordinary.ttf" in x for x in findings))
 
     def test_nested_workspace_autostart_detected(self):
         with tempfile.TemporaryDirectory() as directory:
