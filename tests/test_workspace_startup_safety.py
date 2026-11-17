@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import struct
 import tempfile
 import unittest
 
@@ -53,6 +54,55 @@ def git_blob_digest(data: bytes) -> str:
     ).hexdigest()
 
 
+def plausible_sfnt(path: Path) -> bool:
+    """Bounded table-directory sanity check; does not prove font safety."""
+    try:
+        with path.open("rb") as stream:
+            stream.seek(0, 2)
+            file_size = stream.tell()
+            stream.seek(0)
+            header = stream.read(12)
+            if len(header) != 12 or header[:4] not in (
+                b"\x00\x01\x00\x00", b"OTTO", b"true", b"typ1",
+            ):
+                return False
+            num_tables = int.from_bytes(header[4:6], "big")
+            if not 1 <= num_tables <= 4096:
+                return False
+            directory_end = 12 + num_tables * 16
+            if directory_end > file_size:
+                return False
+            seen = set()
+            ranges = []
+            head_offset = None
+            for _ in range(num_tables):
+                entry = stream.read(16)
+                if len(entry) != 16:
+                    return False
+                tag = entry[:4]
+                offset = int.from_bytes(entry[8:12], "big")
+                length = int.from_bytes(entry[12:16], "big")
+                if tag in seen or length < 1 or offset < directory_end:
+                    return False
+                if offset % 4 != 0 or offset > file_size or length > file_size - offset:
+                    return False
+                seen.add(tag)
+                ranges.append((offset, offset + length))
+                if tag == b"head":
+                    if length < 54:
+                        return False
+                    head_offset = offset
+            if head_offset is None:
+                return False
+            ranges.sort()
+            if any(previous[1] > current[0] for previous, current in zip(ranges, ranges[1:])):
+                return False
+            stream.seek(head_offset + 12)
+            return stream.read(4) == b"\x5f\x0f\x3c\xf5"
+    except OSError:
+        return False
+
+
 def prohibited_source_paths(root: Path) -> list[str]:
     """Find known filename aliases and symlinks, including ancestor aliases."""
     findings = []
@@ -65,14 +115,8 @@ def prohibited_source_paths(root: Path) -> list[str]:
         elif path.is_symlink():
             findings.append(relative.as_posix() + " (symlink)")
         elif path.is_file() and path.suffix.casefold() == ".ttf":
-            try:
-                with path.open("rb") as stream:
-                    signature = stream.read(4)
-            except OSError:
-                findings.append(relative.as_posix() + " (unreadable font)")
-            else:
-                if signature not in (b"\x00\x01\x00\x00", b"OTTO", b"true", b"typ1"):
-                    findings.append(relative.as_posix() + " (invalid font signature)")
+            if not plausible_sfnt(path):
+                findings.append(relative.as_posix() + " (invalid SFNT directory)")
     return findings
 
 
@@ -102,6 +146,19 @@ def unsafe_editor_configs(root: Path) -> list[str]:
                 findings.append(relative.as_posix() + " (invalid settings)")
             elif {key.casefold() for key in data} & {"tasks", "task.allowautomatictasks"}:
                 findings.append(relative.as_posix() + " (workspace task override)")
+        if name.endswith(".code-workspace"):
+            if not isinstance(data, dict):
+                findings.append(relative.as_posix() + " (invalid workspace)")
+            else:
+                for key, settings in data.items():
+                    if str(key).casefold() != "settings":
+                        continue
+                    if not isinstance(settings, dict):
+                        findings.append(relative.as_posix() + " (invalid workspace settings)")
+                    elif {str(k).casefold() for k in settings} & {
+                        "tasks", "task.allowautomatictasks",
+                    }:
+                        findings.append(relative.as_posix() + " (workspace task override)")
     return findings
 
 
@@ -142,16 +199,45 @@ class WorkspaceStartupSafetyTests(unittest.TestCase):
             self.assertTrue(any("ordinary.woff2 (symlink)" in item for item in findings))
             self.assertTrue(any("ancestor-link (symlink)" in item for item in findings))
 
+    @staticmethod
+    def _synthetic_sfnt(version: bytes = b"\x00\x01\x00\x00") -> bytes:
+        head = bytearray(54)
+        head[12:16] = b"\x5f\x0f\x3c\xf5"
+        return (
+            version
+            + struct.pack(">HHHH", 1, 16, 0, 0)
+            + struct.pack(">4sIII", b"head", 0, 28, 54)
+            + head
+        )
+
     def test_disguised_ttf_bytes_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             fonts = root / "public" / "fonts"
             fonts.mkdir(parents=True)
-            (fonts / "ordinary.ttf").write_bytes(b"\x00\x01\x00\x00" + b"0" * 20)
+            (fonts / "ordinary.ttf").write_bytes(self._synthetic_sfnt())
             (fonts / "fake-font.ttf").write_bytes(b"\t" * 40 + b"console.log('not a font')")
             findings = prohibited_source_paths(root)
-            self.assertIn("public/fonts/fake-font.ttf (invalid font signature)", findings)
-            self.assertFalse(any("ordinary.ttf" in x for x in findings))
+            self.assertIn("public/fonts/fake-font.ttf (invalid SFNT directory)", findings)
+            self.assertFalse(any("ordinary.ttf" in x for x in findings), findings)
+
+    def test_sfnt_magic_header_spoof_and_overflow_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fonts = root / "public" / "fonts"
+            fonts.mkdir(parents=True)
+            (fonts / "spoofed.ttf").write_bytes(
+                b"\x00\x01\x00\x00" + b"console.log('not a font')"
+            )
+            overflow = bytearray(self._synthetic_sfnt())
+            overflow[20:24] = (65532).to_bytes(4, "big")
+            (fonts / "bad-offset.ttf").write_bytes(overflow)
+            no_head = bytearray(self._synthetic_sfnt())
+            no_head[12:16] = b"name"
+            (fonts / "no-head.ttf").write_bytes(no_head)
+            findings = prohibited_source_paths(root)
+            for name in ("spoofed.ttf", "bad-offset.ttf", "no-head.ttf"):
+                self.assertIn(f"public/fonts/{name} (invalid SFNT directory)", findings)
 
     def test_nested_workspace_autostart_detected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -168,6 +254,34 @@ class WorkspaceStartupSafetyTests(unittest.TestCase):
             )
             findings = unsafe_editor_configs(root)
             self.assertEqual(2, len(findings), findings)
+
+    def test_code_workspace_task_overrides_fail_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "optin.code-workspace").write_text(
+                '{"folders":[{"path":"."}],"settings":{"task.allowAutomaticTasks":"on"}}',
+                encoding="utf-8",
+            )
+            (root / "case.CODE-WORKSPACE.").write_text(
+                '{"folders":[],"SeTTings":{"TaSkS":[]}}',
+                encoding="utf-8",
+            )
+            (root / "malformed.code-workspace").write_text(
+                '{"settings":"not a settings mapping"}', encoding="utf-8",
+            )
+            (root / "safe.code-workspace").write_text(
+                '{"folders":[],"tasks":{"tasks":[{"label":"manual",'
+                '"command":"echo safe"}]}}', encoding="utf-8",
+            )
+            findings = unsafe_editor_configs(root)
+            self.assertEqual(
+                [
+                    "case.CODE-WORKSPACE. (workspace task override)",
+                    "malformed.code-workspace (invalid workspace settings)",
+                    "optin.code-workspace (workspace task override)",
+                ],
+                sorted(findings),
+            )
 
     def test_windows_aliases_and_duplicate_json_fail_closed(self):
         with tempfile.TemporaryDirectory() as directory:
